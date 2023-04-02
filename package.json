@@ -1,0 +1,30 @@
+{
+  "name": "neko233-ts-suger",
+  "version": "1.0.2",
+  "description": "typescript ts common utils",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/SolarisNeko/neko233-ts-suger.git"
+  },
+  "keywords": [
+    "typescript",
+    "ts",
+    "common",
+    "utils"
+  ],
+  "author": "solarisneko",
+  "license": "ISC",
+  "dependencies": {
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0"
+  }
+}

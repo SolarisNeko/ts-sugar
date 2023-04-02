@@ -1,0 +1,1 @@
+tsc --target ES6 --experimentalDecorators demo.ts
