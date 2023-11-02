@@ -1,10 +1,10 @@
 /**
- * @LogFunction 注解
+ * @LogDecorator 注解
  * @param target 目标对象
  * @param key 函数名
  * @param descriptor 函数
  */
-export default function LogFunction(target: any, key: string, descriptor: PropertyDescriptor) {
+export default function LogDecorator(target: any, key: string, descriptor: PropertyDescriptor) {
 
     const originalMethod = descriptor.value;
     const className = target.constructor.name; // 获取类名

@@ -1,6 +1,6 @@
 // common
-import * as StringUtils from './common/StringUtils'
-import * as ObjectUtils from './common/ObjectUtils'
+import * as StringUtils from './utils/StringUtils'
+import * as ObjectUtils from './utils/ObjectUtils'
 
 // rate_limiter
 import {RateLimiter} from './rateLimiter/RateLimiter'
