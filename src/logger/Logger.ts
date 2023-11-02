@@ -59,35 +59,6 @@ export default class Logger {
         return '';
     }
 
-
-    // private static getCallLocation(): string {
-    //     const stack = new Error().stack;
-    //     if (stack) {
-    //         const stackLines = stack.split('\n');
-    //         // 调用栈的第三行通常是调用此方法的位置
-    //         if (stackLines.length >= 3) {
-    //             const callSite = stackLines[2].trim();
-    //             const fileNameMatches = callSite.match(/\((.*):\d+:\d+\)/);
-    //             if (fileNameMatches && fileNameMatches.length > 1) {
-    //                 const filePathParts = fileNameMatches[1].split('/');
-    //                 const fileName = filePathParts[filePathParts.length - 1];
-    //                 let number = fileName.lastIndexOf("\\");
-    //                 if (!number) {
-    //                     number = fileName.indexOf("/")
-    //                 }
-    //                 // 如果还是找不到 simple fileName, 就直接返回
-    //                 if (!number) {
-    //                     return fileName
-    //                 }
-    //                 // 只返回 simple fileName
-    //                 return `${fileName.substring(number + 1)}`;
-    //             }
-    //         }
-    //     }
-    //     return '';
-    // }
-
-
     private static log(level: LogLevel,
                        message: any,
                        ...args: any[]
