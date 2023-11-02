@@ -1,9 +1,12 @@
 // RateLimiter.ts
 
-import { RateLimiterApi } from "../../types/Suger";
+import {RateLimiterApi} from "../../types/Suger";
 
 
-// Rate limiter class for rate limiting requests
+/**
+ * 限流器, n 秒/m次
+ * Rate limiter class for rate limiting requests
+ */
 export class RateLimiter implements RateLimiterApi {
 
     // Maximum allowed requests per time window
@@ -19,7 +22,9 @@ export class RateLimiter implements RateLimiterApi {
     private currentRequestsCount: number;
 
 
-    constructor(maxRequestsCount: number, timeWindowInMs?: number) {
+    constructor(maxRequestsCount: number,
+                timeWindowInMs?: number
+    ) {
         this.maxRequestsCount = maxRequestsCount;
         // 永久
         this.timeWindowInMs = timeWindowInMs || Date.now() + 9999999999999;

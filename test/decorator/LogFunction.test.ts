@@ -2,7 +2,7 @@
 
 
 // 使用注解
-import LogDecorator from "../../src/logging/LogDecorator";
+import LogDecorator from "../../src/logger/LogDecorator";
 
 class MyClass {
     @LogDecorator
