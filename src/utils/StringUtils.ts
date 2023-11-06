@@ -18,6 +18,9 @@ export default class StringUtils {
 
     // 去除字符串两端空格
     static trim(str) {
+        if (this.isBlank(str)) {
+            return "";
+        }
         return str.replace(/(^\s*)|(\s*$)/g, "");
     }
 
@@ -29,6 +32,9 @@ export default class StringUtils {
 
     // 判断字符串是否为空白
     static isBlank(str) {
+        if (str == null) {
+            return true;
+        }
         const reg = /\s/;
         return reg.test(str);
     }
