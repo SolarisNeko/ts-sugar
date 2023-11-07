@@ -1,22 +1,25 @@
+/**
+ * 2023-10-25T13:30:00Z = UTC+0 timezone
+ * 2023-10-25T13:30:00 = UTC+${当前时区} = UTC+8 default
+ */
 export default class DateTimeUtils {
 
     //  时区：暂时按东八区，需要与服务器一致
     public static readonly TIME_ZONE: string = "+08";
 
     /**
-     /**
-     * @deprecated 游戏中不显示具体时间点，用剩余时长表示
+     * DateTime Format = "yyyy-MM-dd HH:mm:ss"
      * 表示时间点
      * yyyy-mm-dd hh:mm:ss
      */
     public static getDateTimeText(timeMs: number): string {
-        var date: Date = new Date(timeMs);
-        var year: number = date.getFullYear();
-        var month: number = date.getMonth() + 1; 	//返回的月份从0-11；
-        var day: number = date.getDate();
-        var hours: number = date.getHours();
-        var minute: number = date.getMinutes();
-        var second: number = date.getSeconds();
+        let date: Date = new Date(timeMs);
+        let year: number = date.getFullYear();
+        let month: number = date.getMonth() + 1; 	//返回的月份从0-11；
+        let day: number = date.getDate();
+        let hours: number = date.getHours();
+        let minute: number = date.getMinutes();
+        let second: number = date.getSeconds();
         let hoursStr = hours < 10 ? ("0" + hours) : hours.toString();
         let minuteStr = minute < 10 ? ("0" + minute) : minute.toString();
         let secondStr = second < 10 ? ("0" + second) : second.toString();
@@ -85,8 +88,8 @@ export default class DateTimeUtils {
 
 
     public static getMonthBySecond(time: number): number {
-        var date: Date = new Date(time);
-        var month: number = date.getMonth() + 1;
+        let date: Date = new Date(time);
+        let month: number = date.getMonth() + 1;
         return month;
     }
 
