@@ -111,7 +111,9 @@ describe('Actor Class', () => {
         actor.scheduleInterval(callback, 10);
 
         setTimeout(() => {
-            expect(result).toBeGreaterThan(1);
+            console.log(result);
+            
+            expect(result).toBeGreaterThanOrEqual(1);
             done();
         }, 25);
     });

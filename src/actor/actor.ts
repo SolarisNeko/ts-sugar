@@ -83,7 +83,7 @@ export default class Actor {
     scheduleInterval(callback: () => void,
                      intervalMs: number
     ) {
-        setInterval(callback, intervalMs);
+        setInterval(callback, 0, intervalMs);
     }
 
     scheduleRepeated(callback: () => void,
