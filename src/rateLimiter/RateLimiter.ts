@@ -7,7 +7,7 @@ import {RateLimiterApi} from "../../types/Suger";
  * 限流器, n 秒/m次
  * Rate limiter class for rate limiting requests
  */
-export class RateLimiter implements RateLimiterApi {
+export default class RateLimiter implements RateLimiterApi {
 
     // Maximum allowed requests per time window
     private readonly maxRequestsCount: number;
@@ -63,5 +63,3 @@ export class RateLimiter implements RateLimiterApi {
         return !this.isRequestAllowed(requestTime);
     }
 }
-
-export default {RateLimiter}

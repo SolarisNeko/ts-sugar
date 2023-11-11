@@ -3,12 +3,12 @@
  * 通过方法, 控制 Lifecycle 是否走下一个
  * 相当于 Promise.resolve
  */
-type OkAction = () => void;
+export type OkAction = () => void;
 
 /**
  * Lambda, 提供一个 yes 
  */
-type Action = (ok: OkAction) => void;
+export type Action = (ok: OkAction) => void;
 
 /**
  * 异步工具类
@@ -25,8 +25,6 @@ export default class ActionChain {
       actionArray.length <= 0) {
       return;
     }
-
-
 
     // temp function
     let ok = function (): void {

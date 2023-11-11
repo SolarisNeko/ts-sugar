@@ -1,7 +1,7 @@
-import Suger from '../../src/Suger.index'
+import RateLimiter from "../../src/rateLimiter/RateLimiter";
 
 
-let rateLimiter = new Suger.RateLimiter(1);
+let rateLimiter = new RateLimiter(1);
 
 
 

@@ -1,10 +1,10 @@
-export default class HeartbeatTool {
+export default class HeartbeatManager {
     intervals = {};
 
     startHeartbeat(taskName: string, intervalMs: number, callback: Function) {
         this.intervals[taskName] = setInterval(() => {
             callback();
-            }, intervalMs);
+        }, intervalMs);
     }
 
     cancelHeartbeat(taskName: string) {
