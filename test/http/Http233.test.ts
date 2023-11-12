@@ -1,11 +1,15 @@
-import Http233, {HttpResponse} from "../../src/http/Http233";
+import {
+    Http233,
+    HttpResponse
+} from "../../src/http/Http233";
 
 describe('Http', () => {
     it('should send a GET request', async () => {
-        const response: HttpResponse = await Http233.builder()
+        const builder = Http233.builder()
             .url('https://jsonplaceholder.typicode.com/posts/1')
-            .method('GET')
-            .send();
+            .method('GET');
+
+        const response: HttpResponse = await builder.send();
 
         expect(response.status).toBe(200); // 检查状态码是否为 200
         expect(response.body).toBeDefined(); // 检查返回的数据不是 undefined
@@ -18,12 +22,14 @@ describe('Http', () => {
             body: 'bar',
             userId: 1
         };
-        const response: HttpResponse = await Http233.builder()
+
+        const builder = Http233.builder()
             .url('https://jsonplaceholder.typicode.com/posts')
             .method('POST')
             .headers({'Content-Type': 'application/json'})
-            .data(data)
-            .send();
+            .data(data);
+
+        const response: HttpResponse = await builder.send();
 
         expect(response.status).toBe(201); // 检查状态码是否为 201 (Created)
         expect(response.body).toBeDefined(); // 检查返回的数据不是 undefined

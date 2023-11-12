@@ -1,5 +1,11 @@
+/**
+ * HTTP 请求方法
+ */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
+/**
+ * HTTP 请求配置
+ */
 export interface HttpRequestConfig {
     url: string;
     method: HttpMethod;
@@ -8,20 +14,25 @@ export interface HttpRequestConfig {
     timeoutMs?: any;
 }
 
-// 响应
+/**
+ * HTTP 响应
+ */
 export interface HttpResponse {
     status: number;
-    body: any;
     headers: Record<string, string>;
+    body: any;
 }
 
-export default class Http233 {
+/**
+ * HTTP 工具
+ */
+export class Http233 {
     // 配置
     private config: HttpRequestConfig = {
         url: '',
         method: 'GET',
         // 默认超时时间 10s
-        timeoutMs: 10 * 1000 
+        timeoutMs: 10 * 1000
     };
 
 
@@ -57,7 +68,8 @@ export default class Http233 {
     async send(): Promise<HttpResponse> {
         const controller = new AbortController();
         let timeoutMs = this.config.timeoutMs;
-        const timeoutPromise = new Promise<HttpResponse>((_, reject) =>
+        const timeoutPromise = new Promise<HttpResponse>((_,
+                                                          reject) =>
             setTimeout(() => {
                 // 请求超时，中止请求
                 controller.abort();
@@ -65,21 +77,21 @@ export default class Http233 {
             }, timeoutMs)
         );
 
-        const fetchPromise = fetch(this.config.url, {
-            method: this.config.method,
-            headers: this.config.headers,
-            body: this.config.data ? JSON.stringify(this.config.data) : undefined,
-            // 将 AbortController.signal 传递给 fetch 请求
-            signal: controller.signal
-        })
-            .then(async (response) => {
-                const body = await response.json();
-                return {
-                    status: response.status,
-                    body,
-                    headers: Object.fromEntries(response.headers)
-                };
-            });
+            const fetchPromise = fetch(this.config.url, {
+                method: this.config.method,
+                headers: this.config.headers,
+                body: this.config.data ? JSON.stringify(this.config.data) : undefined,
+                // 将 AbortController.signal 传递给 fetch 请求
+                signal: controller.signal
+            })
+                .then(async (response) => {
+                    const body = await response.json();
+                    return {
+                        status: response.status,
+                        body,
+                        headers: Object.fromEntries(response.headers)
+                    };
+                });
 
         try {
             const response: HttpResponse = await Promise.race([fetchPromise, timeoutPromise]);
