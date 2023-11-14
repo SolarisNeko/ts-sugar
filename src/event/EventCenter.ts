@@ -1,63 +1,80 @@
-import EventCallbackHandler from "./EventCallbackHandler";
+import LazySingleton from "../core/LazySingleton";
+import Logger from "../logger/Logger";
 
-/**
- * @author LuoHaoJun on 2023-06-19
- */
-export default class EventCenter {
+export interface EventCallbackHandler<T> {
+    self: any;
+    callback: (arg: T) => void;
+    once: boolean;
+}
 
-    // callback
-    private static callbackMap = new Map<string, EventCallbackHandler>();
+export class EventCenter extends LazySingleton {
 
-    static register(eventName: string,
-                    callback: Function,
-                    self: any,
-                    isOnce: boolean = false
-    ) {
-        this.callbackMap[eventName] = {
-            callback: callback,
-            self: self,
-            isOnce: isOnce
+
+    private _listeners: Map<string, EventCallbackHandler<any>[]> = new Map();
+
+    public on<T>(eventName: string, callback: (arg: T) => void, self: any, once = false) {
+        const eventCallback: EventCallbackHandler<T> = {
+            self,
+            callback,
+            once,
         };
+
+        if (!this._listeners.has(eventName)) {
+            this._listeners.set(eventName, []);
+        }
+
+        this._listeners.get(eventName)!.push(eventCallback);
     }
 
+    public off<T>(eventName: string, callback: (arg: T) => void, self: any) {
+        if (!this._listeners.has(eventName)) {
+            return;
+        }
 
-    static unregister(eventName: string) {
-        this.callbackMap.delete(eventName);
+        this._listeners.set(
+            eventName,
+            this._listeners.get(eventName)!.filter(
+                (eventCallback) => !(eventCallback.self === self && eventCallback.callback === callback)
+            )
+        );
     }
 
-    static postSync(eventName: string,
-                    data?: any
-    ) {
-        // 结构
-        let callbackDto: EventCallbackHandler = this.callbackMap[eventName];
+    public trigger<T>(eventName: string, arg: T) {
+        if (!this._listeners.has(eventName)) {
+            return;
+        }
 
-        let callback = callbackDto.callback;
-        let self = callbackDto.self;
+        const listeners = this._listeners.get(eventName)!;
 
-        callback.call(self, data);
+        for (let i = listeners.length - 1; i >= 0; i--) {
+            const { self, callback, once } = listeners[i];
 
-        // 一次性
-        if (callbackDto.isOnce) {
-            this.unregister(eventName);
+            if (!self) {
+                console.error('Error: Event callback skipped due to undefined "self".');
+                continue;
+            }
+
+            try {
+                callback.call(self, arg);
+            } catch (error) {
+               Logger.error(`Error in event callback for "${eventName}":`, error);
+            }
+    
+
+            if (once) {
+                // Remove the one-time event listener after triggering
+                listeners.splice(i, 1);
+            }
         }
     }
 
-    static async postAsync(eventName: string,
-                           data?: any
-    ) {
-        // 结构
-        let callbackDto: EventCallbackHandler = this.callbackMap[eventName];
-
-        let callback = callbackDto.callback;
-        let self = callbackDto.self;
-
-        callback.call(self, data);
-
-        // 一次性
-        if (callbackDto.isOnce) {
-            this.unregister(eventName);
-        }
+    public cancelEventsForTarget(target: any): void {
+        this._listeners.forEach((handlers, eventName) => {
+            this._listeners.set(
+                eventName,
+                handlers.filter(eventCallback => eventCallback.self !== target)
+            );
+        });
     }
-
-
+    
 }
