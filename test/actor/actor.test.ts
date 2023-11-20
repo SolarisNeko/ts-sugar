@@ -18,7 +18,7 @@ describe('Actor Class', () => {
             result = data;
         };
 
-        actor.registerExclusiveCallback('testKey', callback);
+        actor.addCallback('testKey', callback);
         actor.executeCallbacks('testKey', 42);
 
         expect(result).toBe(42);
@@ -36,7 +36,7 @@ describe('Actor Class', () => {
             result -= data;
         };
 
-        actor.registerMultipleCallbacks('testKey', [callback1, callback2, callback3]);
+        actor.addCallback('testKey', [callback1, callback2, callback3]);
         actor.executeCallbacks('testKey', 5);
 
         expect(result).toBe(((0 + 5) * 5) - 5);

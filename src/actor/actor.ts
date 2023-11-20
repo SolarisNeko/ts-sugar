@@ -2,40 +2,31 @@ type Callback = (data: any) => void;
 
 
 export default class Actor {
-    private callbacks: ((data: any) => void)[] = [];
-
     private callbackMap: Map<string, Callback | Callback[]> = new Map();
 
-    registerExclusiveCallback(key: string,
-                              callback: Callback
-    ): void {
-        this.callbackMap.set(key, callback);
-    }
 
-    registerMultipleCallbacks(key: string,
-                              callbacks: Callback[]
-    ): void {
-        this.callbackMap.set(key, callbacks);
-    }
-
-    addCallback(key: string,
-                callback: Callback
+    // 添加回调，如果 key 已存在回调，则将新的回调追加到现有回调数组中；如果 key 不存在回调，则创建一个新的回调数组
+    addCallback(
+        key: string,
+        callback: Callback | Callback[]
     ): void {
         const existingCallbacks = this.callbackMap.get(key);
+
         if (existingCallbacks) {
             if (Array.isArray(existingCallbacks)) {
-                existingCallbacks.push(callback);
+                this.callbackMap.set(key, Array.isArray(callback) ? [...existingCallbacks, ...callback] : [...existingCallbacks, callback]);
             } else {
-                this.callbackMap.set(key, [existingCallbacks, callback]);
+                this.callbackMap.set(key, Array.isArray(callback) ? [existingCallbacks, ...callback] : [existingCallbacks, callback]);
             }
         } else {
             this.callbackMap.set(key, callback);
         }
     }
 
-    executeCallbacks(key: string,
-                     data: any
-    ): void {
+
+
+    // 执行指定 key 对应的所有回调，并传递给它们指定的数据
+    executeCallbacks(key: string, data: any): void {
         const callbackOrArray = this.callbackMap.get(key);
 
         if (callbackOrArray) {
@@ -49,9 +40,8 @@ export default class Actor {
         }
     }
 
-    removeCallbackSingle(key: string,
-                         callback: Callback
-    ): void {
+    // 移除单个回调，如果 key 对应的回调是一个数组，从数组中移除指定的回调；如果 key 对应的是单个回调，直接删除
+    removeCallbackSingle(key: string, callback: Callback): void {
         const existingCallbacks = this.callbackMap.get(key);
 
         if (existingCallbacks) {
@@ -70,26 +60,23 @@ export default class Actor {
         }
     }
 
+    // 移除指定 key 对应的所有回调
     removeCallback(key: string): void {
         this.callbackMap.delete(key);
     }
 
-    scheduleOnce(callback: () => void,
-                 delayMs: number
-    ): void {
+    // 单次定时调度，延迟一定时间后执行回调
+    scheduleOnce(callback: () => void, delayMs: number): void {
         setTimeout(callback, delayMs);
     }
 
-    scheduleInterval(callback: () => void,
-                     intervalMs: number
-    ) {
+    // 固定时间间隔调度，循环执行回调
+    scheduleInterval(callback: () => void, intervalMs: number) {
         setInterval(callback, 0, intervalMs);
     }
 
-    scheduleRepeated(callback: () => void,
-                     initialDelayMs: number,
-                     intervalMs: number
-    ) {
+    // 重复调度，首先延迟一定时间，然后以固定时间间隔循环执行回调
+    scheduleRepeated(callback: () => void, initialDelayMs: number, intervalMs: number) {
         setTimeout(() => {
             callback();
             this.scheduleInterval(callback, intervalMs);
