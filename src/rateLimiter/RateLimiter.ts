@@ -1,13 +1,72 @@
-// RateLimiter.ts
 
-import {RateLimiterApi} from "../../types/Suger";
+/**
+ * 限流相关
+ */
 
+/**
+ * 防抖注解
+ * 窗口时间内, 只执行最后一次函数, 调用延长 timeMs 执行
+ * @param timeMs 防抖时间 ms 
+ */
+export function Debounce(timeMs: number) {
+    return function (target: any, propKey: string, descriptor: PropertyDescriptor) {
+        let oldFunc = descriptor.value
+        let timer = null;
+
+        descriptor.value = function (...args: any[]) {
+            if (timer) {
+                clearTimeout(timer);
+            }
+            timer = setTimeout(() => {
+                oldFunc.apply(this, args);
+            }, timeMs);
+        }
+    }
+}
+
+/**
+ * 限流注解
+ *  * 窗口时间内, 只执行第一次函数, timeMs 后解锁
+ * @param timeMs 限流时间 ms 
+ */
+export function Throttle(timeMs: number) {
+    return function (target: any, propKey: string, descriptor: PropertyDescriptor) {
+        let oldFunc = descriptor.value
+        let isLock = false;
+
+        descriptor.value = function (...args: any[]) {
+            if (isLock) {
+                return
+            }
+            isLock = true
+            oldFunc.apply(this, args);
+            setTimeout(() => {
+                isLock = false
+
+            }, timeMs);
+        }
+    }
+}
+
+
+// Interface for rate limit.
+export interface RateLimiterApi {
+
+    // Check if the request is allowed
+    isRequestAllowed(requestTime: number): boolean;
+
+    /**
+     * 是否不允许
+     * @param requestTime 请求次数
+     */
+    isRequestNotAllowed(requestTime: number): boolean;
+}
 
 /**
  * 限流器, n 秒/m次
  * Rate limiter class for rate limiting requests
  */
-export default class RateLimiter implements RateLimiterApi {
+export class RateLimiter implements RateLimiterApi {
 
     // Maximum allowed requests per time window
     private readonly maxRequestsCount: number;
@@ -23,7 +82,7 @@ export default class RateLimiter implements RateLimiterApi {
 
 
     constructor(maxRequestsCount: number,
-                timeWindowInMs?: number
+        timeWindowInMs?: number
     ) {
         this.maxRequestsCount = maxRequestsCount;
         // 永久

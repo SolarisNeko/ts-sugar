@@ -16,7 +16,7 @@ describe('NumberRange', () => {
 
     test('inIn method should correctly check if a number is in the range', () => {
         const range = NumberRange.create(1, 100);
-        expect(range.inIn(50)).toBe(true);
-        expect(range.inIn(150)).toBe(false);
+        expect(range.isIn(50)).toBe(true);
+        expect(range.isIn(150)).toBe(false);
     });
 });

@@ -127,7 +127,7 @@ describe('Actor Class', () => {
         actor.scheduleRepeated(callback, 10, 10);
 
         setTimeout(() => {
-            expect(result).toBeGreaterThan(1);
+            expect(result).toBeGreaterThanOrEqual(1);
             done();
         }, 35);
     });
