@@ -141,11 +141,13 @@ export default class ArrayUtils {
         return subArr;
     }
 
-    static contains<T>(numbers: T[], i: T): boolean {
+    static contains<T>(numbers: T[],
+                       i: T): boolean {
         return numbers.indexOf(i) !== -1;
     }
 
-    static isSameNumber(array1: number[], array2: number[]): boolean {
+    static isSameNumber(array1: number[],
+                        array2: number[]): boolean {
         if (array1 == null || array2 == null) {
             return false;
         }
@@ -188,6 +190,23 @@ export default class ArrayUtils {
         // 生成随机索引
         const randomIndex: number = Math.floor(Math.random() * array.length);
         return array[randomIndex];
+    }
+
+    /**
+     * 删除元素
+     * @param array 数组
+     * @param index 下标
+     * @param deleteCount 删除数量
+     */
+    removeElements(array: any[],
+                   index: number,
+                   deleteCount: number = 1
+    ) {
+        let lastIndex = index + deleteCount;
+        if (array.length >= lastIndex) {
+            return
+        }
+        array.slice(index, deleteCount)
     }
 }
 
