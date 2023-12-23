@@ -1,31 +1,73 @@
+import {isIInit, isIRemoveBefore} from "./ILifecycle";
+import {ICommand, IComponent, IQuery, IUnregister} from "./IAppApi";
+
 export type Clazz<T = any> = new (...args: any[]) => T;
-function getInstanceType<T>(instance: T): Clazz<T> {
+
+export function getInstanceType<T>(instance: T): Clazz<T> {
     return instance.constructor as Clazz<T>;
 }
 
+
+/**
+ * IOC 容器
+ */
 export class IocContainer {
-    private container: Map<Clazz, any> = new Map();
+    /**
+     * singleton
+     * @private
+     */
+    private singletonMap: Map<Clazz, any> = new Map();
+    private _app: IApp;
 
     register<T>(clazz: Clazz<T>, instance: T): void {
-        if (this.container.has(clazz)) {
+        if (this.singletonMap.has(clazz)) {
             throw new Error(`Class ${clazz.name} is already registered in the IoC container.`);
         }
 
-        this.container.set(clazz, instance);
+        this.singletonMap.set(clazz, instance);
+
+        if (isIInit(instance)) {
+            instance.init(this._app)
+        }
+
     }
 
+
     get<T>(clazz: Clazz<T>): T | null {
-        return this.container.get(clazz) || null;
+        return this.singletonMap.get(clazz) || null;
     }
 
     remove<T>(clazz: Clazz<T>): void {
-        this.container.delete(clazz);
+
+        let instance = this.singletonMap.get(clazz);
+        if (!instance) {
+            return
+        }
+
+        if (isIRemoveBefore(instance)) {
+            instance.remove(this._app);
+        }
+
+        this.singletonMap.delete(clazz);
+
+    }
+
+    setApp(app: IApp) {
+        this._app = app
+
     }
 }
 
-export interface IArchitecture {
+/**
+ * App
+ */
+export interface IApp {
+
+    getAppName(): String
+
     // component 
     registerComponent<T extends IComponent>(component: T): void;
+
     getComponent<T extends IComponent>(type: new () => T): T | null;
 
     // command
@@ -38,99 +80,86 @@ export interface IArchitecture {
     sendEvent<T>(event?: T): void;
 
     /**
+     *  @code
      *  let eventHandler = new EventHandler(
-            clazz,
-            onEvent,
-            onceFlag
-        )
-     * @param clazz 
-     * @param eventHandler 
+     *      clazz,
+     *      onEvent,
+     *      onceFlag
+     * )
+     *
+     * @param clazz
+     * @param eventHandler
      */
     registerEvent<T>(
         clazz: Clazz<T>,
         eventHandler: EventHandler<T>,
     ): IUnregister;
+
     unregisterEvent<T>(clazz: Clazz<T>,
-        eventHandler: EventHandler<T>,
+                       eventHandler: EventHandler<T>,
     ): void;
 
 }
 
 
-export interface ICanGetArchitecture {
-    getArchitecture(): IArchitecture;
-}
-
-export interface ICanSetArchitecture {
-    setArchitecture(architecture: IArchitecture): void;
-}
-
-
-export interface IComponent extends ICanGetArchitecture, ICanSetArchitecture {
-    init(): void;
-}
-
-export interface ICommand extends ICanGetArchitecture, ICanSetArchitecture {
-    execute(): void;
-}
-
-export interface IQuery<TResult> extends ICanGetArchitecture, ICanSetArchitecture {
-    execute(): TResult;
-}
-
-export interface IUnregister {
-    unregister(): void;
-}
-
-
 export abstract class AbstractComponent implements IComponent {
-    private architecture: IArchitecture | null = null;
 
-    abstract init(): void;
+    private _app: IApp | null = null;
 
-    getArchitecture(): IArchitecture {
-        if (!this.architecture) {
-            throw new Error('Architecture is not set for the component.');
+    getApp(): IApp {
+        if (!this._app) {
+            throw new Error('App is not set for the component.');
         }
-        return this.architecture;
+        return this._app;
     }
 
-    setArchitecture(architecture: IArchitecture): void {
-        this.architecture = architecture;
+    setApp(App: IApp): void {
+        this._app = App;
     }
+
+    init(): void {
+        // nothing
+    }
+
+
+    removeBefore(): void {
+        // nothing
+    }
+
+
 }
 
 export abstract class AbstractCommand implements ICommand {
-    private architecture: IArchitecture | null = null;
+    private App: IApp | null = null;
 
     abstract execute(): void;
 
-    getArchitecture(): IArchitecture {
-        if (!this.architecture) {
-            throw new Error('Architecture is not set for the command.');
+    getApp(): IApp {
+        if (!this.App) {
+            throw new Error('App is not set for the command.');
         }
-        return this.architecture;
+        return this.App;
     }
 
-    setArchitecture(architecture: IArchitecture): void {
-        this.architecture = architecture;
+    setApp(App: IApp): void {
+        this.App = App;
     }
 }
 
 export abstract class AbstractQuery<TResult> implements IQuery<TResult> {
-    private architecture: IArchitecture | null = null;
+    private App: IApp | null = null;
 
     abstract execute(): TResult;
 
-    getArchitecture(): IArchitecture {
-        if (!this.architecture) {
-            throw new Error('Architecture is not set for the command.');
+    getApp(): IApp {
+        if (!this.App) {
+            throw new Error('App is not set for the command.');
         }
-        return this.architecture;
+        return this.App;
     }
 
-    setArchitecture(architecture: IArchitecture): void {
-        this.architecture = architecture;
+    setApp(App: IApp): void {
+        this.App = App;
     }
 }
 
@@ -138,7 +167,7 @@ export abstract class AbstractQuery<TResult> implements IQuery<TResult> {
 /**
  * 事件处理器
  */
-export class EventHandler<T>{
+export class EventHandler<T> {
     clazz: Clazz<T>;
     onEvent: (e: T) => void;
     onceFlag: boolean = false;
@@ -154,6 +183,10 @@ export class EventHandler<T>{
 
     }
 
+    name(): String {
+        return this.clazz.name
+    }
+
     isOnce(): boolean {
         return this.onceFlag
     }
@@ -167,8 +200,10 @@ export class EventHandler<T>{
 /**
  * 类型事件系统
  */
-export class TypeEventSystem {
+export class EventSystemByClazz {
+    // 永久的
     private eventHandlerMap: Map<Clazz, EventHandler<any>[]> = new Map();
+    // 一次性的
     private onceEventHandlerMap: Map<Clazz, EventHandler<any>[]> = new Map();
 
     send<TEvent>(event: TEvent): void {
@@ -178,7 +213,11 @@ export class TypeEventSystem {
         const regularHandlers = this.eventHandlerMap.get(clazz);
         if (regularHandlers) {
             regularHandlers.forEach((handler) => {
-                handler.handle(event);
+                try {
+                    handler.handle(event);
+                } catch (e) {
+                    this.handleEventHandlerError(e, event, handler)
+                }
             });
         }
 
@@ -186,10 +225,26 @@ export class TypeEventSystem {
         const onceHandlers = this.onceEventHandlerMap.get(clazz);
         if (onceHandlers) {
             onceHandlers.forEach((handler) => {
-                handler.handle(event);
+                try {
+                    handler.handle(event);
+                } catch (e) {
+                    this.handleEventHandlerError(e, event, handler)
+                }
             });
             this.onceEventHandlerMap.delete(clazz);
         }
+    }
+
+    handleEventHandlerError(e: Error,
+                            event: any,
+                            handler: EventHandler<any>
+    ) {
+        // 不影响其他 EventHandler
+        console.error(`[EventSystemByClazz] execute error. handler name = ${handler.name}, event = `,
+            event,
+            e
+        )
+
     }
 
     unregister<T>(clazz: Clazz<T>, eventHandler: EventHandler<T>): void {
@@ -228,64 +283,71 @@ export class TypeEventSystem {
     }
 }
 
-export  abstract class Architecture<T extends Architecture<T>> implements IArchitecture {
+
+/**
+ * 抽象 App
+ */
+export abstract class AbstractApp
+    implements IApp {
+
+    private _name: String = "default";
+
+    constructor(name: String) {
+        this._name = name
+    }
+
     // 是否已经初始化
-    private mInited: boolean = false;
-    // 
-    private mComponents: Set<IComponent> = new Set<IComponent>();
-
-    // 已有的架构
-    // Note: Use 'any' here, as we cannot directly refer to 'T' in a static context.
-    protected static mArchitecture: Architecture<any>;
-
-    public static OnregisterPatch: (architecture: Architecture<any>) => void = architecture => { };
+    private _initFlag: boolean = false;
 
     // ioc 容器
-    private mContainer: IocContainer = new IocContainer();
+    private _container: IocContainer = new IocContainer();
 
     // 类型事件系统
-    private eventSystem: TypeEventSystem = new TypeEventSystem();
+    private eventSystem: EventSystemByClazz = new EventSystemByClazz();
 
-    public static get Interface(): IArchitecture {
-        if (!this.mArchitecture) {
-            this.createApp();
-        }
-        return this.mArchitecture;
-    }
 
-    private static createApp(): void {
-        if (!this.mArchitecture) {
-            this.mArchitecture = new (this as any)();
-            this.mArchitecture.init();
+    /**
+     * 首次创建调用
+     * @private
+     */
+    private create(): void {
+        this._container.setApp(this);
+        if (!this._initFlag) {
+            this.init();
 
-            this.OnregisterPatch?.(this.mArchitecture);
-
-            this.mArchitecture.mComponents.forEach(architectureComponent => {
-                architectureComponent.init();
-            });
-            this.mArchitecture.mComponents.clear();
-
-            this.mArchitecture.mInited = true;
+            this._initFlag = true;
         }
     }
+
+    getAppName(): String {
+        return this._name;
+    }
+
 
     protected abstract init(): void;
 
-    public registerComponent<TComponent extends IComponent>(component: TComponent): void {
-        component.setArchitecture(this);
-        const type = getInstanceType(component);
-        this.mContainer.register<TComponent>(type, component);
 
-        if (!this.mInited) {
-            this.mComponents.add(component);
-        } else {
-            component.init();
+    public registerComponent<TComponent extends IComponent>(component: TComponent): void {
+        const type = getInstanceType(component);
+
+
+        let existApp = component.getApp();
+        if (existApp) {
+            throw new Error(`component = ${type.name} 已经绑定了 App 了 app name = ${this.getAppName()}`)
+        }
+        component.setApp(this);
+
+        if (!this._initFlag) {
+
+            this._container.register<TComponent>(type, component);
         }
     }
 
 
-    public getComponent<TComponent extends IComponent>(type: Clazz): TComponent {
-        return this.mContainer.get<TComponent>(type);
+    public getComponent<TComponent extends IComponent>(
+        type: Clazz<TComponent>
+    ): TComponent {
+        return this._container.get<TComponent>(type);
     }
 
 
@@ -299,12 +361,12 @@ export  abstract class Architecture<T extends Architecture<T>> implements IArchi
 
 
     protected executeCommand(command: ICommand): void {
-        command.setArchitecture(this);
+        command.setApp(this);
         command.execute();
     }
 
     protected doQuery<TResult>(query: IQuery<TResult>): TResult {
-        query.setArchitecture(this);
+        query.setApp(this);
         return query.execute();
     }
 

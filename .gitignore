@@ -1,4 +1,7 @@
+# 生成的 js
 src/**.js
+
+.vscode/
 
 **/Log分析
 **/*.log

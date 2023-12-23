@@ -1,17 +1,7 @@
-import {
-    Clazz,
-    IocContainer,
-    IArchitecture,
-    IComponent,
-    ICommand,
-    IQuery,
-    IUnregister,
-    EventHandler,
-    TypeEventSystem,
-} from '../../src/iapp/IApp';
+import {AbstractComponent, EventHandler, IocContainer, EventSystemByClazz,} from '../../src/iapp/IApp';
 
 
-describe('IocContainer', () => {
+describe('IocContainer.ts', () => {
     let container: IocContainer;
 
     beforeEach(() => {
@@ -19,15 +9,8 @@ describe('IocContainer', () => {
     });
 
     test('register and get', () => {
-        class TestComponent implements IComponent {
-            getArchitecture(): IArchitecture {
-                throw new Error('Method not implemented.');
-            }
-            setArchitecture(architecture: IArchitecture): void {
-                throw new Error('Method not implemented.');
-            }
+        class TestComponent extends AbstractComponent {
             init(): void {
-                throw new Error('Method not implemented.');
             }
         }
 
@@ -39,15 +22,9 @@ describe('IocContainer', () => {
     });
 
     test('register duplicate class', () => {
-        class TestComponent implements IComponent {
-            getArchitecture(): IArchitecture {
-                throw new Error('Method not implemented.');
-            }
-            setArchitecture(architecture: IArchitecture): void {
-                throw new Error('Method not implemented.');
-            }
+        class TestComponent extends AbstractComponent {
+
             init(): void {
-                throw new Error('Method not implemented.');
             }
         }
 
@@ -61,15 +38,8 @@ describe('IocContainer', () => {
     });
 
     test('get non-registered class', () => {
-        class TestComponent implements IComponent {
-            getArchitecture(): IArchitecture {
-                throw new Error('Method not implemented.');
-            }
-            setArchitecture(architecture: IArchitecture): void {
-                throw new Error('Method not implemented.');
-            }
+        class TestComponent extends AbstractComponent {
             init(): void {
-                throw new Error('Method not implemented.');
             }
         }
 
@@ -78,15 +48,8 @@ describe('IocContainer', () => {
     });
 
     test('remove', () => {
-        class TestComponent implements IComponent {
-            getArchitecture(): IArchitecture {
-                throw new Error('Method not implemented.');
-            }
-            setArchitecture(architecture: IArchitecture): void {
-                throw new Error('Method not implemented.');
-            }
+        class TestComponent extends AbstractComponent {
             init(): void {
-                throw new Error('Method not implemented.');
             }
         }
 
@@ -103,10 +66,10 @@ describe('IocContainer', () => {
 });
 
 describe('TypeEventSystem', () => {
-    let eventSystem: TypeEventSystem;
+    let eventSystem: EventSystemByClazz;
 
     beforeEach(() => {
-        eventSystem = new TypeEventSystem();
+        eventSystem = new EventSystemByClazz();
     });
 
     test('send event', () => {
@@ -124,7 +87,7 @@ describe('TypeEventSystem', () => {
         const eventData = 'Hello, Jest!';
         eventSystem.send(new TestEvent(eventData));
 
-        expect(eventHandler).toHaveBeenCalledWith(expect.objectContaining({ data: eventData }));
+        expect(eventHandler).toHaveBeenCalledWith(expect.objectContaining({data: eventData}));
         unsubscribe.unregister();
     });
 
@@ -143,7 +106,7 @@ describe('TypeEventSystem', () => {
         const eventData = 'Hello, Jest!';
         eventSystem.send(new TestEvent(eventData));
 
-        expect(eventHandler).toHaveBeenCalledWith(expect.objectContaining({ data: eventData }));
+        expect(eventHandler).toHaveBeenCalledWith(expect.objectContaining({data: eventData}));
         expect(eventHandler).toHaveBeenCalledTimes(1);
 
         // Send the event again, the once handler should not be called
@@ -168,7 +131,7 @@ describe('TypeEventSystem', () => {
         const eventData = 'Hello, Jest!';
         eventSystem.send(new TestEvent(eventData));
 
-        expect(eventHandler).toHaveBeenCalledWith(expect.objectContaining({ data: eventData }));
+        expect(eventHandler).toHaveBeenCalledWith(expect.objectContaining({data: eventData}));
 
         eventHandler.mockClear();
 
