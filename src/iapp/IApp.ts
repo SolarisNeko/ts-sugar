@@ -65,6 +65,7 @@ export interface ICanSetArchitecture {
     setArchitecture(architecture: IArchitecture): void;
 }
 
+
 export interface IComponent extends ICanGetArchitecture, ICanSetArchitecture {
     init(): void;
 }
@@ -80,6 +81,59 @@ export interface IQuery<TResult> extends ICanGetArchitecture, ICanSetArchitectur
 export interface IUnregister {
     unregister(): void;
 }
+
+
+export abstract class AbstractComponent implements IComponent {
+    private architecture: IArchitecture | null = null;
+
+    abstract init(): void;
+
+    getArchitecture(): IArchitecture {
+        if (!this.architecture) {
+            throw new Error('Architecture is not set for the component.');
+        }
+        return this.architecture;
+    }
+
+    setArchitecture(architecture: IArchitecture): void {
+        this.architecture = architecture;
+    }
+}
+
+export abstract class AbstractCommand implements ICommand {
+    private architecture: IArchitecture | null = null;
+
+    abstract execute(): void;
+
+    getArchitecture(): IArchitecture {
+        if (!this.architecture) {
+            throw new Error('Architecture is not set for the command.');
+        }
+        return this.architecture;
+    }
+
+    setArchitecture(architecture: IArchitecture): void {
+        this.architecture = architecture;
+    }
+}
+
+export abstract class AbstractQuery<TResult> implements IQuery<TResult> {
+    private architecture: IArchitecture | null = null;
+
+    abstract execute(): TResult;
+
+    getArchitecture(): IArchitecture {
+        if (!this.architecture) {
+            throw new Error('Architecture is not set for the command.');
+        }
+        return this.architecture;
+    }
+
+    setArchitecture(architecture: IArchitecture): void {
+        this.architecture = architecture;
+    }
+}
+
 
 /**
  * 事件处理器
