@@ -19,7 +19,6 @@
   "author": "solarisneko",
   "license": "ISC",
   "dependencies": {
-    "jest": "^29.7.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
