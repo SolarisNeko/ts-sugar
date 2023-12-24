@@ -142,11 +142,9 @@ export interface IApp {
      *      onceFlag
      * )
      *
-     * @param clazz
      * @param eventHandler
      */
     registerEventHandler<T>(
-        clazz: Clazz<T>,
         eventHandler: EventHandler<T>,
     ): IUnregister;
 
@@ -222,7 +220,7 @@ export abstract class AbstractQuery<TResult> implements IQuery<TResult> {
  * 事件处理器
  */
 export class EventHandler<T> {
-    // 类型
+    // 事件类型
     clazz: Clazz<T>;
     // handler
     onEvent: (event: T) => void;
@@ -399,6 +397,9 @@ export abstract class AbstractApp
             this.init();
 
             this._initFlag = true;
+
+            this.afterInit();
+
         }
     }
 
@@ -470,13 +471,12 @@ export abstract class AbstractApp
 
     /**
      * 注册事件
-     * @param eventClazz 事件类型
      * @param eventHandler 事件处理器
      */
     public registerEventHandler<TEvent>(
-        eventClazz: Clazz<TEvent>,
         eventHandler: EventHandler<TEvent>,
     ): IUnregister {
+        let eventClazz = eventHandler.clazz;
         return this.eventSystem.register<TEvent>(eventClazz, eventHandler);
     }
 
@@ -497,5 +497,9 @@ export abstract class AbstractApp
         clazz: Clazz<TEvent>,
     ): void {
         this.eventSystem.unregisterByClazz<TEvent>(clazz);
+    }
+
+    public afterInit() {
+
     }
 }

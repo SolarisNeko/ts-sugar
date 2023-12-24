@@ -1,18 +1,29 @@
-import {AbstractApp, AbstractComponent, IocContainer} from "../../src/iapp/IApp";
-import * as Stream from "stream";
+import {AbstractApp, AbstractComponent, EventHandler} from "../../src/iapp/IApp";
 import {HashMap} from "../../src/dataStruct/HashMap";
+import {DemoCommand, DemoEvent, DemoQuery} from "./mock/IAppDemoData.test";
 
 class KvComponent extends AbstractComponent {
 
-    public kvMap : HashMap<String, any> = new HashMap()
+    public kvMap: HashMap<String, any> = new HashMap()
 
 }
 
 class DemoApp extends AbstractApp {
 
-
     protected init(): void {
+        // component
         this.registerComponentByClazz(KvComponent)
+
+
+        // event handler
+        let iUnregister = this.registerEventHandler(
+            new EventHandler(
+                DemoEvent,
+                (e) => {
+                    e.count = 1
+                },
+                false
+            ));
     }
 
 }
@@ -20,16 +31,31 @@ class DemoApp extends AbstractApp {
 describe('IApp.demo.test.ts', () => {
 
     test("demo", () => {
+        // app run !
         let demoApp = new DemoApp("DemoApp");
         demoApp.run();
 
+        // component
         let kvComponent = demoApp.getComponent(KvComponent);
-
         kvComponent.kvMap.put("demo", 1)
 
         let v = kvComponent.kvMap.get("demo");
-        console.log(`demo = ${v}`)
+        expect(v === 1).toBe(true)
 
+
+        // command
+        let command = new DemoCommand();
+        demoApp.executeQuery(command);
+        expect(command.count === 1).toBe(true)
+
+        // query
+        let count = demoApp.executeQuery(new DemoQuery());
+        expect(count === 1).toBe(true)
+
+        // event
+        let demoEvent = new DemoEvent();
+        demoApp.sendEvent(demoEvent);
+        expect(demoEvent.count === 1).toBe(true)
 
 
     })
