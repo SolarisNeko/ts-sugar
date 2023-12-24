@@ -1,8 +1,57 @@
 import {isIInit, isIRemoveBefore} from "./ILifecycle";
-import {ICommand, IComponent, IQuery, IUnregister} from "./IAppApi";
 
 export type Clazz<T = any> = new (...args: any[]) => T;
 
+
+/**
+ * get App 能力
+ */
+export interface ICanGetApp {
+    getApp(): IApp;
+}
+
+/**
+ * set App 能力
+ */
+export interface ICanSetApp {
+    setApp(App: IApp): void;
+}
+
+
+/**
+ * 组件
+ */
+export interface IComponent extends ICanGetApp, ICanSetApp {
+    init(): void;
+
+    removeBefore(): void
+}
+
+/**
+ * 命令
+ */
+export interface ICommand extends ICanGetApp, ICanSetApp {
+    execute(): void;
+}
+
+/**
+ * 查询
+ */
+export interface IQuery<TResult> extends ICanGetApp, ICanSetApp {
+    execute(): TResult;
+}
+
+/**
+ * 注销注册
+ */
+export interface IUnregister {
+    unregister(): void;
+}
+
+/**
+ * 获取 Class Type
+ * @param instance 对象
+ */
 export function getInstanceType<T>(instance: T): Clazz<T> {
     return instance.constructor as Clazz<T>;
 }
@@ -65,16 +114,22 @@ export interface IApp {
 
     getAppName(): String
 
+    /**
+     * no-args constructor clazz
+     * @param type
+     */
+    registerComponentByClazz<T extends IComponent>(type: Clazz<T>): void
+
     // component 
     registerComponent<T extends IComponent>(component: T): void;
 
     getComponent<T extends IComponent>(type: new () => T): T | null;
 
     // command
-    sendCommand<T extends ICommand>(command: T): void;
+    executeCommand<T extends ICommand>(command: T): void;
 
     // query
-    sendQuery<TResult>(query: IQuery<TResult>): TResult;
+    executeQuery<TResult>(query: IQuery<TResult>): TResult;
 
     // event
     sendEvent<T>(event?: T): void;
@@ -90,7 +145,7 @@ export interface IApp {
      * @param clazz
      * @param eventHandler
      */
-    registerEvent<T>(
+    registerEventHandler<T>(
         clazz: Clazz<T>,
         eventHandler: EventHandler<T>,
     ): IUnregister;
@@ -101,15 +156,14 @@ export interface IApp {
 
 }
 
-
+/**
+ * 抽象组件
+ */
 export abstract class AbstractComponent implements IComponent {
 
     private _app: IApp | null = null;
 
     getApp(): IApp {
-        if (!this._app) {
-            throw new Error('App is not set for the component.');
-        }
         return this._app;
     }
 
@@ -129,37 +183,37 @@ export abstract class AbstractComponent implements IComponent {
 
 }
 
+/**
+ * 抽象命令
+ */
 export abstract class AbstractCommand implements ICommand {
-    private App: IApp | null = null;
+    private _app: IApp | null = null;
 
     abstract execute(): void;
 
     getApp(): IApp {
-        if (!this.App) {
-            throw new Error('App is not set for the command.');
-        }
-        return this.App;
+        return this._app;
     }
 
     setApp(App: IApp): void {
-        this.App = App;
+        this._app = App;
     }
 }
 
+/**
+ * 抽象查询
+ */
 export abstract class AbstractQuery<TResult> implements IQuery<TResult> {
-    private App: IApp | null = null;
+    private _app: IApp | null = null;
 
     abstract execute(): TResult;
 
     getApp(): IApp {
-        if (!this.App) {
-            throw new Error('App is not set for the command.');
-        }
-        return this.App;
+        return this._app;
     }
 
     setApp(App: IApp): void {
-        this.App = App;
+        this._app = App;
     }
 }
 
@@ -168,10 +222,19 @@ export abstract class AbstractQuery<TResult> implements IQuery<TResult> {
  * 事件处理器
  */
 export class EventHandler<T> {
+    // 类型
     clazz: Clazz<T>;
-    onEvent: (e: T) => void;
+    // handler
+    onEvent: (event: T) => void;
+    // 是否是一次性的
     onceFlag: boolean = false;
 
+    /**
+     * 构造
+     * @param clazz
+     * @param onEvent
+     * @param onceFlag
+     */
     constructor(
         clazz: Clazz<T>,
         onEvent: (e: T) => void,
@@ -183,15 +246,24 @@ export class EventHandler<T> {
 
     }
 
+    /**
+     * 处理器名字
+     */
     name(): String {
         return this.clazz.name
     }
 
+    /**
+     * 是否是一次性的
+     */
     isOnce(): boolean {
         return this.onceFlag
     }
 
-
+    /**
+     * 处理事件
+     * @param event 事件
+     */
     handle(event: T): void {
         this.onEvent.call(this, event)
     }
@@ -281,6 +353,16 @@ export class EventSystemByClazz {
             unregister: () => this.unregister(clazz, eventHandler),
         } as IUnregister;
     }
+
+    unregisterByClazz<T>(clazz: Clazz<T>) {
+        this.onceEventHandlerMap.delete(clazz)
+        this.eventHandlerMap.delete(clazz)
+    }
+
+    unregisterAll<T>() {
+        this.onceEventHandlerMap.clear()
+        this.eventHandlerMap.clear()
+    }
 }
 
 
@@ -307,10 +389,11 @@ export abstract class AbstractApp
 
 
     /**
-     * 首次创建调用
-     * @private
+     * [Core] new App + run() 是基本法则
+     *
+     * 开始运行该 App
      */
-    private create(): void {
+    public run(): void {
         this._container.setApp(this);
         if (!this._initFlag) {
             this.init();
@@ -327,7 +410,19 @@ export abstract class AbstractApp
     protected abstract init(): void;
 
 
-    public registerComponent<TComponent extends IComponent>(component: TComponent): void {
+    public registerComponentByClazz<T extends IComponent>(type: Clazz<T>): void {
+
+        let component = new type(null)
+
+        let existApp = component.getApp();
+        if (existApp) {
+            throw new Error(`component = ${type.name} 已经绑定了 App 了 app name = ${this.getAppName()}`)
+        }
+        component.setApp(this);
+        this._container.register<T>(type, component);
+    }
+
+    public registerComponent<T extends IComponent>(component: T): void {
         const type = getInstanceType(component);
 
 
@@ -336,11 +431,7 @@ export abstract class AbstractApp
             throw new Error(`component = ${type.name} 已经绑定了 App 了 app name = ${this.getAppName()}`)
         }
         component.setApp(this);
-
-        if (!this._initFlag) {
-
-            this._container.register<TComponent>(type, component);
-        }
+        this._container.register<T>(type, component);
     }
 
 
@@ -350,42 +441,61 @@ export abstract class AbstractApp
         return this._container.get<TComponent>(type);
     }
 
-
-    public sendCommand<TCommand extends ICommand>(command: TCommand): void {
-        this.executeCommand(command);
-    }
-
-    public sendQuery<TResult>(query: IQuery<TResult>): TResult {
-        return this.doQuery(query);
-    }
-
-
-    protected executeCommand(command: ICommand): void {
+    /**
+     * 执行查询
+     * @param command 命令封装
+     */
+    public executeCommand<TCommand extends ICommand>(command: TCommand): void {
         command.setApp(this);
         command.execute();
     }
 
-    protected doQuery<TResult>(query: IQuery<TResult>): TResult {
+    /**
+     * 执行查询
+     * @param query 查询封装
+     */
+    public executeQuery<TResult>(query: IQuery<TResult>): TResult {
         query.setApp(this);
         return query.execute();
     }
 
+
+    /**
+     * 发送一个事件
+     * @param event 事件
+     */
     public sendEvent<TEvent>(event: TEvent): void {
         this.eventSystem.send<TEvent>(event);
     }
 
-    public registerEvent<TEvent>(
-        clazz: Clazz<TEvent>,
+    /**
+     * 注册事件
+     * @param eventClazz 事件类型
+     * @param eventHandler 事件处理器
+     */
+    public registerEventHandler<TEvent>(
+        eventClazz: Clazz<TEvent>,
         eventHandler: EventHandler<TEvent>,
     ): IUnregister {
-
-        return this.eventSystem.register<TEvent>(clazz, eventHandler);
+        return this.eventSystem.register<TEvent>(eventClazz, eventHandler);
     }
 
+    /**
+     * 注销注册事件
+     * @param clazz
+     * @param eventHandler
+     */
     public unregisterEvent<TEvent>(
         clazz: Clazz<TEvent>,
         eventHandler: EventHandler<TEvent>,
     ): void {
         this.eventSystem.unregister<TEvent>(clazz, eventHandler);
+    }
+
+
+    public unregisterEventAll<TEvent>(
+        clazz: Clazz<TEvent>,
+    ): void {
+        this.eventSystem.unregisterByClazz<TEvent>(clazz);
     }
 }
