@@ -3,10 +3,12 @@
  */
 export class FSM<DATA> {
     // 存储状态的映射
-    private stateIdMap: Map<string, State<DATA>> = new Map();
+    private stateIdMap: Map<string, AbstractState<DATA>> = new Map();
 
     // 当前状态
-    private curStateId!: string;
+    private _curStateId!: string;
+    // 退出的状态id
+    private _exitStateId!: string;
 
     /**
      * 创建并添加一个新的状态到状态机
@@ -15,7 +17,7 @@ export class FSM<DATA> {
      * @param state 状态
      * @return FSM 实例
      */
-    addState(stateId: string, state: State<DATA>): FSM<DATA> {
+    addState(stateId: string, state: AbstractState<DATA>): FSM<DATA> {
         // 记录有这么一个状态
         this.stateIdMap.set(stateId, state);
         return this;
@@ -32,83 +34,131 @@ export class FSM<DATA> {
         if (!state) {
             throw new Error(`No such state by stateId = ${stateId}`);
         }
-        this.curStateId = state.stateId;
+        this._curStateId = state.stateId;
     }
 
     /**
      * 首个状态
      * @param stateId 状态的唯一标识符
      */
-    firstStateId(stateId: string): FSM<DATA> {
+    enterStateId(stateId: string): FSM<DATA> {
         const state = this.stateIdMap.get(stateId);
         if (!state) {
             throw new Error(`No such stateId = ${stateId}`);
         }
-        this.curStateId = stateId;
+
+        // Check mutual exclusion
+        if (this._exitStateId === stateId) {
+            throw new Error(`Enter stateId cannot be the same as exit stateId`);
+        }
+
+        this._curStateId = stateId;
+        return this;
+    }
+
+    exitStateId(stateId: string): FSM<DATA> {
+        const state = this.stateIdMap.get(stateId);
+        if (!state) {
+            throw new Error(`No such stateId = ${stateId}`);
+        }
+
+        // Check mutual exclusion
+        if (this._curStateId === stateId) {
+            throw new Error(`Exit stateId cannot be the same as current stateId`);
+        }
+
+        this._exitStateId = stateId;
         return this;
     }
 
     /**
-  * 持续调用直到出口状态或达到最大次数
-  *
-  * @param data 新的数据(外部处理过, 再丢进来尝试)
-  * @param maxStateOccurrences 允许状态重复出现的最大次数
-  * @return StateChangeResult 状态变更结果
-  */
+     * 持续调用直到出口状态或达到最大次数
+     *
+     * @param data 新的数据(外部处理过, 再丢进来尝试)
+     * @param maxStateOccurrences 允许状态重复出现的最大次数
+     * @return StateChangeResult 状态变更结果
+     */
     tick(data: DATA, maxStateOccurrences: number = 2): StateChangeResult {
         const stateChangeResult: StateChangeResult = {
+            changeStateFlag: false,
             stateIdSequence: [],
             exitStateId: '',
             stateIdCounterMap: new Map(),
+            reason: '', // Added reason field
         };
 
         const stateSequence: string[] = [];
 
+        if (!this._curStateId) {
+            throw new Error('没有设置初始化状态 stateId !');
+        }
+
+        if (!this._exitStateId) {
+            throw new Error('没有设置初始化的出口状态 exitStateId !');
+        }
+
         while (true) {
-            const currentState = this.stateIdMap.get(this.curStateId);
+            const currentState = this.stateIdMap.get(this._curStateId);
             if (!currentState) {
-                console.error(`No such state by stateId = ${this.curStateId}`);
+                console.error(`No such state by stateId = ${this._curStateId}`);
                 break;
             }
 
             // 执行逻辑
             currentState.onTick(data);
 
-            // 重新计算状态 | 有可能和现在一样
-            const newStateId = currentState.tryUpdateState(data);
+            // 获取可以过渡到的状态 ID 列表
+            const canTransitionStateIds = currentState.getCanTransitionStateId();
 
-            // 记录状态序列
-            stateSequence.push(newStateId);
+            // 遍历获取的状态 ID 列表，判断是否满足进入条件
+            for (const newStateId of canTransitionStateIds) {
+                const newState = this.stateIdMap.get(newStateId);
+                if (newState && newState.isCanEnterThisState(data)) {
+                    // 记录状态序列
+                    stateSequence.push(newStateId);
 
-            // 记录状态出现次数
-            const count = stateChangeResult.stateIdCounterMap.get(newStateId) || 0;
-            stateChangeResult.stateIdCounterMap.set(newStateId, count + 1);
+                    // 记录状态出现次数
+                    const count = stateChangeResult.stateIdCounterMap.get(newStateId) || 0;
+                    let newCnt = count + 1
+                    stateChangeResult.stateIdCounterMap.set(newStateId, newCnt);
 
-            // 是否和现有状态相同
-            const isSameState = newStateId === this.curStateId;
-            if (isSameState) {
-                stateChangeResult.exitStateId = newStateId;
-                break;
+                    // 更新最后一个状态
+                    stateChangeResult.exitStateId = newStateId;
+
+                    // 是否和现有状态相同
+                    const isSameState = newStateId === this._curStateId;
+                    if (isSameState) {
+                        break;
+                    }
+                    // 变更了状态
+                    stateChangeResult.changeStateFlag = true;
+
+                    // switch state
+                    this._curStateId = newState.stateId;
+
+                    // old state exit
+                    currentState.onExit(data);
+
+                    // new state enter
+                    newState.onEnter(data);
+
+                    // 检查状态出现次数是否达到最大次数
+                    if (stateChangeResult.stateIdCounterMap.get(newStateId) === maxStateOccurrences) {
+                        stateChangeResult.reason = `stateId = ${this._curStateId} 状态变更次数到达 ${newCnt} 次`
+                        break;
+                    }
+
+                    // 到达退出条件
+                    if (this._curStateId == this._exitStateId) {
+                        stateChangeResult.exitStateId = this._curStateId;
+                        stateChangeResult.reason = '到达出口状态'
+                        break;
+                    }
+                }
             }
 
-            // switch state
-            const newState = this.stateIdMap.get(newStateId);
-            if (!newState) {
-                console.error(`No new state to switch, newStateId = ${newStateId}`);
-                break;
-            }
-            this.curStateId = newState.stateId;
-
-            // old state exit
-            currentState.onExit(data);
-
-            // new state enter
-            newState.onEnter(data);
-
-            // 检查状态出现次数是否达到最大次数
-            if (stateChangeResult.stateIdCounterMap.get(newStateId) === maxStateOccurrences) {
-                break;
-            }
+            // 如果状态相同或者没有合适的状态可切换，退出循环
+            break;
         }
 
         stateChangeResult.stateIdSequence = stateSequence;
@@ -116,13 +166,24 @@ export class FSM<DATA> {
         return stateChangeResult;
     }
 
+    /**
+     * 执行一次状态变更
+     *
+     * @param data 新的数据(外部处理过, 再丢进来尝试)
+     * @return StateChangeResult 状态变更结果
+     */
+    tickByOneStep(data: DATA): StateChangeResult {
+        return this.tick(data, 1);
+    }
+
+
 
 }
 
 /**
  * 状态类，包含状态的回调函数
  */
-export abstract class State<DATA> {
+export abstract class AbstractState<DATA> {
     // 状态唯一标识
     readonly stateId: string = '';
     // 归属的状态机
@@ -133,8 +194,13 @@ export abstract class State<DATA> {
         this.stateId = stateId;
     }
 
-    // 计算下一个状态, 允许返回一样的状态
-    abstract tryUpdateState(data: DATA): string;
+
+    // 获取可以过渡到的状态 ID 列表
+    abstract getCanTransitionStateId(): string[];
+
+    // 判断是否满足进入条件
+    abstract isCanEnterThisState(data: DATA): boolean;
+
 
     // 进入该状态时候的回调
     abstract onEnter(data: DATA): void;
@@ -150,8 +216,14 @@ export abstract class State<DATA> {
  * 状态变更结果
  */
 export interface StateChangeResult {
-    stateIdSequence: string[]; // 状态变更序列
-    exitStateId: string; // 出口状态
+    // 是否变更了状态
+    changeStateFlag: boolean;
+    // 状态变更序列
+    stateIdSequence: string[];
+    // 出口状态
+    exitStateId: string;
     // 次数
-    stateIdCounterMap: Map<String, number>; 
+    stateIdCounterMap: Map<String, number>;
+    // 结束原因
+    reason: string;
 }
