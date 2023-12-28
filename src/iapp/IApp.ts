@@ -1,5 +1,11 @@
-import {isIInit, isIRemoveBefore} from "./ILifecycle";
+import {
+    isIInit,
+    isIRemoveBefore
+} from "./ILifecycle";
 
+/**
+ * 类型
+ */
 export type Clazz<T = any> = new (...args: any[]) => T;
 
 
@@ -17,6 +23,13 @@ export interface ICanSetApp {
     setApp(App: IApp): void;
 }
 
+/**
+ * 判断对象是否实现了 ICanSetApp 接口
+ * @param instance 要检查的对象
+ */
+function isICanSetApp(instance: any): instance is ICanSetApp {
+    return 'setApp' in instance;
+}
 
 /**
  * 组件
@@ -68,7 +81,8 @@ export class IocContainer {
     private singletonMap: Map<Clazz, any> = new Map();
     private _app: IApp;
 
-    register<T>(clazz: Clazz<T>, instance: T): void {
+    register<T>(clazz: Clazz<T>,
+                instance: T): void {
         if (this.singletonMap.has(clazz)) {
             throw new Error(`Class ${clazz.name} is already registered in the IoC container.`);
         }
@@ -317,7 +331,8 @@ export class EventSystemByClazz {
 
     }
 
-    unregister<T>(clazz: Clazz<T>, eventHandler: EventHandler<T>): void {
+    unregister<T>(clazz: Clazz<T>,
+                  eventHandler: EventHandler<T>): void {
         const handlers = this.eventHandlerMap.get(clazz);
         if (handlers) {
             const index = handlers.indexOf(eventHandler);
@@ -335,7 +350,8 @@ export class EventSystemByClazz {
         }
     }
 
-    register<T>(clazz: Clazz<T>, eventHandler: EventHandler<T>): IUnregister {
+    register<T>(clazz: Clazz<T>,
+                eventHandler: EventHandler<T>): IUnregister {
 
         if (eventHandler.isOnce()) {
             const onceHandlers = this.onceEventHandlerMap.get(clazz) || [];
@@ -411,35 +427,27 @@ export abstract class AbstractApp
     protected abstract init(): void;
 
 
-    public registerComponentByClazz<T extends IComponent>(type: Clazz<T>): void {
-
+    public registerComponentByClazz<T>(type: Clazz<T>): void {
         let component = new type(null)
-
-        let existApp = component.getApp();
-        if (existApp) {
-            throw new Error(`component = ${type.name} 已经绑定了 App 了 app name = ${this.getAppName()}`)
-        }
-        component.setApp(this);
-        this._container.register<T>(type, component);
+        return this.registerComponent(component)
     }
 
-    public registerComponent<T extends IComponent>(component: T): void {
-        const type = getInstanceType(component);
+    public registerComponent<T>(instance: T): void {
+        const type = getInstanceType(instance);
 
-
-        let existApp = component.getApp();
-        if (existApp) {
-            throw new Error(`component = ${type.name} 已经绑定了 App 了 app name = ${this.getAppName()}`)
+        // 组件 ?
+        if (instance instanceof AbstractComponent) {
+            instance.setApp(this)
+            instance.init()
         }
-        component.setApp(this);
-        this._container.register<T>(type, component);
+        this._container.register<T>(type, instance);
     }
 
 
-    public getComponent<TComponent extends IComponent>(
-        type: Clazz<TComponent>
-    ): TComponent {
-        return this._container.get<TComponent>(type);
+    public getComponent<T>(
+        type: Clazz<T>
+    ): T {
+        return this._container.get<T>(type);
     }
 
     /**
