@@ -77,24 +77,48 @@ export class Http233 {
             }, timeoutMs)
         );
 
-            const fetchPromise = fetch(this.config.url, {
-                method: this.config.method,
-                headers: this.config.headers,
-                body: this.config.data ? JSON.stringify(this.config.data) : undefined,
-                // 将 AbortController.signal 传递给 fetch 请求
-                signal: controller.signal
-            })
-                .then(async (response) => {
-                    const body = await response.json();
-                    return {
-                        status: response.status,
-                        body,
-                        headers: Object.fromEntries(response.headers)
+        const xhr = new XMLHttpRequest();
+        xhr.open(this.config.method, this.config.url, true);
+
+        // Set headers
+        if (this.config.headers) {
+            for (const [key, value] of Object.entries(this.config.headers)) {
+                xhr.setRequestHeader(key, value);
+            }
+        }
+
+        xhr.timeout = timeoutMs;
+
+        // Create a promise for the XMLHttpRequest
+        const xhrPromise = new Promise<HttpResponse>((resolve,
+                                                      reject) => {
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    const headers: Record<string, string> = {};
+                    xhr.getAllResponseHeaders().trim().split('\n').forEach((header) => {
+                        const [name, value] = header.split(':').map((h) => h.trim());
+                        headers[name] = value;
+                    });
+
+                    const response: HttpResponse = {
+                        status: xhr.status,
+                        headers,
+                        body: xhr.responseText,
                     };
-                });
+
+                    resolve(response);
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network request failed'));
+            xhr.ontimeout = () => reject(new Error('Request timeout'));
+        });
+
+        // Send the request with the provided data
+        xhr.send(this.config.data ? JSON.stringify(this.config.data) : undefined);
 
         try {
-            const response: HttpResponse = await Promise.race([fetchPromise, timeoutPromise]);
+            const response: HttpResponse = await Promise.race([xhrPromise, timeoutPromise]);
             return response;
         } catch (error) {
             // 捕获超时错误
