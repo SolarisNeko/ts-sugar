@@ -1,6 +1,7 @@
 /**
  * 栈
- */export default class Stack<T> {
+ */
+export default class Stack<T> {
 
     // 私有数组，用于存储栈元素
     private _stack: T[] = [];

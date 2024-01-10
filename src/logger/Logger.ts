@@ -57,21 +57,12 @@ export default class Logger {
 
             let formattedMessage = message;
 
-            if (typeof message === 'string' && args.length > 0) {
-                formattedMessage = message.replace(/{(\d+)}/g,
-                    (match,
-                     index
-                    ) => {
-                        const argIndex = parseInt(index, 10);
-                        return args[argIndex] !== undefined ? args[argIndex] : match;
-                    });
-            }
 
             if (Logger.isPrintStack) {
                 const callerInfo = Logger.getCallLocation();
-                console.log(`${timestamp} [${logLevelString}] [${callerInfo}] - ${formattedMessage}`);
+                console.log(`${timestamp} [${logLevelString}] [${callerInfo}] - ${formattedMessage}`, args);
             } else {
-                console.log(`${timestamp} [${logLevelString}] - ${formattedMessage}`);
+                console.log(`${timestamp} [${logLevelString}] - ${formattedMessage}`, args);
             }
         }
     }

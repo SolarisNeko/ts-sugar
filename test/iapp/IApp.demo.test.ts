@@ -1,5 +1,5 @@
 import {AbstractApp, AbstractComponent, EventHandler} from "../../src/iapp/IApp";
-import {HashMap} from "../../src/dataStruct/HashMap";
+import {HashMap} from "../../src/collection/HashMap";
 import {DemoCommand, DemoEvent, DemoQuery} from "./mock/IAppDemoData";
 
 class KvComponent extends AbstractComponent {

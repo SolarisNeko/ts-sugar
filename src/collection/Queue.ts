@@ -1,6 +1,7 @@
 /**
  * 队列
- */export default class Queue<T> {
+ */
+export default class Queue<T> {
 
     // 队列数组，用于存储队列元素
     private _queue: T[] = [];

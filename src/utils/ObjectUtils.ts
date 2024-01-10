@@ -104,4 +104,30 @@ export default class ObjectUtils {
     static isError(obj) {
         return Object.prototype.toString.call(obj) === '[object Error]';
     }
+
+
+    /**
+     * 递归拷贝属性
+     * @param source 来源对象
+     * @param target 目标对象
+     */
+    public static copyProperty(source: any, target: any): void {
+        if (!source || !target) {
+            return;
+        }
+
+        for (const key in source) {
+            // 不包含原型链
+            if (source.hasOwnProperty(key)) {
+                if (typeof source[key] === 'object' && source[key] !== null) {
+                    // 如果属性值是对象且不为null，递归复制
+                    target[key] = target[key] || {};
+                    this.copyProperty(source[key], target[key]);
+                } else {
+                    // 否则直接复制属性值
+                    target[key] = source[key];
+                }
+            }
+        }
+    }
 }
