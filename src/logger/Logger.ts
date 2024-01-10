@@ -9,21 +9,9 @@ enum LogLevel {
  * Logger.error("An error occurred: {0} - {1}", errorMessage, errorCode);
  */
 export default class Logger {
-    private static logLevel: LogLevel = LogLevel.DEBUG;
 
-    // private static getCallerInfo(): string {
-    //     const stack = new Error().stack;
-    //     if (stack) {
-    //         const lines = stack.split('\n');
-    //         // 第一个元素是当前函数，第二个是调用该函数的函数
-    //         const callerLine = lines[3] || lines[2]; // 这里根据具体情况调整堆栈信息行数
-    //         const methodName = callerLine.split('at ')[1].trim();
-    //         const [fullClassName] = methodName.split('.');
-    //         const className = fullClassName.substring(fullClassName.lastIndexOf(' ') + 1);
-    //         return className + '::' + methodName;
-    //     }
-    //     return 'Unknown::Unknown';
-    // }
+    public static isPrintStack: Boolean = false;
+    private static logLevel: LogLevel = LogLevel.DEBUG;
 
     private static getCallLocation(): string {
         const stack = new Error().stack;
@@ -66,7 +54,6 @@ export default class Logger {
         if (level >= Logger.logLevel) {
             const logLevelString = ['DEBUG', 'INFO', 'WARN', 'ERROR'][level];
             const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0];
-            const callerInfo = Logger.getCallLocation();
 
             let formattedMessage = message;
 
@@ -80,7 +67,12 @@ export default class Logger {
                     });
             }
 
-            console.log(`${timestamp} [${logLevelString}] [${callerInfo}] - ${formattedMessage}`);
+            if (Logger.isPrintStack) {
+                const callerInfo = Logger.getCallLocation();
+                console.log(`${timestamp} [${logLevelString}] [${callerInfo}] - ${formattedMessage}`);
+            } else {
+                console.log(`${timestamp} [${logLevelString}] - ${formattedMessage}`);
+            }
         }
     }
 
