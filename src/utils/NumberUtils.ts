@@ -30,4 +30,27 @@ export default class NumberUtils {
         return String(value).length;
     }
 
+    /**
+     * 检查数组中的数字是否连续
+     * @param numbers 数字数组
+     * @returns 是否连续
+     */
+    static isConsecutive(numbers: number[]): boolean {
+        if (numbers.length < 2) {
+            // 如果数组长度小于2，不需要检查连续性
+            return true;
+        }
+
+        // 先将数组排序
+        numbers.sort((a, b) => a - b);
+
+        // 检查相邻数字是否连续
+        for (let i = 1; i < numbers.length; i++) {
+            if (numbers[i] !== numbers[i - 1] + 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
