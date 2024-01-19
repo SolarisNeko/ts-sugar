@@ -1,0 +1,24 @@
+{
+  "blackboard": {
+    "diyKey": "value"
+  },
+  "nodes": [
+    {
+      "type": "sequence",
+      "childrenNodes": [
+        {
+          "type": "diyAction",
+          "data": {
+            "name": "demo"
+          }
+        }
+      ]
+    },
+    {
+      "type": "diyAction",
+      "data": {
+        "name": "kk"
+      }
+    }
+  ]
+}
