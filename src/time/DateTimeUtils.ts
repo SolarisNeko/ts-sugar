@@ -8,23 +8,42 @@ export default class DateTimeUtils {
     public static readonly TIME_ZONE: string = "+08";
 
     /**
-     * DateTime Format = "yyyy-MM-dd HH:mm:ss"
-     * 表示时间点
-     * yyyy-mm-dd hh:mm:ss
+     * 格式化时间点
+     * @param timeMs 时间戳
+     * @param format 格式字符串，例如 "yyyy-MM-dd HH:mm:ss"
+     * @returns 格式化后的时间文本
      */
-    public static getDateTimeText(timeMs: number): string {
-        let date: Date = new Date(timeMs);
-        let year: number = date.getFullYear();
-        let month: number = date.getMonth() + 1; 	//返回的月份从0-11；
-        let day: number = date.getDate();
-        let hours: number = date.getHours();
-        let minute: number = date.getMinutes();
-        let second: number = date.getSeconds();
-        let hoursStr = hours < 10 ? ("0" + hours) : hours.toString();
-        let minuteStr = minute < 10 ? ("0" + minute) : minute.toString();
-        let secondStr = second < 10 ? ("0" + second) : second.toString();
-        return year + "-" + month + "-" + day + " " + hoursStr + ":" + minuteStr + ":" + secondStr;
+    public static getDateTimeText(timeMs: number, format: string = "yyyy-MM-dd HH:mm:ss"): string {
+        const date: Date = new Date(timeMs);
+        const year: number = date.getFullYear();
+        const month: number = date.getMonth() + 1;  // 返回的月份从0-11；
+        const day: number = date.getDate();
+        const hours: number = date.getHours();
+        const minute: number = date.getMinutes();
+        const second: number = date.getSeconds();
+
+        const tokens = {
+            'yyyy': year,
+            'MM': month,
+            'dd': day,
+            'HH': hours,
+            'mm': minute,
+            'ss': second,
+        };
+
+        return format.replace(/yyyy|MM|dd|HH|mm|ss/g, match => tokens[match].toString().padStart(2, '0'));
     }
+
+    /**
+     * 获取当前日期文本
+     * @param format 格式字符串，例如 "yyyy-MM-dd HH:mm:ss"
+     * @returns 格式化后的当前日期文本
+     */
+    public static getCurrentDateTimeText(format: string = "yyyy-MM-dd HH:mm:ss"): string {
+        const timeMs = new Date().getTime();
+        return this.getDateTimeText(timeMs, format);
+    }
+
 
     public static getTomorrowStartTime(time: number = this.currentTimeMs,
                                        offsetHour: number = 0

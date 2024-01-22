@@ -1,19 +1,63 @@
-enum LogLevel {
-    DEBUG = 0,
-    INFO,
-    WARN,
-    ERROR,
+import DateTimeUtils from "../time/DateTimeUtils";
+
+
+export enum LogLevel {
+    DEBUG = 'DEBUG',
+    INFO = 'INFO',
+    WARN = 'WARN',
+    ERROR = 'ERROR',
+}
+
+// Logger 配置选项接口
+export class LoggerOptions {
+    level: LogLevel = LogLevel.DEBUG
+    color: string = LogColor.None
+}
+
+
+// Logger 颜色枚举
+export enum LogColor {
+    None = 'color:blue;',
+    Green = 'color:green;',
+    Red = 'color:red;',
+    Grey = 'color:grey;',
+    Orange = 'color:#ee7700;',
+    Violet = 'color:Violet;',
+    Blue = 'color:#3a5fcd;',
 }
 
 /**
- * Logger.error("An error occurred: {0} - {1}", errorMessage, errorCode);
+ * Logger 类，用于记录日志。
  */
-export default class Logger {
+export class Logger {
+    // 日志分类
+    private readonly loggerName: string;
+    // 日志级别
+    private readonly level: LogLevel;
+    // 日志颜色
+    private readonly color: string;
+    // 配置选项
+    private readonly options: LoggerOptions;
 
-    public static isPrintStack: Boolean = false;
-    private static logLevel: LogLevel = LogLevel.DEBUG;
+    /**
+     * 创建 Logger 实例。
+     * @param loggerName 日志分类
+     * @param options 配置选项
+     */
+    constructor(loggerName: string,
+                options: LoggerOptions
+    ) {
+        this.loggerName = loggerName;
+        this.options = options;
+        this.level = options.level;
+        this.color = options.color;
+    }
 
-    private static getCallLocation(): string {
+    private get logLevel(): LogLevel {
+        return this.level
+    }
+
+    private getCallLocation(): string {
         const stack = new Error().stack;
 
         function getSimpleFileName(fileName: string) {
@@ -47,51 +91,98 @@ export default class Logger {
         return '';
     }
 
-    private static log(level: LogLevel,
-                       message: any,
-                       ...args: any[]
+    private log0(level: LogLevel,
+                 message: string,
+                 ...args: any[]
     ): void {
-        if (level >= Logger.logLevel) {
-            const logLevelString = ['DEBUG', 'INFO', 'WARN', 'ERROR'][level];
-            const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0];
+        if (level < this.logLevel) {
+            return;
+        }
 
-            let formattedMessage = message;
+        let colorStyle: string = this.color;
+        let dateTimeText = DateTimeUtils.getCurrentDateTimeText();
 
+        let logMessage = `%c${dateTimeText} | ${this.loggerName} | ${level.toString()} - ${message}`;
 
-            if (Logger.isPrintStack) {
-                const callerInfo = Logger.getCallLocation();
-                console.log(`${timestamp} [${logLevelString}] [${callerInfo}] - ${formattedMessage}`, args);
-            } else {
-                console.log(`${timestamp} [${logLevelString}] - ${formattedMessage}`, args);
-            }
+        switch (level) {
+            case LogLevel.DEBUG:
+            case LogLevel.INFO:
+                console.log(logMessage, colorStyle, ...args);
+                break;
+            case LogLevel.WARN:
+                console.warn(logMessage, colorStyle, ...args);
+                break;
+            case LogLevel.ERROR:
+                console.error(logMessage, colorStyle, ...args);
+                break;
         }
     }
 
-    static setLevel(level: LogLevel): void {
-        Logger.logLevel = level;
+
+    /**
+     * 调试级别日志。
+     * @param message 日志消息
+     * @param args 其他参数
+     */
+    debug(message: string,
+          ...args: any[]
+    ): void {
+        this.log0(LogLevel.DEBUG, message, ...args);
     }
 
-    static debug(message: any,
-                 ...args: any[]
+    /**
+     * 信息级别日志。
+     * @param message 日志消息
+     * @param args 其他参数
+     */
+    info(message: string,
+         ...args: any[]
     ): void {
-        Logger.log(LogLevel.DEBUG, message, ...args);
+        this.log0(LogLevel.INFO, message, ...args);
     }
 
-    static info(message: any,
-                ...args: any[]
+    /**
+     * 警告级别日志。
+     * @param message 日志消息
+     * @param args 其他参数
+     */
+    warn(message: string,
+         ...args: any[]
     ): void {
-        Logger.log(LogLevel.INFO, message, ...args);
+        this.log0(LogLevel.WARN, message, ...args);
     }
 
-    static warn(message: any,
-                ...args: any[]
+    /**
+     * 错误级别日志。
+     * @param message 日志消息
+     * @param args 其他参数
+     */
+    error(message: string,
+          ...args: any[]
     ): void {
-        Logger.log(LogLevel.WARN, message, ...args);
+        this.log0(LogLevel.ERROR, message, ...args);
     }
+}
 
-    static error(message: any,
-                 ...args: any[]
-    ): void {
-        Logger.log(LogLevel.ERROR, message, ...args);
+/**
+ * LoggerFactory 类，用于创建 Logger 实例。
+ */
+export class LoggerFactory {
+    /**
+     * 获取 Logger 实例。
+     * @param loggerName 日志分类
+     * @param options 配置选项
+     * @returns Logger 实例
+     */
+    static getLogger(loggerName: string,
+                     options: LoggerOptions = new LoggerOptions()
+    ): Logger {
+        return new Logger(loggerName, options);
     }
+}
+
+export class Loggers {
+
+    public static baseLogger: Logger = LoggerFactory.getLogger("base")
+
 }

@@ -22,11 +22,20 @@ export interface SocketRespData {
     data: any
 }
 
+// Socket 连接选项接口
+export interface SocketConnectOptions {
+    url?: string;                    // WebSocket 连接的 URL
+    host?: string;                   // 主机地址
+    port?: number;                   // 端口号
+    autoReconnect?: boolean;         // 是否自动重连
+    autoReconnectInterval?: number;  // 自动重连的时间间隔
+}
+
 /** Socket接口 */
 export interface ISocket<REQ, RESP> {
 
     // 连接接口
-    connect(options: any): any;
+    connect(options: SocketConnectOptions): any;
 
     // 连接回调
     onConnected(): void;

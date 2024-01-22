@@ -1,4 +1,4 @@
-import {ISocket} from "../ISocket";
+import {ISocket, SocketConnectOptions} from "../ISocket";
 // 引入 ws 库提供的 WebSocket 类
 import {WebSocket} from 'ws';
 import {ICodec} from "../ICodec";
@@ -57,11 +57,11 @@ export abstract class AbstractWebSocket<REQ, RESP> implements ISocket<REQ, RESP>
         console.log('WebSocket 连接已关闭');
         if (this.autoReconnect) {
             console.log(`尝试在 ${this.autoReconnectInterval / 1000} 秒后重新连接`);
-            setTimeout(() => this.connect({}), this.autoReconnectInterval);
+            setTimeout(() => this.connect({} as SocketConnectOptions ), this.autoReconnectInterval);
         }
     }
 
-    connect(options: any): void {
+    connect(options: SocketConnectOptions): void {
         this.url = options.url || '';
         this.host = options.host || '';
         this.port = options.port || 0;

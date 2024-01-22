@@ -31,7 +31,10 @@ describe("AbstractWebSocket", () => {
 
     it("should connect successfully", (done) => {
 
-        socket.connect({url: "ws://localhost:11111"});
+        socket.connect({
+            url: "ws://localhost:11111"
+        });
+
         socket.send({
             // 请求码
             cmdCode: 1,

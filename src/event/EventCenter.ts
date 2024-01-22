@@ -1,5 +1,5 @@
 import LazySingleton from "../core/LazySingleton";
-import Logger from "../logger/Logger";
+import {Logger} from "../logger/Logger";
 
 export interface EventCallbackHandler<T> {
     self: any;
@@ -57,7 +57,7 @@ export class EventCenter extends LazySingleton {
             try {
                 callback.call(self, arg);
             } catch (error) {
-               Logger.error(`Error in event callback for "${eventName}":`, error);
+                console.error(`Error in event callback for "${eventName}":`, error);
             }
     
 
