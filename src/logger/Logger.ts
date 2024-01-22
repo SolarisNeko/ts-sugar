@@ -17,7 +17,7 @@ export class LoggerOptions {
 
 // Logger 颜色枚举
 export enum LogColor {
-    None = 'color:blue;',
+    None = '',
     Green = 'color:green;',
     Red = 'color:red;',
     Grey = 'color:grey;',
@@ -181,8 +181,11 @@ export class LoggerFactory {
     }
 }
 
-export class Loggers {
+export class LoggerForTest {
 
+    /**
+     * 基本日志器
+     */
     public static baseLogger: Logger = LoggerFactory.getLogger("base")
 
 }

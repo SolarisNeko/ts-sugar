@@ -1,12 +1,12 @@
-import {Loggers} from "../../src/logger/Logger";
+import {LoggerForTest} from "../../src/logger/Logger";
 
 describe('Loggers.base', () => {
 
     it('demo', () => {
 
-        Loggers.baseLogger.debug('Test DEBUG');
-        Loggers.baseLogger.info('Test info');
-        Loggers.baseLogger.warn('Test warn');
-        Loggers.baseLogger.error('Test error');
+        LoggerForTest.baseLogger.debug('Test DEBUG');
+        LoggerForTest.baseLogger.info('Test info');
+        LoggerForTest.baseLogger.warn('Test warn');
+        LoggerForTest.baseLogger.error('Test error');
     })
 });
