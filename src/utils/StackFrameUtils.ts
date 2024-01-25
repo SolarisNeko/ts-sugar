@@ -1,45 +1,66 @@
-/**
- * 堆栈工具
- * @author luohaojun
- */
-export default class StackFrameUtils {
-    /**
-     * 获取当前调用栈帧的数组
-     */
-    static getCallStack(): string[] {
-        const stack = new Error().stack;
-        if (stack) {
-            const stackLines = stack.split('\n');
-            return stackLines.slice(2).map((line) => line.trim());
-        }
-        return [];
+// StackFrameUtils.ts
+export class StackFrameLine {
+    simpleFileName: string;
+    lineNum: string;
+    columnNum: string;
+
+    constructor(simpleFileName: string, lineNum: string, columnNum: string) {
+        this.simpleFileName = simpleFileName;
+        this.lineNum = lineNum;
+        this.columnNum = columnNum;
     }
 
-    /**
-     * 获取当前方法的调用栈帧信息。
-     */
-    static getCurrentStackFrame(): string {
-        const stack = new Error().stack;
-        if (stack) {
-            const stackLines = stack.split('\n');
-            if (stackLines.length >= 3) {
-                return stackLines[2].trim();
+    static empty(): StackFrameLine {
+        return new StackFrameLine("", "", "");
+    }
+}
+
+export class StackFrameUtils {
+    static getStackTrace(): StackFrameLine[] {
+        const error = new Error();
+        const stackLines = (error.stack || '').split('\n').slice(2); // Skip the current and get the remaining stack
+
+        return stackLines.map((line) => {
+            const frameInfo = line.match(/(?:at\s+)?(.+?)\s+\((.*?)(?::(\d+))?(?::(\d+))?\)/);
+
+            if (frameInfo) {
+                const fullPath = frameInfo[2].replace(/\\/g, '/'); // Replace "\\" with "/"
+                const fileName = fullPath.split('/').pop() || ''; // Extract the file name
+                const rowNum = frameInfo[3] || '';
+                const columnNum = frameInfo[4] ? `:${frameInfo[4]}` : '';
+
+                return new StackFrameLine(fileName, rowNum, columnNum);
             }
-        }
-        return '';
+
+            return StackFrameLine.empty();
+        });
     }
 
-    /**
-     * 获取当前方法的调用栈帧信息（这个栈帧之上的调用）。
-     */
-    static getCurrentMethodStackFrame(): string {
-        const stack = new Error().stack;
-        if (stack) {
-            const stackLines = stack.split('\n');
-            if (stackLines.length >= 4) {
-                return stackLines[3].trim();
-            }
+    static getPreStackFrame(humanNum: number): string | null {
+        const num = Math.max(0, humanNum - 1)
+
+        const stackTrace = this.getStackTrace();
+
+        if (stackTrace.length > num) {
+            const stackLine = stackTrace[num] || StackFrameLine.empty();
+            return `${stackLine.simpleFileName}:${stackLine.lineNum}${stackLine.columnNum}`;
         }
-        return '';
+
+        return null;
+    }
+
+    static getLastOneCallStackFrame(): StackFrameLine {
+        const stackTrace = this.getStackTrace();
+
+        if (stackTrace.length > 0) {
+            return stackTrace[0];
+        }
+
+        return StackFrameLine.empty();
+    }
+
+    static getLastOneCallStackFrameStr(): string {
+        const stackLine = this.getLastOneCallStackFrame();
+        return `${stackLine.simpleFileName}:${stackLine.lineNum}${stackLine.columnNum}`;
     }
 }

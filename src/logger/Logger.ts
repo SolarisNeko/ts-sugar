@@ -1,4 +1,5 @@
 import DateTimeUtils from "../time/DateTimeUtils";
+import {StackFrameUtils} from "../utils/StackFrameUtils";
 
 
 export enum LogLevel {
@@ -101,8 +102,10 @@ export class Logger {
 
         let colorStyle: string = this.color;
         let dateTimeText = DateTimeUtils.getCurrentDateTimeText();
+        const callLine = StackFrameUtils.getPreStackFrame(3);
 
-        let logMessage = `%c${dateTimeText} | ${this.loggerName} | ${level.toString()} - ${message}`;
+
+        let logMessage = `%c${dateTimeText} | ${this.loggerName} | ${level.toString()} | ${callLine} - ${message}`;
 
         switch (level) {
             case LogLevel.DEBUG:
