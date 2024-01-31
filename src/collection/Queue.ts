@@ -1,7 +1,7 @@
 /**
  * 队列
  */
-export default class Queue<T> {
+export class Queue<T> {
 
     // 队列数组，用于存储队列元素
     private _queue: T[] = [];
@@ -89,21 +89,21 @@ export default class Queue<T> {
 
     // 遍历队列中的每个元素，执行回调函数
     public forEach(callback: (item: T,
-                              index: number
+                              index: number,
     ) => void): void {
         this._queue.forEach(callback);
     }
 
     // 对队列中的每个元素执行回调函数，并返回新的数组
     public map<U>(callback: (item: T,
-                             index: number
+                             index: number,
     ) => U): U[] {
         return this._queue.map(callback);
     }
 
     // 过滤队列中的元素，返回新的数组
     public filter(callback: (item: T,
-                             index: number
+                             index: number,
     ) => boolean): T[] {
         return this._queue.filter(callback);
     }
