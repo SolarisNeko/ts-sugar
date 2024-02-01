@@ -1,13 +1,12 @@
-import {AttrTree, AttrTreeCompareResult, AttrType} from "../../src/attr/AttrTree";
+import {AttrType, AttrTree, AttrTreeCompareResult, AttrTreeChangeResult} from "../../src/attr/AttrTree";
 
 export namespace AttrTypeEnum {
     export const ATTACK = new AttrType(1, "atk");
     export const DEFENSE = new AttrType(2, "defense");
 }
 
-
 describe('AttrType', () => {
-    test('calcFinalAttr should return totalMap if calculateFinalLambda is null', () => {
+    test('calcChangeAttrMap should return totalMap if calculateFinalLambda is null', () => {
         const attrType = new AttrType(1, 'test', 2);
         const totalMap = new Map([[attrType, 10]]);
 
@@ -16,7 +15,7 @@ describe('AttrType', () => {
         expect(result).toEqual(totalMap);
     });
 
-    test('calcFinalAttr should apply calculateFinalLambda if present', () => {
+    test('calcChangeAttrMap should apply calculateFinalLambda if present', () => {
         const calculateFinalLambda = (totalMap: Map<AttrType, number>) => {
             const result = new Map<AttrType, number>();
             totalMap.forEach((value, key) => result.set(key, value * 2));
@@ -30,7 +29,6 @@ describe('AttrType', () => {
 
         expect(result.get(attrType)).toBe(20);
     });
-
 
     test('isEqualsTo should return true for equal instances', () => {
         const attrType1 = new AttrType(1, 'test1');
@@ -53,9 +51,11 @@ describe('AttrType', () => {
 
 describe('AttrTree', () => {
     let attrTree: AttrTree<string>;
+    let listenerMock: jest.Mock;
 
     beforeEach(() => {
         attrTree = new AttrTree();
+        listenerMock = jest.fn();
     });
 
     test('setAttrs should set attributes for a path', () => {
@@ -97,5 +97,40 @@ describe('AttrTree', () => {
 
         expect(compareResult.addPart.get(AttrTypeEnum.ATTACK)).toBe(20);
         expect(compareResult.noChangePart.get(AttrTypeEnum.DEFENSE)).toBe(30);
+    });
+
+    test('notifyChangeListeners should call all listeners with correct result', () => {
+        const path = 'player1';
+        const attrs = new Map([[AttrTypeEnum.ATTACK, 50]]);
+        const result: AttrTreeChangeResult<AttrType> = {
+            addPart: new Map([[AttrTypeEnum.ATTACK, 50]]),
+            noChangePart: new Map(),
+            minusPart: new Map(),
+            oldAttrMap: new Map(),
+            newAttrMap: new Map([[AttrTypeEnum.ATTACK, 50]]),
+        };
+
+        attrTree.addChangeListener(listenerMock);
+        attrTree.setAttrs(path, attrs);
+
+        expect(listenerMock).toHaveBeenCalledWith(result);
+    });
+
+    test('attrTree change listener', () => {
+        const path = 'player1';
+
+        const attrs1 = new Map([[AttrTypeEnum.ATTACK, 50]]);
+        const attrs2 = new Map([[AttrTypeEnum.ATTACK, 100]]);
+
+        attrTree.addChangeListener((result) =>{
+            result.oldAttrMap == attrs2
+
+            result.newAttrMap == attrs2
+        }) ;
+
+        attrTree.setAttrs(path, attrs1);
+        attrTree.setAttrs(path, attrs2);
+
+        expect(listenerMock).toHaveBeenCalledWith(result);
     });
 });

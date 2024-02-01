@@ -47,12 +47,46 @@ export class AttrTreeCompareResult<AttrType> {
     }
 }
 
+
+export class AttrTreeChangeResult<AttrType> {
+    addPart: Map<AttrType, number>;
+    noChangePart: Map<AttrType, number>;
+    minusPart: Map<AttrType, number>;
+    oldAttrMap: Map<AttrType, number>;
+    newAttrMap: Map<AttrType, number>;
+
+    constructor(oldAttrMap: Map<AttrType, number>,
+                newAttrMap: Map<AttrType, number>) {
+        this.addPart = new Map();
+        this.noChangePart = new Map();
+        this.minusPart = new Map();
+        this.oldAttrMap = oldAttrMap;
+        this.newAttrMap = newAttrMap;
+    }
+}
+
+export interface AttrTreeChangeListener<AttrType> {
+    (result: AttrTreeChangeResult<AttrType>): void;
+}
+
 export class AttrTree<Path> {
     private pathToAttrMap: Map<Path, Map<AttrType, number>> = new Map();
     private totalAttrMap: Map<AttrType, number> = new Map();
     private finalAttrMap: Map<AttrType, number> = new Map();
+    private changeListeners: AttrTreeChangeListener<AttrType>[] = [];
+
+    addChangeListener(listener: AttrTreeChangeListener<AttrType>): void {
+        this.changeListeners.push(listener);
+    }
+
+    private notifyChangeListeners(result: AttrTreeChangeResult<AttrType>): void {
+        for (const listener of this.changeListeners) {
+            listener(result);
+        }
+    }
 
     setAttrs(path: Path, attrs: Map<AttrType, number>): void {
+        const oldAttrMap = new Map(this.finalAttrMap);
         let attrMap = this.pathToAttrMap.get(path);
         if (!attrMap) {
             attrMap = new Map();
@@ -65,6 +99,38 @@ export class AttrTree<Path> {
 
         this.updateTotalAttrMap();
         this.calculateFinal();
+
+        const newAttrMap = new Map(this.finalAttrMap);
+        const result = this.compareAttrs(oldAttrMap, newAttrMap);
+        this.notifyChangeListeners(result);
+    }
+
+    private compareAttrs(
+        oldAttrMap: Map<AttrType, number>,
+        newAttrMap: Map<AttrType, number>
+    ): AttrTreeChangeResult<AttrType> {
+        const result = new AttrTreeChangeResult<AttrType>(oldAttrMap, newAttrMap);
+
+        for (const [attrType, value] of oldAttrMap.entries()) {
+            const newValue = newAttrMap.get(attrType);
+            if (newValue === undefined) {
+                result.minusPart.set(attrType, value);
+            } else if (newValue > value) {
+                result.addPart.set(attrType, newValue - value);
+            } else if (newValue < value) {
+                result.minusPart.set(attrType, value - newValue);
+            } else {
+                result.noChangePart.set(attrType, value);
+            }
+        }
+
+        for (const [attrType, value] of newAttrMap.entries()) {
+            if (!oldAttrMap.has(attrType)) {
+                result.addPart.set(attrType, value);
+            }
+        }
+
+        return result;
     }
 
     setAttrValue(path: Path, attrType: AttrType, value: number): void {
