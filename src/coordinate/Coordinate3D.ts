@@ -1,7 +1,4 @@
-import {
-    Direction,
-    DirectionEnumArray
-} from "./Direction";
+import {Direction, DirectionEnumArray} from "./Direction";
 
 export interface IMapData<T> {
     type: string;

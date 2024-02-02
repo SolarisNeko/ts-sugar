@@ -1,12 +1,5 @@
-import {
-    isIInit,
-    isIRemoveBefore
-} from "./ILifecycle";
-
-/**
- * 类型
- */
-export type Clazz<T = any> = new (...args: any[]) => T;
+import {isIInit, isIRemoveBefore} from "./ILifecycle";
+import {Clazz} from "../types/Types";
 
 
 /**
@@ -82,7 +75,8 @@ export class IocContainer {
     private _app: IApp;
 
     register<T>(clazz: Clazz<T>,
-                instance: T): void {
+                instance: T,
+    ): void {
         if (this.singletonMap.has(clazz)) {
             throw new Error(`Class ${clazz.name} is already registered in the IoC container.`);
         }
@@ -321,18 +315,19 @@ export class EventSystemByClazz {
 
     handleEventHandlerError(e: Error,
                             event: any,
-                            handler: EventHandler<any>
+                            handler: EventHandler<any>,
     ) {
         // 不影响其他 EventHandler
         console.error(`[EventSystemByClazz] execute error. handler name = ${handler.name}, event = `,
             event,
-            e
+            e,
         )
 
     }
 
     unregister<T>(clazz: Clazz<T>,
-                  eventHandler: EventHandler<T>): void {
+                  eventHandler: EventHandler<T>,
+    ): void {
         const handlers = this.eventHandlerMap.get(clazz);
         if (handlers) {
             const index = handlers.indexOf(eventHandler);
@@ -351,7 +346,8 @@ export class EventSystemByClazz {
     }
 
     register<T>(clazz: Clazz<T>,
-                eventHandler: EventHandler<T>): IUnregister {
+                eventHandler: EventHandler<T>,
+    ): IUnregister {
 
         if (eventHandler.isOnce()) {
             const onceHandlers = this.onceEventHandlerMap.get(clazz) || [];
@@ -445,7 +441,7 @@ export abstract class AbstractApp
 
 
     public getComponent<T>(
-        type: Clazz<T>
+        type: Clazz<T>,
     ): T {
         return this._container.get<T>(type);
     }

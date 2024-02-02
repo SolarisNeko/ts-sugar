@@ -1,5 +1,4 @@
 import LazySingleton from "../core/LazySingleton";
-import {Logger} from "../logger/Logger";
 
 export interface EventCallbackHandler<T> {
     self: any;
