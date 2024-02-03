@@ -1,18 +1,33 @@
-import {PlayerTask, TaskConfig, TaskTargetTypeHandler, TaskTargetTypeRegister} from "../../src/task/Task";
+import {
+    PlayerTask,
+    TaskConfig,
+    TaskEventHandler,
+    TaskPhaseEnum,
+    TaskTarget,
+    TaskTargetTypeHandler,
+    TaskTargetTypeRegister
+} from "../../src/task/Task";
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike"; // Update the path accordingly
 
 // Mocking a simple player-like object for testing
 const mockPlayer: PlayerLike = new TestPlayer()
 
 // Mocking a simple handler for testing
-class MockTaskTargetTypeHandler implements TaskTargetTypeHandler {
-    handleEvent(player: PlayerLike, target: any, eventName: string, eventData: any): void {
-        // Implement your mock handler logic for testing
+class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
+    protected initEventTypeHandler(): void {
+        this.putEventHandler(DemoTaskEvent, new class implements TaskEventHandler<DemoTaskEvent> {
+            handle(player: PlayerLike, target: TaskTarget, eventName: string, event: DemoTaskEvent): void {
+                console.log('类型匹配调用成功!')
+                target.setProgress(10)
+            }
+        })
     }
 
-    handleFinish(player: PlayerLike, target: any): void {
-        // Implement your mock handler logic for testing
-    }
+
+}
+
+class DemoTaskEvent {
+    data: string
 }
 
 // Mocking a simple condition checker for testing
@@ -28,8 +43,9 @@ describe('PlayerTask', () => {
             taskGroupId: 1,
             taskId: 1,
             taskName: 'Test Task',
+            taskType: 'default',
             taskTargetList: [
-                {type: 'exampleType', targetProgressValue: 10},
+                {taskTargetType: 'exampleType', targetProgressValue: 10},
             ],
         };
 
@@ -58,11 +74,16 @@ describe('PlayerTask', () => {
         // Register the handler
         TaskTargetTypeRegister.registerHandler('exampleType', mockHandler);
 
+        let event = new DemoTaskEvent();
+        event.data = 'demo'
+
         // Call the method that triggers handleEvent
-        playerTask.receiveEvent(mockPlayer, 'exampleEvent', {data: 'exampleData'});
+        playerTask.receiveEvent(mockPlayer, 'exampleEvent', event);
 
         // Add assertions based on your mock handler's logic
         expect(handleEventSpy).toHaveBeenCalled();
+
+        expect(playerTask.phase == TaskPhaseEnum.finish)
     });
 
 });

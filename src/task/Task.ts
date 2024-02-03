@@ -1,5 +1,6 @@
 import {ConditionChecker, ConditionResult} from "../condition/ConditionEngine";
 import {PlayerLike} from "../player/PlayerLike";
+import {Clazz} from "../types/Types";
 
 export enum TaskPhaseEnum {
     noOpen = 0,          // 未开启
@@ -9,9 +10,12 @@ export enum TaskPhaseEnum {
     reward = 4           // 领取奖励
 }
 
+/**
+ * 任务的单个目标的配置
+ */
 export class TaskTargetConfig {
     // 任务目标类型
-    type: string;
+    taskTargetType: string;
     // 目标进度
     targetProgressValue: number;
     // 任务目标数据
@@ -28,8 +32,11 @@ export class TaskConfig {
     taskId: number;
     // 任务名字
     taskName: string;
+    // 任务类型
+    taskType: string = "default";
     // 任务多个目标
     taskTargetList: TaskTargetConfig[];
+    // -------- optional -------------
     // 接任务条件
     acceptCondition?: ConditionChecker<PlayerLike>;
     // 任务变更条件
@@ -52,7 +59,7 @@ export class TaskTarget {
     acceptTimeSecond: number = 0;
 
     constructor(config: TaskTargetConfig) {
-        this.type = config.type;
+        this.type = config.taskTargetType;
         this.data = config.data;
         this.targetProgressValue = config.targetProgressValue;
     }
@@ -211,10 +218,11 @@ export class PlayerTask {
     ): void {
         // 处理每个任务目标
         this.taskTargets.forEach(target => {
-            const handler = TaskTargetTypeRegister.getHandler(target.type);
-            if (handler) {
-                handler.handleEvent(playerLike, target, eventName, eventData);
+            const targetTypeHandler = TaskTargetTypeRegister.getHandler(target.type);
+            if (!targetTypeHandler) {
+                return
             }
+            targetTypeHandler.handleEvent(playerLike, target, eventName, eventData);
         });
     }
 
@@ -228,33 +236,62 @@ export class PlayerTask {
     }
 }
 
+export interface TaskEventHandler<T> {
+
+    handle(player: PlayerLike,
+           target: TaskTarget,
+           eventName: string,
+           event: T
+    ): void
+}
+
 // 定义任务目标类型处理器接口
-export interface TaskTargetTypeHandler {
+export abstract class TaskTargetTypeHandler {
+
+    protected eventTypeToEventHandlerMap = new Map<Clazz<any>, TaskEventHandler<any>>()
+
+    constructor() {
+        this.initEventTypeHandler()
+    }
 
     // 处理事件的方法
     handleEvent(player: PlayerLike,
                 target: TaskTarget,
                 eventName: string,
                 eventData: any,
-    ): void;
+    ): void {
+        let eventClass = eventData.constructor;
 
-    handleFinish(player: PlayerLike,
-                 target: TaskTarget,
-    ): void;
+        let handler = this.eventTypeToEventHandlerMap.get(eventClass);
+        if (!handler) {
+            return
+        }
+        handler.handle(player, target, eventName, eventData)
+    }
+
+    putEventHandler<T>(clazz: Clazz<T>,
+                       handler: TaskEventHandler<T>
+    ) {
+        this.eventTypeToEventHandlerMap.set(clazz, handler)
+    }
+
+    protected abstract initEventTypeHandler(): void
 }
 
 // 注册表，将任务目标类型与对应的处理器关联
 export class TaskTargetTypeRegister {
-    private static targetTypeHandlers: Map<string, TaskTargetTypeHandler> = new Map();
+
+    // <任务目标类型, 该目标处理器>
+    private static targetTypeHandlerMap: Map<string, TaskTargetTypeHandler> = new Map();
 
     // 注册处理器方法
-    static registerHandler(type: string, handler: TaskTargetTypeHandler): void {
-        this.targetTypeHandlers.set(type, handler);
+    static registerHandler(taskTargetType: string, handler: TaskTargetTypeHandler): void {
+        this.targetTypeHandlerMap.set(taskTargetType, handler);
     }
 
     // 获取处理器方法
     static getHandler(type: string): TaskTargetTypeHandler | undefined {
-        return this.targetTypeHandlers.get(type);
+        return this.targetTypeHandlerMap.get(type);
     }
 }
 
