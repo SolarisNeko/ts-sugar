@@ -1,6 +1,10 @@
-import {ConditionChecker, ConditionResult} from "../condition/ConditionEngine";
 import {PlayerLike} from "../player/PlayerLike";
 import {Clazz} from "../types/Types";
+import ArrayUtils from "../utils/ArrayUtils";
+import * as console from "console";
+import {ProgressBar} from "../core/ProgressBar";
+
+import {IUnRegister, UnRegister} from "../unregister/UnRegister";
 
 export enum TaskPhaseEnum {
     noOpen = 0,          // 未开启
@@ -37,12 +41,6 @@ export class TaskConfig {
     // 任务多个目标
     taskTargetList: TaskTargetConfig[];
     // -------- optional -------------
-    // 接任务条件
-    acceptCondition?: ConditionChecker<PlayerLike>;
-    // 任务变更条件
-    progressCondition?: ConditionChecker<PlayerLike>;
-    // 任务完成条件
-    finishCondition?: ConditionChecker<PlayerLike>;
 }
 
 // 任务目标, 带状态
@@ -51,28 +49,54 @@ export class TaskTarget {
     readonly type: string;
     // 任务目标数据
     readonly data?: any;
-    // 目标进度值
-    readonly targetProgressValue: number = 0;
-    // 任务目标状态
-    progress: number = 0;
-    // 接取时间
-    acceptTimeSecond: number = 0;
+    // 进度条
+    private progressBar: ProgressBar
 
     constructor(config: TaskTargetConfig) {
         this.type = config.taskTargetType;
         this.data = config.data;
-        this.targetProgressValue = config.targetProgressValue;
+        this.progressBar = new ProgressBar(config.targetProgressValue);
     }
 
     // 更新任务目标状态
-    setProgress(value: number): void {
-        this.progress = value;
+    setProgressValue(value: number): void {
+        this.progressBar.curProgressValue = value;
     }
 
-    addProgress(value: number): void {
-        this.progress += value;
+    addProgressValue(value: number): void {
+        this.progressBar.curProgressValue += value;
     }
 
+    getProgressValue(): number {
+        return this.progressBar.curProgressValue
+    }
+
+    getProgressPercent(): number {
+        return this.progressBar.getProgressPercent()
+    }
+
+    getProgressPercentStr(): string {
+        return this.progressBar.getProgressPercentStr()
+    }
+
+    isComplete(): boolean {
+        return this.progressBar.isComplete()
+    }
+
+    getProgressBarSingle(): ProgressBar {
+        return this.progressBar;
+    }
+}
+
+export interface TaskStateUpdateListener {
+    onUpdate(task: PlayerTask,
+             oldPhase: TaskPhaseEnum,
+             newPhase: TaskPhaseEnum,
+    ): void;
+}
+
+export interface TaskProgressWatcher {
+    onTaskProgressChange(task: PlayerTask): void;
 }
 
 /**
@@ -80,26 +104,47 @@ export class TaskTarget {
  */
 export class PlayerTask {
     // 当前任务阶段
+    private oldPhase: TaskPhaseEnum = TaskPhaseEnum.noOpen;
     private currentPhase: TaskPhaseEnum = TaskPhaseEnum.noOpen;
     private taskTargets: TaskTarget[] = [];
-    readonly config: TaskConfig
+    readonly taskConfig: TaskConfig
+    // 接取时间
+    acceptTimeMs: number = 0;
+    private _updateListener: TaskStateUpdateListener
+    // 进度监听器
+    private progressWatchers: TaskProgressWatcher[] = [];
 
-    constructor(config: TaskConfig,
-                resetStateCallback: (task: PlayerTask) => void,
+
+    set updateListener(value: TaskStateUpdateListener) {
+        this._updateListener = value;
+    }
+
+    /**
+     *
+     * @param taskConfig 任务配置
+     * @param resetTaskStateCallback 重置状态
+     */
+    constructor(taskConfig: TaskConfig,
+                resetTaskStateCallback: (task: PlayerTask) => void,
     ) {
-        this.config = config
-        this.init();
+        this.taskConfig = taskConfig
+        this.loadConfig();
 
-        resetStateCallback(this)
+        // 设置状态
+        resetTaskStateCallback(this)
+
+        // 状态同步
+        this.oldPhase = this.phase
     }
 
     /**
      * 初始化任务，恢复历史状态数据
      */
-    init(): void {
+    loadConfig(): void {
         // 根据 TaskConfig 中的 taskTargetList 构建 TaskTarget 实例
-        let config: TaskConfig = this.config;
+        let config: TaskConfig = this.taskConfig;
 
+        // 每一个任务目标
         this.taskTargets = config.taskTargetList
             .map((targetConfig) => {
                 return this.createTaskTarget(targetConfig);
@@ -113,71 +158,81 @@ export class PlayerTask {
         return this.currentPhase;
     }
 
+    setTaskTargetProgressValue(targetIndex: number,
+                               progressValue: number,
+    ): void {
+        if (ArrayUtils.isNotInSafeIndex(this.taskTargets, targetIndex)) {
+            console.error(`task target[] 数组访问越界. 安全退出. targetIndex=${targetIndex}, progressValue=${progressValue}`);
+            return;
+        }
+        let taskTarget: TaskTarget = this.taskTargets[targetIndex];
+        if (!taskTarget) {
+            return
+        }
+        taskTarget.setProgressValue(progressValue)
+
+
+        this.tryUpdateTaskState()
+        // 通知进度变更
+        this.notifyProgressWatchers()
+    }
+
+    setTaskTargetProgressValueByMap(progressMap: Map<number, number>): void {
+        progressMap.forEach((progressValue, targetIndex) => {
+            this.setTaskTargetProgressValue(targetIndex, progressValue);
+        });
+    }
+
     /**
      * 完成任务
      */
     finish(player: PlayerLike): boolean {
-        if (this.currentPhase === TaskPhaseEnum.inProgress) {
-            if (!this.isHaveFinishAllTaskTarget()) {
-                return false;
-            }
+        if (this.currentPhase !== TaskPhaseEnum.inProgress) {
+            return false;
+        }
+        if (!this.isHaveFinishAllTaskTarget()) {
+            return false;
+        }
+        this.currentPhase = TaskPhaseEnum.finish;
+        this.notifyTaskListener()
+        return true;
+    }
 
-            // 如果 finishCondition 不存在，视为条件满足
-            const result = this.config.finishCondition ? this.config.finishCondition.verify(player) : ConditionResult.success();
-
-            if (result.isSuccess()) {
-                this.currentPhase = TaskPhaseEnum.finish;
-            }
-
-            return result.success;
+    /**
+     * 标记任务可以接收了
+     */
+    setCanAccept(): boolean {
+        if (this.currentPhase !== TaskPhaseEnum.noOpen) {
+            return true;
         }
 
-        return false; // Task not in the correct phase to finish
+        this.currentPhase = TaskPhaseEnum.canAccept;
+        this.notifyTaskListener()
+        return true;
     }
 
     /**
      * 接受任务
      */
-    accept(player: PlayerLike): boolean {
-        if (this.currentPhase === TaskPhaseEnum.noOpen) {
-            // 如果 acceptCondition 不存在，视为条件满足
-            const result = this.config.acceptCondition ? this.config.acceptCondition.verify(player) : ConditionResult.success();
+    acceptTask(): boolean {
 
-            if (result.isSuccess()) {
-                this.currentPhase = TaskPhaseEnum.canAccept;
-            }
-
-            return result.success;
+        if (this.currentPhase !== TaskPhaseEnum.canAccept) {
+            return false;
         }
 
-        return false; // Already accepted or in other phases
+        this.currentPhase = TaskPhaseEnum.inProgress;
+        this.notifyTaskListener()
+        return true;
     }
 
-    /**
-     * 开始任务
-     */
-    start(player: PlayerLike): boolean {
-        if (this.currentPhase === TaskPhaseEnum.canAccept) {
-            // 如果 progressCondition 不存在，视为条件满足
-            const result = this.config.progressCondition ? this.config.progressCondition.verify(player) : ConditionResult.success();
-
-            if (result.isSuccess()) {
-                this.currentPhase = TaskPhaseEnum.inProgress;
-            }
-
-            return result.success;
-        }
-
-        return false; // Task not in the correct phase to start
-    }
 
     /**
-     * 检查任务目标进度是否满足条件
+     * 检查所有任务目标, 是否已经都完成了 ?
      */
-    private isHaveFinishAllTaskTarget(): boolean {
+    public isHaveFinishAllTaskTarget(): boolean {
         for (const target of this.taskTargets) {
             // 检查任务目标的进度是否达到目标值
-            if (target.progress < target.targetProgressValue) {
+            if (!target.isComplete()) {
                 return false;
             }
         }
@@ -188,15 +243,26 @@ export class PlayerTask {
     /**
      * 领取奖励
      */
-    claimReward(player: PlayerLike): boolean {
-        if (this.currentPhase === TaskPhaseEnum.finish) {
-            // 处理领取奖励的逻辑
-            this.currentPhase = TaskPhaseEnum.reward;
-
-            return true;
+    receiveReward(): boolean {
+        if (this.currentPhase !== TaskPhaseEnum.finish) {
+            return false;
         }
-        // Task not in the correct phase to claim reward
-        return false;
+
+        // 处理领取奖励的逻辑
+        this.currentPhase = TaskPhaseEnum.reward;
+        this.notifyTaskListener()
+        return true;
+    }
+
+    setFinishState() {
+        if (this.currentPhase !== TaskPhaseEnum.reward) {
+            return false;
+        }
+
+        // 处理领取奖励的逻辑
+        this.currentPhase = TaskPhaseEnum.finish;
+        this.notifyTaskListener()
+        return true;
     }
 
     /**
@@ -230,10 +296,64 @@ export class PlayerTask {
      * 根据 TaskTargetConfig 创建 TaskTarget 实例
      */
     private createTaskTarget(targetConfig: TaskTargetConfig): TaskTarget {
-        // 实际项目中可能需要根据配置创建具体的 TaskTarget 类型
-        // 这里简化为创建基础的 TaskTarget
         return new TaskTarget(targetConfig);
     }
+
+    private tryUpdateTaskState(): void {
+        // 在更新进度后，检查是否已经完成所有任务目标，如果是，则重新计算 currentPhase
+        if (this.phase === TaskPhaseEnum.inProgress) {
+            if (this.isHaveFinishAllTaskTarget()) {
+                this.currentPhase = TaskPhaseEnum.finish;
+            }
+        }
+
+        this.notifyTaskListener()
+    }
+
+    private notifyTaskListener(): void {
+        if (this.oldPhase === this.currentPhase) {
+            return
+        }
+
+        if (!this._updateListener) {
+            return;
+        }
+        this._updateListener.onUpdate(this, this.oldPhase, this.currentPhase);
+
+        // 同步状态
+        this.oldPhase = this.currentPhase
+    }
+
+    registerProgressValueWatcher(watcher: TaskProgressWatcher): IUnRegister {
+        this.progressWatchers.push(watcher);
+        return UnRegister.create(() => {
+            this.unregisterProgressValueWatcher(watcher)
+        })
+    }
+
+    unregisterProgressValueWatcher(watcher: TaskProgressWatcher): void {
+        const index = this.progressWatchers.indexOf(watcher);
+        if (index !== -1) {
+            this.progressWatchers.splice(index, 1);
+        }
+    }
+
+    private notifyProgressWatchers(): void {
+        for (const watcher of this.progressWatchers) {
+            watcher.onTaskProgressChange(this);
+        }
+    }
+
+    getAllTargetProgressMap(): Map<number, ProgressBar> {
+        const progressMap = new Map<number, ProgressBar>();
+
+        this.taskTargets.forEach((target, index) => {
+            progressMap.set(index, target.getProgressBarSingle());
+        });
+
+        return progressMap;
+    }
+
 }
 
 export interface TaskEventHandler<T> {
@@ -241,7 +361,7 @@ export interface TaskEventHandler<T> {
     handle(player: PlayerLike,
            target: TaskTarget,
            eventName: string,
-           event: T
+           event: T,
     ): void
 }
 
@@ -270,7 +390,7 @@ export abstract class TaskTargetTypeHandler {
     }
 
     putEventHandler<T>(clazz: Clazz<T>,
-                       handler: TaskEventHandler<T>
+                       handler: TaskEventHandler<T>,
     ) {
         this.eventTypeToEventHandlerMap.set(clazz, handler)
     }

@@ -1,4 +1,4 @@
 /**
  * 类型
  */
-export type Clazz<T> = new (...args: any[]) => T;
+export type Clazz<T = any> = new (...args: any[]) => T;

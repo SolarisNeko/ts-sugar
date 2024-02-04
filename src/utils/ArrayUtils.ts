@@ -28,7 +28,8 @@ export default class ArrayUtils {
      * 判断两个数组是否相等
      */
     static equals<T>(array1: T[],
-                     array2: T[]): boolean {
+                     array2: T[],
+    ): boolean {
         if (array1 === array2) {
             return true;
         }
@@ -76,7 +77,8 @@ export default class ArrayUtils {
      */
     static insert<T>(array: T[],
                      index: number,
-                     ...elements: T[]): T[] {
+                     ...elements: T[]
+    ): T[] {
         return array.slice(0, index).concat(elements, array.slice(index));
     }
 
@@ -84,7 +86,8 @@ export default class ArrayUtils {
      * 删除数组指定位置的元素
      */
     static remove<T>(array: T[],
-                     index: number): T[] {
+                     index: number,
+    ): T[] {
         return array.slice(0, index).concat(array.slice(index + 1));
     }
 
@@ -98,7 +101,8 @@ export default class ArrayUtils {
 
     static subArray<T>(data: T[],
                        startIndex: number,
-                       endIndex: number): T[] {
+                       endIndex: number,
+    ): T[] {
         // 确保 startIndex 和 endIndex 在有效范围内
         startIndex = Math.max(startIndex, 0);
         endIndex = Math.min(endIndex, data.length - 1);
@@ -118,7 +122,8 @@ export default class ArrayUtils {
 
     static subArrayByExclude<T>(data: T[],
                                 startIndex: number,
-                                endIndex: number): T[] {
+                                endIndex: number,
+    ): T[] {
         // 确保 startIndex 和 endIndex 在有效范围内
         startIndex = Math.max(startIndex, 0);
         endIndex = Math.min(endIndex, data.length - 1);
@@ -142,12 +147,14 @@ export default class ArrayUtils {
     }
 
     static contains<T>(numbers: T[],
-                       i: T): boolean {
+                       i: T,
+    ): boolean {
         return numbers.indexOf(i) !== -1;
     }
 
     static isSameNumber(array1: number[],
-                        array2: number[]): boolean {
+                        array2: number[],
+    ): boolean {
         if (array1 == null || array2 == null) {
             return false;
         }
@@ -200,13 +207,29 @@ export default class ArrayUtils {
      */
     removeElements(array: any[],
                    index: number,
-                   deleteCount: number = 1
+                   deleteCount: number = 1,
     ) {
         let lastIndex = index + deleteCount;
         if (array.length >= lastIndex) {
             return
         }
         array.slice(index, deleteCount)
+    }
+
+    /**
+     * 检查数组索引是否在有效范围内
+     * @param array
+     * @param index
+     */
+    static isInSafeIndex<T>(array: T[], index: number): boolean {
+        if (!array) {
+            return false
+        }
+        return index >= 0 && index < array.length;
+    }
+
+    static isNotInSafeIndex<T>(array: T[], index: number): boolean {
+        return !this.isInSafeIndex(array, index)
     }
 }
 

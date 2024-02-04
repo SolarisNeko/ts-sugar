@@ -5,7 +5,7 @@ import {
     TaskPhaseEnum,
     TaskTarget,
     TaskTargetTypeHandler,
-    TaskTargetTypeRegister
+    TaskTargetTypeRegister,
 } from "../../src/task/Task";
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike"; // Update the path accordingly
 
@@ -18,7 +18,7 @@ class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
         this.putEventHandler(DemoTaskEvent, new class implements TaskEventHandler<DemoTaskEvent> {
             handle(player: PlayerLike, target: TaskTarget, eventName: string, event: DemoTaskEvent): void {
                 console.log('类型匹配调用成功!')
-                target.setProgress(10)
+                target.setProgressValue(10)
             }
         })
     }
@@ -59,7 +59,7 @@ describe('PlayerTask', () => {
     });
 
     test('Accepting the task', () => {
-        playerTask.accept(mockPlayer);
+        playerTask.acceptTask();
         expect(playerTask.phase).toBe(1); // Check if the task is in the correct phase after acceptance
     });
 

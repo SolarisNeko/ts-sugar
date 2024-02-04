@@ -16,7 +16,7 @@ class DemoApp extends AbstractApp {
 
 
         // event handler
-        let iUnregister = this.registerEventHandler(
+        let IUnRegister = this.registerEventHandler(
             new EventHandler(
                 DemoEvent,
                 (e) => {

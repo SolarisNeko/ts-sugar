@@ -1,5 +1,6 @@
 import {isIInit, isIRemoveBefore} from "./ILifecycle";
 import {Clazz} from "../types/Types";
+import {IUnRegister} from "../unregister/UnRegister";
 
 
 /**
@@ -47,12 +48,6 @@ export interface IQuery<TResult> extends ICanGetApp, ICanSetApp {
     execute(): TResult;
 }
 
-/**
- * 注销注册
- */
-export interface IUnregister {
-    unregister(): void;
-}
 
 /**
  * 获取 Class Type
@@ -154,7 +149,7 @@ export interface IApp {
      */
     registerEventHandler<T>(
         eventHandler: EventHandler<T>,
-    ): IUnregister;
+    ): IUnRegister;
 
     unregisterEvent<T>(clazz: Clazz<T>,
                        eventHandler: EventHandler<T>,
@@ -347,7 +342,7 @@ export class EventSystemByClazz {
 
     register<T>(clazz: Clazz<T>,
                 eventHandler: EventHandler<T>,
-    ): IUnregister {
+    ): IUnRegister {
 
         if (eventHandler.isOnce()) {
             const onceHandlers = this.onceEventHandlerMap.get(clazz) || [];
@@ -361,7 +356,7 @@ export class EventSystemByClazz {
 
         return {
             unregister: () => this.unregister(clazz, eventHandler),
-        } as IUnregister;
+        } as IUnRegister;
     }
 
     unregisterByClazz<T>(clazz: Clazz<T>) {
@@ -479,7 +474,7 @@ export abstract class AbstractApp
      */
     public registerEventHandler<TEvent>(
         eventHandler: EventHandler<TEvent>,
-    ): IUnregister {
+    ): IUnRegister {
         let eventClazz = eventHandler.clazz;
         return this.eventSystem.register<TEvent>(eventClazz, eventHandler);
     }
