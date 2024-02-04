@@ -20,8 +20,8 @@ export enum TaskPhaseEnum {
 export class TaskTargetConfig {
     // 任务目标类型
     taskTargetType: string;
-    // 目标进度
-    targetProgressValue: number;
+    // 最大进度
+    maxProgressValue: number;
     // 任务目标数据
     data?: any;
 }
@@ -55,7 +55,7 @@ export class TaskTarget {
     constructor(config: TaskTargetConfig) {
         this.type = config.taskTargetType;
         this.data = config.data;
-        this.progressBar = new ProgressBar(config.targetProgressValue);
+        this.progressBar = new ProgressBar(config.maxProgressValue);
     }
 
     // 更新任务目标状态
@@ -113,6 +113,7 @@ export class PlayerTask {
     private _updateListener: TaskStateUpdateListener
     // 进度监听器
     private progressWatchers: TaskProgressWatcher[] = [];
+    private _interestEventClassSet = new Set<Clazz>();
 
 
     set updateListener(value: TaskStateUpdateListener) {
@@ -149,6 +150,18 @@ export class PlayerTask {
             .map((targetConfig) => {
                 return this.createTaskTarget(targetConfig);
             });
+
+        this.taskTargets.forEach((target) => {
+            let targetType: string = target.type;
+            const targetTypeHandler: TaskTargetTypeHandler = TaskTargetTypeRegister.getHandler(targetType);
+            if (!targetTypeHandler) {
+                return
+            }
+            let interestEventClass: Clazz[] = targetTypeHandler.getInterestEventClass();
+            interestEventClass.forEach((clz) => {
+                this._interestEventClassSet.add(clz)
+            })
+        })
     }
 
     /**
@@ -272,19 +285,30 @@ export class PlayerTask {
         return this.taskTargets;
     }
 
+
+    public getInterestEventClassSet(): Set<Clazz> {
+        return this._interestEventClassSet;
+    }
+
     /**
+     * 【Event】
      * 接收事件，根据事件名称分发给对应的处理器
      * @param playerLike 玩家
      * @param eventName 事件名称
      * @param eventData 事件数据
      */
-    receiveEvent(playerLike: PlayerLike,
-                 eventName: string,
-                 eventData: any,
+    onEvent(playerLike: PlayerLike,
+            eventName: string,
+            eventData: any,
     ): void {
+        let clazz: Clazz = eventData.constructor;
+        if (!this._interestEventClassSet.has(clazz)) {
+            return
+        }
+
         // 处理每个任务目标
         this.taskTargets.forEach(target => {
-            const targetTypeHandler = TaskTargetTypeRegister.getHandler(target.type);
+            const targetTypeHandler: TaskTargetTypeHandler = TaskTargetTypeRegister.getHandler(target.type);
             if (!targetTypeHandler) {
                 return
             }
@@ -373,6 +397,8 @@ export abstract class TaskTargetTypeHandler {
     constructor() {
         this.initEventTypeHandler()
     }
+
+    abstract getInterestEventClass(): Clazz[]
 
     // 处理事件的方法
     handleEvent(player: PlayerLike,

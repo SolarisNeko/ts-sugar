@@ -130,4 +130,9 @@ export default class ObjectUtils {
             }
         }
     }
+
+    static initObj<T>(obj: T, init: (obj: T) => void): T {
+        init(obj);
+        return obj;
+    }
 }

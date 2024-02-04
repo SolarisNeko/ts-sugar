@@ -83,4 +83,6 @@ export default class ClassUtils {
     static isError(obj) {
         return Object.prototype.toString.call(obj) === '[object Error]';
     }
+
+
 }

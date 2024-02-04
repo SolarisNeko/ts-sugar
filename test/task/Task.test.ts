@@ -7,7 +7,9 @@ import {
     TaskTargetTypeHandler,
     TaskTargetTypeRegister,
 } from "../../src/task/Task";
-import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike"; // Update the path accordingly
+import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike";
+import {Clazz} from "../../src/types/Types";
+import * as console from "console"; // Update the path accordingly
 
 // Mocking a simple player-like object for testing
 const mockPlayer: PlayerLike = new TestPlayer()
@@ -23,6 +25,9 @@ class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
         })
     }
 
+    getInterestEventClass(): Clazz[] {
+        return [DemoTaskEvent];
+    }
 
 }
 
@@ -45,7 +50,7 @@ describe('PlayerTask', () => {
             taskName: 'Test Task',
             taskType: 'default',
             taskTargetList: [
-                {taskTargetType: 'exampleType', targetProgressValue: 10},
+                {taskTargetType: 'exampleType', maxProgressValue: 10},
             ],
         };
 
@@ -78,7 +83,7 @@ describe('PlayerTask', () => {
         event.data = 'demo'
 
         // Call the method that triggers handleEvent
-        playerTask.receiveEvent(mockPlayer, 'exampleEvent', event);
+        playerTask.onEvent(mockPlayer, 'exampleEvent', event);
 
         // Add assertions based on your mock handler's logic
         expect(handleEventSpy).toHaveBeenCalled();

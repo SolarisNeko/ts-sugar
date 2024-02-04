@@ -7,6 +7,7 @@ import {
     TaskTargetTypeRegister,
 } from "../../src/task/Task";
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike";
+import {Clazz} from "../../src/types/Types";
 
 const mockPlayer: PlayerLike = new TestPlayer()
 
@@ -24,6 +25,10 @@ class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
     protected initEventTypeHandler(): void {
         // Registering mock event handler
         this.putEventHandler(MockEvent, new MockTaskEventHandler());
+    }
+
+    getInterestEventClass(): Clazz[] {
+        return [MockEvent];
     }
 }
 
