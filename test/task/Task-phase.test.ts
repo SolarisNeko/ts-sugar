@@ -1,10 +1,10 @@
 import {
     PlayerTask,
+    TaskConfig,
     TaskEventHandler,
     TaskPhaseEnum,
     TaskTarget,
     TaskTargetTypeHandler,
-    TaskTargetTypeRegister,
 } from "../../src/task/Task";
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike";
 import {Clazz} from "../../src/types/Types";
@@ -36,7 +36,7 @@ describe('任务阶段测试', () => {
     let playerTask: PlayerTask;
 
     beforeEach(() => {
-        const taskConfig = {
+        const taskConfig: TaskConfig = {
             taskGroupId: 1,
             taskId: 1,
             taskName: 'Test Task',
@@ -44,7 +44,7 @@ describe('任务阶段测试', () => {
             taskTargetList: [
                 {
                     taskTargetType: 'MockTarget',
-                    targetProgressValue: 100,
+                    maxProgressValue: 100,
                     data: {},
                 },
             ],

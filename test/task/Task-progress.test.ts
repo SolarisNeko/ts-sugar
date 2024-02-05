@@ -1,5 +1,6 @@
 import {
     PlayerTask,
+    TaskConfig,
     TaskEventHandler,
     TaskProgressWatcher,
     TaskTarget,
@@ -8,6 +9,7 @@ import {
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike";
 import {ProgressBar} from "../../src/core/ProgressBar";
 import {JsonUtils} from "../../src/json/JsonUtils";
+import {Clazz} from "../../src/types/Types";
 
 const mockPlayer: PlayerLike = new TestPlayer()
 
@@ -26,13 +28,17 @@ class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
         // Registering mock event handler
         this.putEventHandler(MockEvent, new MockTaskEventHandler());
     }
+
+    getInterestEventClass(): Clazz[] {
+        return [MockEvent];
+    }
 }
 
 describe('任务进度测试', () => {
     let playerTask: PlayerTask;
 
     beforeEach(() => {
-        const taskConfig = {
+        const taskConfig: TaskConfig = {
             taskGroupId: 1,
             taskId: 1,
             taskName: 'Test Task',
@@ -40,7 +46,7 @@ describe('任务进度测试', () => {
             taskTargetList: [
                 {
                     taskTargetType: 'MockTarget',
-                    targetProgressValue: 100,
+                    maxProgressValue: 100,
                     data: {},
                 },
             ],

@@ -228,7 +228,6 @@ export class PlayerTask {
      * 接受任务
      */
     acceptTask(): boolean {
-
         if (this.currentPhase !== TaskPhaseEnum.canAccept) {
             return false;
         }

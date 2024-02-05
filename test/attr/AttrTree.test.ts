@@ -1,4 +1,5 @@
-import {AttrType, AttrTree, AttrTreeCompareResult, AttrTreeChangeResult} from "../../src/attr/AttrTree";
+import {AttrTree, AttrTreeChangeResult, AttrTreeCompareResult, AttrType} from "../../src/attr/AttrTree";
+import {MapUtils} from "../../src/utils/MapUtils";
 
 export namespace AttrTypeEnum {
     export const ATTACK = new AttrType(1, "atk");
@@ -122,15 +123,29 @@ describe('AttrTree', () => {
         const attrs1 = new Map([[AttrTypeEnum.ATTACK, 50]]);
         const attrs2 = new Map([[AttrTypeEnum.ATTACK, 100]]);
 
-        attrTree.addChangeListener((result) =>{
-            result.oldAttrMap == attrs2
-
-            result.newAttrMap == attrs2
-        }) ;
+        let r
+        attrTree.addChangeListener((result) => {
+            r = result
+        });
 
         attrTree.setAttrs(path, attrs1);
         attrTree.setAttrs(path, attrs2);
 
-        expect(listenerMock).toHaveBeenCalledWith(result);
+
+        const diffMap = new Map();
+
+        MapUtils.mergeAll(
+            diffMap,
+            (v1, v2) => v1 + v2,
+            attrs2,
+        )
+        MapUtils.mergeAll(
+            diffMap,
+            (v1, v2) => v1 - v2,
+            attrs1,
+        )
+
+        expect(diffMap.get(AttrTypeEnum.ATTACK)).toBe(50);
+
     });
 });

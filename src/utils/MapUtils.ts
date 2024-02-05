@@ -31,7 +31,12 @@ export class MapUtils {
                 if (kvMap != null) {
                     for (let i = 0; i < repeatCount; ++i) {
                         kvMap.forEach((value, key) => {
-                            output.set(key, output.has(key) ? biConsumer(output.get(key), value) : value);
+                            if (output.has(key)) {
+                                let mergeValue: any = biConsumer(output.get(key), value);
+                                output.set(key, mergeValue);
+                            } else {
+                                output.set(key, value);
+                            }
                         });
                     }
                 }
