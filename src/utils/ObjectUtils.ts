@@ -1,3 +1,5 @@
+import {Clazz} from "../types/Types";
+
 /**
  * ObjectUtils is a collection of utility methods for dealing with objects.
  * Like Java Apache commons-lang3 / ObjectUtils
@@ -134,5 +136,15 @@ export default class ObjectUtils {
     static initObj<T>(obj: T, init: (obj: T) => void): T {
         init(obj);
         return obj;
+    }
+
+    static initObjByClass<T>(clazz: Clazz<T>, init: (obj: T) => void): T {
+        let obj: T = new clazz();
+        init(obj);
+        return obj;
+    }
+
+    static cloneDataObject<T>(item: T): T {
+        return JSON.parse(JSON.stringify(item));
     }
 }

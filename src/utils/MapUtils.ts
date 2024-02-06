@@ -89,6 +89,14 @@ export class MapUtils {
         }, new Map<K1, Map<K2, T>>());
     }
 
+    /**
+     * 转为 lv.3 Map
+     * @param dataList
+     * @param keyExtractor1
+     * @param keyExtractor2
+     * @param keyExtractor3
+     * @param mergeFunction
+     */
     static toLevel3Map<K1, K2, K3, T>(
         dataList: T[],
         keyExtractor1: KeyExtractor<T, K1>,
@@ -107,5 +115,41 @@ export class MapUtils {
             map.set(key1, innerMap1);
             return map;
         }, new Map<K1, Map<K2, Map<K3, T>>>());
+    }
+
+
+    /**
+     * 获取指定 key 对应的值，如果不存在则创建并返回默认值
+     * @param map 要操作的 Map 对象
+     * @param key 要获取或创建的键
+     * @param defaultValueCreator 默认值
+     * @returns 指定键对应的值
+     */
+    static getOrCreate<K, V>(map: Map<K, V>, key: K, defaultValueCreator: (() => V)): V {
+        if (!map.has(key)) {
+            let value = defaultValueCreator();
+            map.set(key, value);
+        }
+        return map.get(key)!;
+    }
+
+    static merge<K, V>(map: Map<K, V>,
+                       key: K,
+                       value: V,
+                       mergeFunc: (v1: V, v2: V) => V,
+    ): Map<K, V> {
+        if (!map) {
+            return map
+        }
+        if (map.has(key)) {
+            const existingValue = map.get(key);
+            if (existingValue !== undefined) {
+                const mergedValue = mergeFunc(existingValue, value);
+                map.set(key, mergedValue);
+            }
+        } else {
+            map.set(key, value);
+        }
+        return map
     }
 }
