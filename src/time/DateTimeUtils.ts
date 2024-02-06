@@ -46,17 +46,17 @@ export default class DateTimeUtils {
 
 
     public static getTomorrowStartTime(time: number = this.currentTimeMs,
-                                       offsetHour: number = 0
+                                       offsetHour: number = 0,
     ): number {
         let date: Date = new Date(time);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(),
-            offsetHour, 0, 0, 0
+            offsetHour, 0, 0, 0,
         )
             .getTime() + 24 * 3600 * 1000;
     }
 
     public static getYesterdayStartTime(time: number = this.currentTimeMs,
-                                        offsetHour: number = 0
+                                        offsetHour: number = 0,
     ): number {
         let date: Date = new Date(time);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(),
@@ -68,7 +68,7 @@ export default class DateTimeUtils {
      * 默认 0 点刷新
      */
     public static getRefreshDataTime(time: number = this.currentTimeMs,
-                                     offsetHour: number = 0
+                                     offsetHour: number = 0,
     ): number {
         let date = new Date(time);
         if (date.getHours() < offsetHour) {
@@ -89,7 +89,7 @@ export default class DateTimeUtils {
      * 默认 0 点刷新
      */
     public static getLastRefreshDateTime(time: number = this.currentTimeMs,
-                                         offsetHour: number = 0
+                                         offsetHour: number = 0,
     ): number {
         let date = new Date(time);
         if (date.getHours() < offsetHour) {
@@ -119,4 +119,7 @@ export default class DateTimeUtils {
         return new Date().getTime();
     }
 
+    static getCurrentTimeMs(): number {
+        return new Date().getTime()
+    }
 }

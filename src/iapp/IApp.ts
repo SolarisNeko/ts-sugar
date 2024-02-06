@@ -66,7 +66,7 @@ export class IocContainer {
      * singleton
      * @private
      */
-    private singletonMap: Map<Clazz, any> = new Map();
+    private singletonMap: Map<Clazz<any>, any> = new Map();
     private _app: IApp;
 
     register<T>(clazz: Clazz<T>,
@@ -275,9 +275,9 @@ export class EventHandler<T> {
  */
 export class EventSystemByClazz {
     // 永久的
-    private eventHandlerMap: Map<Clazz, EventHandler<any>[]> = new Map();
+    private eventHandlerMap: Map<Clazz<any>, EventHandler<any>[]> = new Map();
     // 一次性的
-    private onceEventHandlerMap: Map<Clazz, EventHandler<any>[]> = new Map();
+    private onceEventHandlerMap: Map<Clazz<any>, EventHandler<any>[]> = new Map();
 
     send<TEvent>(event: TEvent): void {
         const clazz = event.constructor as Clazz<TEvent>;

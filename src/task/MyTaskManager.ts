@@ -4,7 +4,7 @@ import {Clazz} from "../types/Types";
 
 export class MyTaskManager {
     private taskMap: Map<number, PlayerTask> = new Map();
-    private eventTaskIndex: Map<Clazz, PlayerTask[]> = new Map();
+    private eventTaskIndex: Map<Clazz<any>, PlayerTask[]> = new Map();
 
     constructor() {
     }
@@ -14,7 +14,7 @@ export class MyTaskManager {
     ): void {
         taskConfigs.forEach((taskConfig) => {
             const playerTask = new PlayerTask(taskConfig, resetTaskStateCallback.bind(this));
-            let interestEventClassSet: Set<Clazz> = playerTask.getInterestEventClassSet();
+            let interestEventClassSet: Set<Clazz<any>> = playerTask.getInterestEventClassSet();
 
             // 将任务添加到 taskMap
             this.taskMap.set(taskConfig.taskId, playerTask);

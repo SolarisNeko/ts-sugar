@@ -25,7 +25,7 @@ class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
         })
     }
 
-    getInterestEventClass(): Clazz[] {
+    getInterestEventClass(): Clazz<any>[] {
         return [DemoTaskEvent];
     }
 

@@ -8,7 +8,7 @@ export class ConfigManager {
 
     private static _instance: ConfigManager;
 
-    private typeToDataMap: Map<Clazz, any[]> = new Map()
+    private typeToDataMap: Map<Clazz<any>, any[]> = new Map()
 
     // 私有构造函数，防止直接实例化
     private constructor() {

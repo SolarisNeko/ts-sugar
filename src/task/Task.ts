@@ -113,7 +113,7 @@ export class PlayerTask {
     private _updateListener: TaskStateUpdateListener
     // 进度监听器
     private progressWatchers: TaskProgressWatcher[] = [];
-    private _interestEventClassSet = new Set<Clazz>();
+    private _interestEventClassSet = new Set<Clazz<any>>();
 
 
     set updateListener(value: TaskStateUpdateListener) {
@@ -157,7 +157,7 @@ export class PlayerTask {
             if (!targetTypeHandler) {
                 return
             }
-            let interestEventClass: Clazz[] = targetTypeHandler.getInterestEventClass();
+            let interestEventClass: Clazz<any>[] = targetTypeHandler.getInterestEventClass();
             interestEventClass.forEach((clz) => {
                 this._interestEventClassSet.add(clz)
             })
@@ -285,7 +285,7 @@ export class PlayerTask {
     }
 
 
-    public getInterestEventClassSet(): Set<Clazz> {
+    public getInterestEventClassSet(): Set<Clazz<any>> {
         return this._interestEventClassSet;
     }
 
@@ -300,7 +300,7 @@ export class PlayerTask {
             eventName: string,
             eventData: any,
     ): void {
-        let clazz: Clazz = eventData.constructor;
+        let clazz: Clazz<any> = eventData.constructor;
         if (!this._interestEventClassSet.has(clazz)) {
             return
         }
@@ -397,7 +397,7 @@ export abstract class TaskTargetTypeHandler {
         this.initEventTypeHandler()
     }
 
-    abstract getInterestEventClass(): Clazz[]
+    abstract getInterestEventClass(): Clazz<any>[]
 
     // 处理事件的方法
     handleEvent(player: PlayerLike,

@@ -31,7 +31,7 @@ describe('MyTaskManager', () => {
             })
         }
 
-        getInterestEventClass(): Clazz[] {
+        getInterestEventClass(): Clazz<any>[] {
             return [String];
         }
 

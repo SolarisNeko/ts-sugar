@@ -29,7 +29,7 @@ class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
         this.putEventHandler(MockEvent, new MockTaskEventHandler());
     }
 
-    getInterestEventClass(): Clazz[] {
+    getInterestEventClass(): Clazz<any>[] {
         return [MockEvent];
     }
 }
