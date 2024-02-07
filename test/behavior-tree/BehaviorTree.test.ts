@@ -5,7 +5,7 @@ import {
     DecoratorNode,
     SelectorNode,
     SequenceNode
-} from "../../src/behavior-tree/BehaviorTree";
+} from "../../src/behaviorTree/BehaviorTree";
 
 describe('BehaviorTree', () => {
     it('should execute a sequence of nodes', () => {
