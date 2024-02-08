@@ -1,7 +1,7 @@
 /**
  * 类检查工具
  */
-export default class ClassUtils {
+export class ClassUtils {
 
 
     /**

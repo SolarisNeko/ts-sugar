@@ -1,4 +1,3 @@
-// Mocks for testing
 import {
     ActivityInfo,
     ActivityManager,

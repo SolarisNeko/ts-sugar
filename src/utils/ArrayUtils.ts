@@ -1,7 +1,7 @@
-import ObjectUtils from "./ObjectUtils";
+import {ObjectUtils} from "./ObjectUtils";
 
 
-export default class ArrayUtils {
+export class ArrayUtils {
 
     /**
      * 判断数组是否为空

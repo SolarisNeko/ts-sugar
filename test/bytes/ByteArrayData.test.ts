@@ -1,4 +1,4 @@
-import ByteArrayData from "../../src/bytes/ByteArrayData";
+import {ByteArrayData} from "../../src/bytes/ByteArrayData";
 
 describe('ByteArrayData', () => {
     let byteArray: ByteArrayData;

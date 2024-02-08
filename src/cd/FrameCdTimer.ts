@@ -1,7 +1,7 @@
 /**
  * 基于逻辑帧的 Cd
  */
-export default class FrameCdTimer {
+export class FrameCdTimer {
 
   // 每一帧消耗ms
   private frameCostMs: number;

@@ -1,7 +1,7 @@
 /**
  * 基于现实时间的 CdTimer
  */
-export default class CdTimer {
+export class CdTimer {
     private cooldowns: Map<string, number>;
   
     constructor() {

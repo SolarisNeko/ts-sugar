@@ -1,7 +1,7 @@
 /**
  *
  */
-export default interface CmdHandler {
+export interface CmdHandler {
 
     handle(data: any): void;
 

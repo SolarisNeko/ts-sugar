@@ -4,7 +4,7 @@
  * @author LuoHaoJun
  * @version 1.0.0
  */
-export default class StringUtils {
+export class StringUtils {
 
     // 判断字符串是否为空
     static isEmpty(str) {

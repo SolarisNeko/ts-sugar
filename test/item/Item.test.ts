@@ -1,5 +1,5 @@
 import {Item, ItemConfig, ItemConfigManager, PlayerBackpack, PlayerItem} from "../../src/item/Items";
-import ObjectUtils from "../../src/utils/ObjectUtils";
+import {ObjectUtils} from "../../src/utils/ObjectUtils";
 
 ItemConfigManager.instance.registerItemConfig([
     ObjectUtils.initObjByClass(ItemConfig, (self) => {

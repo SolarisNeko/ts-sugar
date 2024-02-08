@@ -1,4 +1,4 @@
-import FrameCdTimer from "../../src/cd/FrameCdTimer";
+import {FrameCdTimer} from "../../src/cd/FrameCdTimer";
 
 describe("FrameCdTimer", () => {
   test("canExecute returns true if key is not in timers", () => {

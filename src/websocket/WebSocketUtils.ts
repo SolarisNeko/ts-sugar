@@ -1,7 +1,7 @@
 /**
  * WebSocketUtils 处理 WebSocket 连接和消息处理，处理特定格式的二进制数据包。
  */
-export default class WebSocketUtils {
+export class WebSocketUtils {
     private websocket: WebSocket | null = null;
     private url: string;
     private maxRetries: number;

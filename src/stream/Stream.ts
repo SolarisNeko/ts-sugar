@@ -5,7 +5,7 @@ type KeyFunc<T> = Func<T, any>;
 type Dict<T> = { [key: string]: T };
 
 
-export default class Stream<T> {
+export class Stream<T> {
 
     private readonly data: Iterable<T>;
 

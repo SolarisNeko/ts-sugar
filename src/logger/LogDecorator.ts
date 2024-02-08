@@ -4,7 +4,7 @@
  * @param key 函数名
  * @param descriptor 函数
  */
-export default function LogDecorator(target: any, key: string, descriptor: PropertyDescriptor) {
+export function LogDecorator(target: any, key: string, descriptor: PropertyDescriptor) {
 
     const originalMethod = descriptor.value;
     const className = target.constructor.name; // 获取类名

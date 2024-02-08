@@ -1,6 +1,6 @@
 import {PlayerLike} from "../player/PlayerLike";
 import {Clazz} from "../types/Types";
-import ArrayUtils from "../utils/ArrayUtils";
+import {ArrayUtils} from "../utils/ArrayUtils";
 import * as console from "console";
 import {ProgressBar} from "../core/ProgressBar";
 

@@ -1,4 +1,4 @@
-export default class RandomUtils {
+export class RandomUtils {
     /**
      * 生成指定范围内的随机整数
      * @param min 最小值（包含）

@@ -1,6 +1,6 @@
-import DateTimeUtils from "../time/DateTimeUtils";
+import {DateTimeUtils} from "../time/DateTimeUtils";
 import {Clazz} from "../types/Types";
-import ObjectUtils from "../utils/ObjectUtils";
+import {ObjectUtils} from "../utils/ObjectUtils";
 
 /**
  * 活动信息和状态的共同属性接口

@@ -1,7 +1,7 @@
 type Callback = (data: any) => void;
 
 
-export default class Actor {
+export class Actor {
     private callbackMap: Map<string, Callback | Callback[]> = new Map();
 
 

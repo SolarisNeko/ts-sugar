@@ -1,4 +1,4 @@
-import Stream from "../../src/stream/Stream";
+import {Stream} from "../../src/stream/Stream";
 
 describe('Stream', () => {
     it('should create a stream from an array', () => {

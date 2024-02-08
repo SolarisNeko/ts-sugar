@@ -12,7 +12,7 @@ import {
 } from "../../src/task/Task";
 import console from "console";
 import {Clazz} from "../../src/types/Types";
-import ObjectUtils from "../../src/utils/ObjectUtils";
+import {ObjectUtils} from "../../src/utils/ObjectUtils";
 
 let testPlayer: PlayerLike = new TestPlayer();
 

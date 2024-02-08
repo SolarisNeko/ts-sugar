@@ -1,7 +1,7 @@
 /**
  * @author LuoHaoJun on 2023-06-20
  */
-export default class CollectionUtils {
+export class CollectionUtils {
 
 
     static isEmpty(collection: any): boolean {

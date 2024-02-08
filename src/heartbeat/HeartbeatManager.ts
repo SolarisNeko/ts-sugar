@@ -1,4 +1,4 @@
-export default class HeartbeatManager {
+export class HeartbeatManager {
     intervals = {};
 
     startHeartbeat(taskName: string, intervalMs: number, callback: Function) {

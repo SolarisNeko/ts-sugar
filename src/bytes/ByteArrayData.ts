@@ -1,7 +1,7 @@
 type ByteArray = Uint8Array;
 
 
-export default class ByteArrayData {
+export class ByteArrayData {
     private readIndex: number;
     private writeIndex: number;
     private data: ByteArray;

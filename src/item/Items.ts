@@ -1,5 +1,5 @@
 import {MapUtils} from "../utils/MapUtils";
-import ObjectUtils from "../utils/ObjectUtils";
+import {ObjectUtils} from "../utils/ObjectUtils";
 
 /**
  * 道具配置

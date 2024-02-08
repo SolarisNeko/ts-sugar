@@ -1,7 +1,7 @@
 // objectPool.test.ts
 
 
-import ObjectPool from "../../src/objectPool/ObjectPool";
+import {ObjectPool} from "../../src/objectPool/ObjectPool";
 
 describe('ObjectPool', () => {
     let objectPool: ObjectPool<{ id: number }>;

@@ -1,7 +1,7 @@
 /**
  * 基类
  */
-export default class AbstractSingleton {
+export class AbstractSingleton {
     public constructor() {
     }
 

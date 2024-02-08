@@ -1,7 +1,7 @@
 /**
  * 对象池
  */
-export default class ObjectPool<T> {
+export class ObjectPool<T> {
     private pool: T[] = [];
 
     constructor(private createInstance: () => T,

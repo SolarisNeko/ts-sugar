@@ -1,4 +1,4 @@
-import HeartbeatManager from "../../src/heartbeat/HeartbeatManager";
+import {HeartbeatManager} from "../../src/heartbeat/HeartbeatManager";
 import { Time } from "../../src/time/TimeUnit";
 
 // Mock setInterval and clearInterval

@@ -13,7 +13,7 @@ export type Action = (ok: OkAction) => void;
 /**
  * 异步工具类
  */
-export default class ActionChain {
+export class ActionChain {
 
   /**
    * 序列化执行

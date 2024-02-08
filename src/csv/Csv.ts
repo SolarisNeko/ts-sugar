@@ -1,7 +1,7 @@
 /**
  * CSV
  */
-export default class Csv {
+export class Csv {
     private columns: string[];
 
     constructor(csvText: string) {

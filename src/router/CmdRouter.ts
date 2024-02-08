@@ -1,11 +1,13 @@
-import Logger from "../logger/Logger";
-import LazySingleton from "../core/LazySingleton";
+import {LazySingleton} from "../core/LazySingleton";
+import {Logger} from "../logger/Logger";
 
 /**
  * cmd 路由
  * @author LuoHaoJun on 2023-06-20
  */
-export default class CmdRouter extends LazySingleton {
+export class CmdRouter extends LazySingleton {
+
+    private static readonly LOGGER = new Logger("CmdRouter");
 
     // cmd -> function callback, 只有一个 data 参数
     private readonly cmdToCallbackMap: Map<string, Function> = new Map<string, Function>();
@@ -20,7 +22,7 @@ export default class CmdRouter extends LazySingleton {
         let object: any = this.getHandlerObject(cmd);
 
         if (!cmdHandler) {
-            Logger.error(`没有找到 cmd = ${cmd} 对应的处理方法.`);
+            CmdRouter.LOGGER.error(`没有找到 cmd = ${cmd} 对应的处理方法.`);
             return;
         }
 
@@ -28,7 +30,7 @@ export default class CmdRouter extends LazySingleton {
             cmdHandler.call(object, data)
         } catch (e) {
             // global exception
-            Logger.error(`cmd = ${cmd} 处理的 data 执行报错. data = ${data}`)
+            CmdRouter.LOGGER.error(`cmd = ${cmd} 处理的 data 执行报错. data = ${data}`)
             return;
         }
     }

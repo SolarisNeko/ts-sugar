@@ -1,5 +1,5 @@
-import DateTimeUtils from "../time/DateTimeUtils";
 import {StackFrameUtils} from "../utils/StackFrameUtils";
+import {DateTimeUtils} from "../time/DateTimeUtils";
 
 
 export enum LogLevel {
@@ -46,7 +46,7 @@ export class Logger {
      * @param options 配置选项
      */
     constructor(loggerName: string,
-                options: LoggerOptions
+                options: LoggerOptions = new LoggerOptions ()
     ) {
         this.loggerName = loggerName;
         this.options = options;

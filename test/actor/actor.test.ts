@@ -1,4 +1,4 @@
-import Actor from "../../src/actor/actor";
+import {Actor} from "../../src/actor/actor";
 
 
 class ActorImpl extends Actor {

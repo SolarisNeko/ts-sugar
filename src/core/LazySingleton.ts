@@ -3,7 +3,7 @@
  * 懒加载, 业务对象, 和 cc.Component 无关.
  * 无状态, 提供一系列常用方法
  */
-export default class LazySingleton {
+export class LazySingleton {
 
     /**
      * 获取一个单例

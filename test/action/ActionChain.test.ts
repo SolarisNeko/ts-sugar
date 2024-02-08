@@ -1,4 +1,4 @@
-import ActionChain, { Action } from "../../src/action/ActionChain";
+import {Action, ActionChain} from "../../src/action/ActionChain";
 // Mock the setTimeout function
 jest.mock('timers', () => ({
   ...jest.requireActual('timers'),

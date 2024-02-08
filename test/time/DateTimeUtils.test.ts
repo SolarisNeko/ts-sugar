@@ -1,4 +1,4 @@
-import DateTimeUtils from "../../src/time/DateTimeUtils";
+import {DateTimeUtils} from "../../src/time/DateTimeUtils";
 
 describe('DateTimeUtils', () => {
     test('getDateTimeText should format date correctly', () => {

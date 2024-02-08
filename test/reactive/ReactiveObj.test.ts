@@ -1,4 +1,4 @@
-import ReactiveObj, {OnValueChangedCallback} from "../../src/reactive/ReactiveObj";
+import {OnValueChangedCallback, ReactiveObj} from "../../src/reactive/ReactiveObj";
 
 
 describe('ReactiveObj', () => {

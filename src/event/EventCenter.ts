@@ -1,4 +1,4 @@
-import LazySingleton from "../core/LazySingleton";
+import {LazySingleton} from "../core/LazySingleton";
 
 export interface EventCallbackHandler<T> {
     self: any;

@@ -1,4 +1,4 @@
-export default class BeanUtils {
+export class BeanUtils {
     /**
      * 将源对象的属性拷贝到目标对象
      * @param source 源对象

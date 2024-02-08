@@ -7,7 +7,7 @@ import {Clazz} from "../types/Types";
  * @author LuoHaoJun
  * @version 1.0.0
  */
-export default class ObjectUtils {
+export class ObjectUtils {
 
     /**
      * Checks if the given object is null or undefined.

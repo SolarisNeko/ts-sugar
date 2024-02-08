@@ -2,7 +2,7 @@
  * 2023-10-25T13:30:00Z = UTC+0 timezone
  * 2023-10-25T13:30:00 = UTC+${当前时区} = UTC+8 default
  */
-export default class DateTimeUtils {
+export class DateTimeUtils {
 
     //  时区：暂时按东八区，需要与服务器一致
     public static readonly TIME_ZONE: string = "+08";

@@ -1,9 +1,9 @@
-import ObjectUtils from "./ObjectUtils";
+import {ObjectUtils} from "./ObjectUtils";
 
 /**
  * @author LuoHaoJun on 2023-06-20
  */
-export default class NumberUtils {
+export class NumberUtils {
 
     static parseInt(num: number,
         defaultValue: number = 0): number {

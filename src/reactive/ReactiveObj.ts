@@ -1,6 +1,6 @@
 export type OnValueChangedCallback = (fieldName: string, oldValue: any, newValue: any) => void;
 
-export default class ReactiveObj<T> {
+export class ReactiveObj<T> {
     private target: any;
     private callback: OnValueChangedCallback;
     private proxy: T;
