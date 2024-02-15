@@ -1,7 +1,13 @@
 /**
  * HTTP 请求方法
  */
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export enum HttpMethod {
+    GET = 'GET',
+    POST = 'POST',
+    PUT = 'PUT',
+    DELETE = 'DELETE',
+    OPTION = 'OPTION',
+}
 
 /**
  * HTTP 请求配置
@@ -30,9 +36,9 @@ export class Http233 {
     // 配置
     private config: HttpRequestConfig = {
         url: '',
-        method: 'GET',
+        method: HttpMethod.GET,
         // 默认超时时间 10s
-        timeoutMs: 10 * 1000
+        timeoutMs: 10 * 1000,
     };
 
 
@@ -69,12 +75,13 @@ export class Http233 {
         const controller = new AbortController();
         let timeoutMs = this.config.timeoutMs;
         const timeoutPromise = new Promise<HttpResponse>((_,
-                                                          reject) =>
-            setTimeout(() => {
-                // 请求超时，中止请求
-                controller.abort();
-                reject(new Error('Request timeout'));
-            }, timeoutMs)
+                                                          reject,
+            ) =>
+                setTimeout(() => {
+                    // 请求超时，中止请求
+                    controller.abort();
+                    reject(new Error('Request timeout'));
+                }, timeoutMs),
         );
 
         const xhr = new XMLHttpRequest();
@@ -91,7 +98,8 @@ export class Http233 {
 
         // Create a promise for the XMLHttpRequest
         const xhrPromise = new Promise<HttpResponse>((resolve,
-                                                      reject) => {
+                                                      reject,
+        ) => {
             xhr.onreadystatechange = () => {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     const headers: Record<string, string> = {};
@@ -128,18 +136,18 @@ export class Http233 {
 
 
     sendGet(): Promise<HttpResponse> {
-        return this.method('GET').send();
+        return this.method(HttpMethod.GET).send();
     }
 
     sendPost(): Promise<HttpResponse> {
-        return this.method('POST').send();
+        return this.method(HttpMethod.POST).send();
     }
 
     sendPut(): Promise<HttpResponse> {
-        return this.method('PUT').send();
+        return this.method(HttpMethod.PUT).send();
     }
 
     sendDelete(): Promise<HttpResponse> {
-        return this.method('DELETE').send();
+        return this.method(HttpMethod.DELETE).send();
     }
 }
