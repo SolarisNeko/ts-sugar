@@ -118,7 +118,7 @@ describe('AttrTree', () => {
     });
 
     test('attrTree change listener', () => {
-        const path = 'player1';
+        const path = 'player1/equip/3';
 
         const attrs1 = new Map([[AttrTypeEnum.ATTACK, 50]]);
         const attrs2 = new Map([[AttrTypeEnum.ATTACK, 100]]);

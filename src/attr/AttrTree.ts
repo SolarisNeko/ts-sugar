@@ -1,11 +1,25 @@
 import {MapUtils} from "../utils/MapUtils";
 
+/**
+ * 定义一个属性
+ */
 export class AttrType {
+    // 属性id
     readonly id: number;
+    // 属性名
     readonly name: string;
+    // 计算先后顺序
     readonly order: number;
+    // 将最终属性 -> 战斗用的属性
     private readonly calculateFinalLambda?: (totalMap: Map<AttrType, number>) => Map<AttrType, number>;
 
+    /**
+     *
+     * @param id 属性id
+     * @param name 属性名
+     * @param order 计算先后顺序
+     * @param calculateFinalLambda 将最终属性 -> 战斗用的属性
+     */
     constructor(
         id: number,
         name: string,
@@ -56,7 +70,8 @@ export class AttrTreeChangeResult<AttrType> {
     newAttrMap: Map<AttrType, number>;
 
     constructor(oldAttrMap: Map<AttrType, number>,
-                newAttrMap: Map<AttrType, number>) {
+                newAttrMap: Map<AttrType, number>,
+    ) {
         this.addPart = new Map();
         this.noChangePart = new Map();
         this.minusPart = new Map();
@@ -70,9 +85,13 @@ export interface AttrTreeChangeListener<AttrType> {
 }
 
 export class AttrTree<Path> {
+    // 原生属性
     private pathToAttrMap: Map<Path, Map<AttrType, number>> = new Map();
+    // 汇总属性. 用于展示用
     private totalAttrMap: Map<AttrType, number> = new Map();
+    // 最终应用于战斗属性. 此时将攻击力百分比, 转为固定攻击力. 100atk + 30%atk = 130点
     private finalAttrMap: Map<AttrType, number> = new Map();
+    // 属性变更的 listeners
     private changeListeners: AttrTreeChangeListener<AttrType>[] = [];
 
     addChangeListener(listener: AttrTreeChangeListener<AttrType>): void {
@@ -107,7 +126,7 @@ export class AttrTree<Path> {
 
     private compareAttrs(
         oldAttrMap: Map<AttrType, number>,
-        newAttrMap: Map<AttrType, number>
+        newAttrMap: Map<AttrType, number>,
     ): AttrTreeChangeResult<AttrType> {
         const result = new AttrTreeChangeResult<AttrType>(oldAttrMap, newAttrMap);
 
