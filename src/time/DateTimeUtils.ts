@@ -21,6 +21,7 @@ export class DateTimeUtils {
         const hours: number = date.getHours();
         const minute: number = date.getMinutes();
         const second: number = date.getSeconds();
+        const ms: number = date.getMilliseconds();
 
         const tokens = {
             'yyyy': year,
@@ -29,9 +30,10 @@ export class DateTimeUtils {
             'HH': hours,
             'mm': minute,
             'ss': second,
+            'SSS': ms,
         };
 
-        return format.replace(/yyyy|MM|dd|HH|mm|ss/g, match => tokens[match].toString().padStart(2, '0'));
+        return format.replace(/yyyy|MM|dd|HH|mm|ss|SSS/g, match => tokens[match].toString().padStart(2, '0'));
     }
 
     /**
@@ -108,8 +110,7 @@ export class DateTimeUtils {
 
     public static getMonthBySecond(time: number): number {
         let date: Date = new Date(time);
-        let month: number = date.getMonth() + 1;
-        return month;
+        return date.getMonth() + 1;
     }
 
     /**
