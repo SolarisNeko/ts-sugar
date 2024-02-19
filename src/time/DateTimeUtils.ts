@@ -41,7 +41,7 @@ export class DateTimeUtils {
      * @param format 格式字符串，例如 "yyyy-MM-dd HH:mm:ss"
      * @returns 格式化后的当前日期文本
      */
-    public static getCurrentDateTimeText(format: string = "yyyy-MM-dd HH:mm:ss"): string {
+    public static getCurrentDateTimeText(format: string = "yyyy-MM-dd HH:mm:ss,SSS"): string {
         const timeMs = new Date().getTime();
         return this.getDateTimeText(timeMs, format);
     }
@@ -110,7 +110,8 @@ export class DateTimeUtils {
 
     public static getMonthBySecond(time: number): number {
         let date: Date = new Date(time);
-        return date.getMonth() + 1;
+        let month: number = date.getMonth() + 1;
+        return month;
     }
 
     /**
