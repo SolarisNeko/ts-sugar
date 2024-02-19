@@ -1,10 +1,12 @@
 /**
- * @LogDecorator 注解
+ * @AutoLogFunctionInvoke
+ * 自动记录函数的调用前后. 入参 + 返回值
+ *
  * @param target 目标对象
  * @param key 函数名
  * @param descriptor 函数
  */
-export function LogDecorator(target: any, key: string, descriptor: PropertyDescriptor) {
+export function AutoLogFunctionInvoke(target: any, key: string, descriptor: PropertyDescriptor) {
 
     const originalMethod = descriptor.value;
     const className = target.constructor.name; // 获取类名

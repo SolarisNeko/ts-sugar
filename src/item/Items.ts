@@ -1,5 +1,7 @@
+import {Stream} from "../stream/Stream";
 import {MapUtils} from "../utils/MapUtils";
 import {ObjectUtils} from "../utils/ObjectUtils";
+import {FromDataGenerateField} from "../decorator/TipsDecorator";
 
 /**
  * 道具配置
@@ -64,6 +66,7 @@ export class PlayerItem extends Item {
 export class ItemConfigManager {
     public static readonly instance = new ItemConfigManager();
 
+    @FromDataGenerateField()
     private itemConfigs: Map<number, ItemConfig> = new Map();
 
     /**
@@ -153,8 +156,9 @@ export class PlayerBackpack {
     getItemsByType(itemType: string): PlayerItem[] {
         const itemIdMap = this.itemTypeToItemIdMap.get(itemType);
         if (itemIdMap) {
-            return Array.from(itemIdMap.values())
-                .flatMap((items) => Array.from(items));
+            return Stream.from(Array.from(itemIdMap.values()))
+                .flatMap((it) => Array.from(it))
+                .toList()
         }
         return [];
     }
