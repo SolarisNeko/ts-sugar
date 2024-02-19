@@ -1,5 +1,9 @@
 import {BiFunction, BinaryOperator, KeyExtractor} from "./LambdaExtension";
 
+export class MapEntry<K, V> {
+    key: K
+    value: V
+}
 
 export class MapUtils {
 
@@ -133,6 +137,13 @@ export class MapUtils {
         return map.get(key)!;
     }
 
+    /**
+     * 合并函数
+     * @param map Map
+     * @param key key
+     * @param value 值
+     * @param mergeFunc 合并value函数
+     */
     static merge<K, V>(map: Map<K, V>,
                        key: K,
                        value: V,
@@ -151,5 +162,17 @@ export class MapUtils {
             map.set(key, value);
         }
         return map
+    }
+
+    static generateAllMapEntry<K, V>(data: Map<K, V>): MapEntry<K, V>[] {
+        const entryList = Array<MapEntry<K, V>>(data.size);
+        let count = 0
+        for (let obj of data.entries()) {
+            let entry = new MapEntry<K, V>();
+            entry.key = obj[0]
+            entry.value = obj[1]
+            entryList[count++] = entry
+        }
+        return entryList
     }
 }

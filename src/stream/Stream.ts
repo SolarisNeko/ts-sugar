@@ -1,43 +1,58 @@
 // Lambda
+import {Kv, KvUtils} from "../kv/Kv";
+import {ObjectUtils} from "../utils/ObjectUtils";
+
 type Func<T, U> = (item: T) => U;
 type PredicateFunc<T> = Func<T, boolean>;
 type KeyFunc<T> = Func<T, any>;
 type Dict<T> = { [key: string]: T };
 
-
+/**
+ * 数据流
+ */
 export class Stream<T> {
 
     private readonly data: Iterable<T>;
 
-    static from<T>(data: T[] | Set<T> | Dict<T> | Map<any, T>): Stream<T> {
+    static from<V>(data: V[] | Set<V> | Dict<V>): Stream<V> {
         if (Array.isArray(data)) {
             return new Stream(data);
-        } else if (data instanceof Map) {
-            return new Stream(Array.from(data.values()));
         } else if (data instanceof Set) {
             return new Stream(Array.from(data));
-        } else if (typeof data === 'object') {
-            return new Stream(Object.values(data));
         } else {
             throw new Error(`[Stream] Unsupported data type = ${typeof data}`);
         }
     }
 
+    static fromMap<K, V>(data: Map<K, V>): Stream<Kv<K, V>> {
+        // entry 就是 T
+        const mapEntryArray: Kv<K, V>[] = KvUtils.generateKvArrayByMap(data)
+        return new Stream(mapEntryArray);
+    }
 
     constructor(data: Iterable<T>) {
         this.data = data;
     }
 
-    sort(sortedFunc: Func<T, any> | null = null,
+    sort(toSortNumFunc: Func<T, number> | null = null,
          reverse = false
     ): Stream<T> {
-        return new Stream([...this.data].sort((a,
-                                               b
-        ) => {
-            const keyA = sortedFunc ? sortedFunc(a) : a;
-            const keyB = sortedFunc ? sortedFunc(b) : b;
-            return reverse ? keyB - keyA : keyA - keyB;
-        }));
+        return new Stream([...this.data]
+            .sort((a, b) => {
+                let keyA: number = toSortNumFunc ? toSortNumFunc(a) : 0;
+                let keyB: number = toSortNumFunc ? toSortNumFunc(b) : 0;
+
+                // 默认排序
+                if (!toSortNumFunc) {
+                    if (ObjectUtils.isNumber(a)
+                        && ObjectUtils.isNumber(b)
+                    ) {
+                        keyA = a as number;
+                        keyB = b as number;
+                    }
+                }
+                return reverse ? keyB - keyA : keyA - keyB;
+            }));
     }
 
     map<U>(func: Func<T, U>): Stream<U> {

@@ -9,7 +9,6 @@ import {
 } from "../../src/task/Task";
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike";
 import {Clazz} from "../../src/types/Types";
-import * as console from "console"; // Update the path accordingly
 
 // Mocking a simple player-like object for testing
 const mockPlayer: PlayerLike = new TestPlayer()

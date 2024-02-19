@@ -2,10 +2,10 @@
 
 
 // 使用注解
-import {LogDecorator} from "../../src/logger/LogDecorator";
+import {AutoLogFunctionInvoke} from "../../src/decorator/AutoLogFunctionInvoke";
 
 class MyClass {
-    @LogDecorator
+    @AutoLogFunctionInvoke
     add(a: number, b: number): number {
         return a + b;
     }
