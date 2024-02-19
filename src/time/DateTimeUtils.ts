@@ -122,4 +122,8 @@ export class DateTimeUtils {
     static getCurrentTimeMs(): number {
         return new Date().getTime()
     }
+
+    static nowStr(): string {
+        return this.getCurrentDateTimeText("yyyy-MM-dd HH:mm:ss,SSS");
+    }
 }
