@@ -1,13 +1,13 @@
 import {
-    Http233,
-    HttpResponse
+    Http233, HttpMethod,
+    HttpResponse,
 } from "../../src/http/Http233";
 
 describe('Http', () => {
     it('should send a GET request', async () => {
         const builder = Http233.builder()
             .url('https://jsonplaceholder.typicode.com/posts/1')
-            .method('GET');
+            .method(HttpMethod.GET);
 
         const response: HttpResponse = await builder.send();
 
@@ -25,7 +25,7 @@ describe('Http', () => {
 
         const builder = Http233.builder()
             .url('https://jsonplaceholder.typicode.com/posts')
-            .method('POST')
+            .method(HttpMethod.POST)
             .headers({'Content-Type': 'application/json'})
             .data(data);
 

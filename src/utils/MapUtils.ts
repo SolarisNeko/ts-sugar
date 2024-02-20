@@ -1,8 +1,8 @@
 import {BiFunction, BinaryOperator, KeyExtractor} from "./LambdaExtension";
 
 export class MapEntry<K, V> {
-    key: K
-    value: V
+    key!: K
+    value!: V
 }
 
 export class MapUtils {
@@ -36,7 +36,8 @@ export class MapUtils {
                     for (let i = 0; i < repeatCount; ++i) {
                         kvMap.forEach((value, key) => {
                             if (output.has(key)) {
-                                let mergeValue: any = biConsumer(output.get(key), value);
+                                const newVar: V = output.get(key)!;
+                                let mergeValue: any = biConsumer(newVar, value);
                                 output.set(key, mergeValue);
                             } else {
                                 output.set(key, value);
@@ -113,7 +114,9 @@ export class MapUtils {
             const key2 = keyExtractor2(item);
             const key3 = keyExtractor3(item);
             const innerMap2 = (map.get(key1) || new Map<K2, Map<K3, T>>()).get(key2) || new Map<K3, T>();
-            innerMap2.set(key3, mergeFunction(innerMap2.get(key3), item));
+
+            const oldItem: T = innerMap2.get(key3) as T;
+            innerMap2.set(key3, mergeFunction(oldItem, item));
             const innerMap1 = map.get(key1) || new Map<K2, Map<K3, T>>();
             innerMap1.set(key2, innerMap2);
             map.set(key1, innerMap1);

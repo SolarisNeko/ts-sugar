@@ -1,11 +1,25 @@
 {
   "name": "neko233-ts-sugar",
-  "version": "1.0.4",
+  "version": "1.0.11",
   "description": "typescript utils. 工具箱",
-  "main": "main.js",
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "test": "jest",
+    "publishToNpm": "node nodejs-auto-create-export-index-ts.js && tsc && npm publish"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
   "repository": {
     "type": "git",
     "url": "https://gitee.com/SolarisNeko/ts-sugar.git"

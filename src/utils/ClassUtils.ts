@@ -10,7 +10,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an array, false otherwise.
      */
-    static isArray(obj) {
+    static isArray(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
 
@@ -20,7 +20,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an object, false otherwise.
      */
-    static isObject(obj) {
+    static isObject(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Object]';
     }
 
@@ -30,7 +30,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a string, false otherwise.
      */
-    static isString(obj) {
+    static isString(obj: any) {
         return Object.prototype.toString.call(obj) === '[object String]';
     }
 
@@ -40,7 +40,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a number, false otherwise.
      */
-    static isNumber(obj) {
+    static isNumber(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Number]';
     }
 
@@ -50,7 +50,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a boolean, false otherwise.
      */
-    static isBoolean(obj) {
+    static isBoolean(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Boolean]';
     }
 
@@ -60,7 +60,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a function, false otherwise.
      */
-    static isFunction(obj) {
+    static isFunction(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Function]';
     }
 
@@ -70,7 +70,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an date, false otherwise.
      */
-    static isDate(obj) {
+    static isDate(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Date]';
     }
 
@@ -80,7 +80,7 @@ export class ClassUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an error, false otherwise.
      */
-    static isError(obj) {
+    static isError(obj: any) {
         return Object.prototype.toString.call(obj) === '[object Error]';
     }
 

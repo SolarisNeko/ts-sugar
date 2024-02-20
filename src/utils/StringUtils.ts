@@ -7,7 +7,7 @@
 export class StringUtils {
 
     // 判断字符串是否为空
-    static isEmpty(str) {
+    static isEmpty(str: string) {
         return str === null || str === undefined || str.length === 0;
     }
 
@@ -17,7 +17,7 @@ export class StringUtils {
     }
 
     // 去除字符串两端空格
-    static trim(str) {
+    static trim(str: string) {
         if (this.isBlank(str)) {
             return "";
         }
@@ -25,13 +25,13 @@ export class StringUtils {
     }
 
     // 判断字符串是否为数字
-    static isNumeric(str) {
+    static isNumeric(str: string) {
         const reg = /^[0-9]+.?[0-9]*$/;
         return reg.test(str);
     }
 
     // 判断字符串是否为空白
-    static isBlank(str) {
+    static isBlank(str: string) {
         if (str == null) {
             return true;
         }
@@ -40,7 +40,7 @@ export class StringUtils {
     }
 
     // 判断字符串是否不为空白
-    static isNotBlank(str) {
+    static isNotBlank(str: string) {
         return !StringUtils.isBlank(str);
     }
 }

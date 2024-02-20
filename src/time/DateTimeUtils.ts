@@ -30,7 +30,7 @@ export class DateTimeUtils {
             'HH': hours,
             'mm': minute,
             'ss': second,
-            'SSS': ms,
+            'SSS': ms.toString().padStart(3, '0'), // 确保毫秒为三位数
         };
 
         return format.replace(/yyyy|MM|dd|HH|mm|ss|SSS/g, match => tokens[match].toString().padStart(2, '0'));

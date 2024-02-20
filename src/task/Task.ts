@@ -152,7 +152,7 @@ export class PlayerTask {
 
         this.taskTargets.forEach((target) => {
             let targetType: string = target.type;
-            const targetTypeHandler: TaskTargetTypeHandler = TaskTargetTypeRegister.getHandler(targetType);
+            const targetTypeHandler: TaskTargetTypeHandler = TaskTargetTypeRegister.getHandler(targetType)!;
             if (!targetTypeHandler) {
                 return
             }
@@ -306,7 +306,7 @@ export class PlayerTask {
 
         // 处理每个任务目标
         this.taskTargets.forEach(target => {
-            const targetTypeHandler: TaskTargetTypeHandler = TaskTargetTypeRegister.getHandler(target.type);
+            const targetTypeHandler: TaskTargetTypeHandler = TaskTargetTypeRegister.getHandler(target.type)!;
             if (!targetTypeHandler) {
                 return
             }
