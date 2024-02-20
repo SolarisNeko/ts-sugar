@@ -35,7 +35,7 @@ describe('DateTimeUtils', () => {
     test('getLastRefreshDateTime should return correct time based on offsetHour and timezone', () => {
         const mockDate = new Date('2023-10-25T13:30:00').getTime();
         const offsetHour = 10; // 10 AM
-        const lastRefreshTime = DateTimeUtils.getLastRefreshDateTime(mockDate, offsetHour);
+        const lastRefreshTime = DateTimeUtils.getLastRefreshDateTimeByHour(mockDate, offsetHour);
         const expectedTime = new Date('2023-10-25T10:00:00').getTime();
         expect(lastRefreshTime).toBe(expectedTime);
     });

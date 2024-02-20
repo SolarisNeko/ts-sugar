@@ -90,28 +90,30 @@ export class DateTimeUtils {
      * 获取上次后端刷新数据时间点（自定义刷新时间）
      * 默认 0 点刷新
      */
-    public static getLastRefreshDateTime(time: number = this.currentTimeMs,
-                                         offsetHour: number = 0,
+    public static getLastRefreshDateTimeByHour(time: number = this.currentTimeMs,
+                                               offsetHour: number = 0,
     ): number {
         let date = new Date(time);
         if (date.getHours() < offsetHour) {
             return this.getYesterdayStartTime(time) + (24 + offsetHour % 24) * 3600 * 1000;
         } else {
-            return new Date(date.getFullYear(),
+            let dt: Date = new Date(date.getFullYear(),
                 date.getMonth(),
                 date.getDate(),
                 0,
                 0,
                 0,
-                0).getTime() + offsetHour * 3600 * 1000;
+                0);
+            // hour to ms
+            let addTimeMs: number = offsetHour * 3600 * 1000;
+            return dt.getTime() + addTimeMs;
         }
     }
 
 
     public static getMonthBySecond(time: number): number {
         let date: Date = new Date(time);
-        let month: number = date.getMonth() + 1;
-        return month;
+        return date.getMonth() + 1;
     }
 
     /**
