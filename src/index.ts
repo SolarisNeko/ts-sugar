@@ -44,7 +44,7 @@ export * from './mvvm/mvvm';
 export * from './network/codec/JsonCodec';
 export * from './network/ICodec';
 export * from './network/ISocket';
-export * from './network/socket/AbstractWebSocket';
+export * from './network/socketImpl/AbstractWebSocket';
 export * from './objectPool/ObjectPool';
 export * from './player/PlayerLike';
 export * from './range/NumberRange';
