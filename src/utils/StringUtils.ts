@@ -43,4 +43,9 @@ export class StringUtils {
     static isNotBlank(str: string) {
         return !StringUtils.isBlank(str);
     }
+
+    static padLeft(value: string | number, targetLength: number, padChar: string): string {
+        const str = value.toString();
+        return str.length >= targetLength ? str : padChar.repeat(targetLength - str.length) + str;
+    }
 }

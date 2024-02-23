@@ -1,3 +1,5 @@
+import {StringUtils} from "../utils/StringUtils";
+
 /**
  * 2023-10-25T13:30:00Z = UTC+0 timezone
  * 2023-10-25T13:30:00 = UTC+${当前时区} = UTC+8 default
@@ -22,6 +24,7 @@ export class DateTimeUtils {
         const minute: number = date.getMinutes();
         const second: number = date.getSeconds();
         const ms: number = date.getMilliseconds();
+        const msStr: string = StringUtils.padLeft(ms.toString(), 3,'0');
 
         const tokens = {
             'yyyy': year,
@@ -30,10 +33,12 @@ export class DateTimeUtils {
             'HH': hours,
             'mm': minute,
             'ss': second,
-            'SSS': ms.toString().padStart(3, '0'), // 确保毫秒为三位数
+            'SSS': msStr, // 确保毫秒为三位数
         };
-
-        return format.replace(/yyyy|MM|dd|HH|mm|ss|SSS/g, match => tokens[match].toString().padStart(2, '0'));
+        return format.replace(/yyyy|MM|dd|HH|mm|ss|SSS/g, match => {
+            const str: string = tokens[match].toString();
+            return StringUtils.padLeft(str, 2, '0')
+        });
     }
 
     /**
