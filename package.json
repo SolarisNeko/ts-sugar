@@ -1,6 +1,6 @@
 {
   "name": "neko233-ts-sugar",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "typescript utils. 工具箱",
   "scripts": {
     "build": "tsc",
@@ -32,8 +32,7 @@
   ],
   "author": "solarisneko",
   "license": "ISC",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^5.2.2",
     "@types/jest": "^29.5.0",
