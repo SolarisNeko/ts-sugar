@@ -89,7 +89,9 @@ export class Http233 {
 
         // Set headers
         if (this.config.headers) {
-            for (const [key, value] of Object.entries(this.config.headers)) {
+            const keys = Object.keys(this.config.headers);
+            for (const key of keys) {
+                const value = this.config.headers[key];
                 xhr.setRequestHeader(key, value);
             }
         }
