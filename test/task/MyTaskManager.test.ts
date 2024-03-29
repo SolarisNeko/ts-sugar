@@ -10,7 +10,6 @@ import {
     TaskTargetTypeHandler,
     TaskTargetTypeRegister,
 } from "../../src/task/Task";
-import console from "console";
 import {Clazz} from "../../src/types/Types";
 import {ObjectUtils} from "../../src/utils/ObjectUtils";
 
@@ -23,7 +22,11 @@ describe('MyTaskManager', () => {
     class MockTaskTargetTypeHandler extends TaskTargetTypeHandler {
         protected initEventTypeHandler(): void {
             this.putEventHandler(String, new class implements TaskEventHandler<String> {
-                handle(player: PlayerLike, target: TaskTarget, eventName: string, event: String): void {
+                handle(player: PlayerLike,
+                       target: TaskTarget,
+                       eventName: string,
+                       event: String,
+                ): void {
                     console.log('类型匹配调用成功!')
                     target.setProgressValue(10)
                     result = 1
