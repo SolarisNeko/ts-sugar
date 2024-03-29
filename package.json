@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "compile": "node nodejs-auto-create-export-index-ts.js && tsc",
     "publishToNpm": "node nodejs-auto-create-export-index-ts.js && tsc && npm publish --production "
   },
   "main": "./dist/index.js",
