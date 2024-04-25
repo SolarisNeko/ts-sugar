@@ -6,8 +6,8 @@
     "build": "tsc",
     "test": "jest",
     "compile": "node nodejs-auto-create-export-index-ts.js && tsc",
-    "publishToNpm": "node nodejs-auto-create-export-index-ts.js && tsc && npm publish --production ",
-    "nextPublishVersion": " npm publish --production "
+    "publishToNpm": "node nodejs-auto-create-export-index-ts.js && npm version patch && tsc && npm publish --production ",
+    "nextPublishVersion": " npm version patch  "
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
