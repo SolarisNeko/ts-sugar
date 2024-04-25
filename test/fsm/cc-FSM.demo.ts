@@ -1,52 +1,80 @@
-// export class NodeAnimationRunState extends State<cc.Node> {
-//     constructor(fsm: FSM<cc.Node>, stateId: string) {
-//         super(fsm, stateId);
+// import { FSM, FSMState, FSMTranslation } from "../Core/FSM";
+//
+// const { ccclass, property } = cc._decorator;
+//
+// enum FSMStateType {
+//     Idle = "Idle",
+//     Jump = "Jump",
+//     Die = "Die",
+// }
+//
+// enum FSMTranslationType {
+//     Touch_Jump = "Touch_Jump",
+//     On_Idle = "On_Idle",
+//     On_Idle_Die = "On_Idle_Die",
+//     On_Jump_Die = "On_Jump_Die",
+// }
+//
+// @ccclass
+// export default class Test extends cc.Component {
+//
+//     private _fsm: FSM = new FSM();
+//
+//     start() {
+//         // 创建状态
+//         let idleState: FSMState = new FSMState(FSMStateType.Idle);
+//         let jumpState: FSMState = new FSMState(FSMStateType.Jump);
+//         let dieState: FSMState = new FSMState(FSMStateType.Die);
+//
+//         // 创建跳转
+//         let idleToJumpTranslation: FSMTranslation = new FSMTranslation(FSMTranslationType.Touch_Jump, idleState, jumpState, this.jump.bind(this));
+//         let jumpToIdleTranslation: FSMTranslation = new FSMTranslation(FSMTranslationType.On_Idle, jumpState, idleState, this.idle.bind(this));
+//         let idleToDieTranslation: FSMTranslation = new FSMTranslation(FSMTranslationType.On_Idle_Die, idleState, dieState, this.idleDie.bind(this));
+//         let jumpToDieTranslation: FSMTranslation = new FSMTranslation(FSMTranslationType.On_Jump_Die, jumpState, dieState, this.jumpDie.bind(this));
+//
+//         // 添加状态
+//         this._fsm.addState(idleState);
+//         this._fsm.addState(jumpState);
+//         this._fsm.addState(dieState);
+//
+//         // 添加跳转
+//         this._fsm.addTranslation(idleToJumpTranslation);
+//         this._fsm.addTranslation(jumpToIdleTranslation);
+//         this._fsm.addTranslation(idleToDieTranslation);
+//         this._fsm.addTranslation(jumpToDieTranslation);
+//
+//         this._fsm.start(idleState);
+//
 //     }
-
-//     tryUpdateState(data: cc.Node): string {
-//         // Your logic to determine the next state
-//         // ...
-
-//         return nextStateId;
+//
+//
+//     // ---------触发事件切换状态------------------------------------------------
+//
+//     /** 起跳 */
+//     private onJumpBtn(): void {
+//         if (this._fsm.currState.name != FSMStateType.Idle) return;
+//
+//         this._fsm.handleEvent(FSMTranslationType.Touch_Jump);
+//         this.unscheduleAllCallbacks();
+//         this.scheduleOnce(() => { this._fsm.handleEvent(FSMTranslationType.On_Idle); }, 0.5);
 //     }
-
-//     onEnter(data: cc.Node): void {
-//         // Play the run animation when entering this state
-//         this.playRunAnimation(data);
-//     }
-
-//     onTick(data: cc.Node): void {
-//         // Your logic for each tick
-//         // ...
-
-//         // Play the run animation during each tick
-//         this.playRunAnimation(data);
-//     }
-
-//     onExit(data: cc.Node): void {
-//         // Play the exit animation when exiting this state
-//         this.playExitAnimation(data);
-//     }
-
-//     private playRunAnimation(node: cc.Node): void {
-//         // Assuming cc.Animation for Cocos Creator
-//         const animationComponent = node.getComponent(cc.Animation);
-//         if (animationComponent) {
-//             // Replace 'RunAnimationClip' with the actual name of your run animation clip
-//             animationComponent.play('RunAnimationClip');
-//         } else {
-//             console.error("Animation Component not found on the node.");
+//
+//     /** 嗝儿屁 */
+//     private onDieBtn(): void {
+//         if (this._fsm.currState.name == FSMStateType.Jump) {
+//             this._fsm.handleEvent(FSMTranslationType.On_Jump_Die);
+//         } else if (this._fsm.currState.name == FSMStateType.Idle) {
+//             this._fsm.handleEvent(FSMTranslationType.On_Idle_Die);
 //         }
 //     }
-
-//     private playExitAnimation(node: cc.Node): void {
-//         // Assuming cc.Animation for Cocos Creator
-//         const animationComponent = node.getComponent(cc.Animation);
-//         if (animationComponent) {
-//             // Replace 'ExitAnimationClip' with the actual name of your exit animation clip
-//             animationComponent.play('ExitAnimationClip');
-//         } else {
-//             console.error("Animation Component not found on the node.");
-//         }
-//     }
+//
+//     // ---------------回调---------------------------------------------
+//
+//     private jump(): void { console.log("jumping"); }
+//
+//     private idle(): void { console.log("idle"); }
+//
+//     private jumpDie(): void { console.log("jumpDie"); }
+//
+//     private idleDie(): void { console.log("idleDie"); }
 // }

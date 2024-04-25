@@ -1,7 +1,7 @@
 // 请求
 export interface SocketReqData {
-    // 请求码
-    cmdCode: number,
+    // 唯一id
+    packetId: string,
     // 加密方式,
     encryptType: number,
     // 描述
@@ -12,8 +12,8 @@ export interface SocketReqData {
 
 // 响应
 export interface SocketRespData {
-    // 请求码
-    cmdCode: number,
+    // 唯一id
+    packetId: string,
     // 加密方式,
     encryptType: number,
     // 描述
@@ -31,7 +31,9 @@ export interface SocketConnectOptions {
     autoReconnectInterval?: number;  // 自动重连的时间间隔
 }
 
-/** Socket接口 */
+/**
+ * Socket接口
+ **/
 export interface ISocket<REQ, RESP> {
 
     // 连接接口
@@ -48,7 +50,7 @@ export interface ISocket<REQ, RESP> {
 
     // 关闭接口
     close(code?: number,
-          reason?: string
+          reason?: string,
     ): void;
 
     // 错误回调

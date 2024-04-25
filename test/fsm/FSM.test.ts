@@ -1,76 +1,74 @@
-import { FSM, AbstractState, StateChangeResult } from "../../src/fsm/FSM";
+import {FSM, FSMState, FSMTranslation} from "../../src/fsm/FSM";
 
-// Mock data for testing
-const testData = { /* your test data here */ };
 
-// Mock State implementation for testing
-class StateA extends AbstractState<typeof testData> {
-    getCanTransitionStateId(): string[] {
-        return ['b'];
-    }
-
-    isCanEnterThisState(data: typeof testData): boolean {
-        // your implementation, for example:
-        return true;
-    }
-
-    onEnter(data: typeof testData): void {
-        // your implementation
-    }
-
-    onTick(data: typeof testData): void {
-        // your implementation
-    }
-
-    onExit(data: typeof testData): void {
-        // your implementation
-    }
+enum FSMStateType {
+    Idle = "Idle",
+    Jump = "Jump",
+    Die = "Die",
 }
 
-class StateB extends AbstractState<typeof testData> {
-    getCanTransitionStateId(): string[] {
-        return ['a'];
-    }
-
-    isCanEnterThisState(data: typeof testData): boolean {
-        // your implementation, for example:
-        return true;
-    }
-
-    onEnter(data: typeof testData): void {
-        // your implementation
-    }
-
-    onTick(data: typeof testData): void {
-        // your implementation
-    }
-
-    onExit(data: typeof testData): void {
-        // your implementation
-    }
+enum FSMTranslationTypeEnum {
+    IDLE_TO_JUMP = "IDLE_TO_JUMP",
+    JUMP_TO_IDLE = "JUMP_TO_IDLE",
+    IDLE_TO_DIE = "IDLE_TO_DIE",
+    JUMP_TO_DIE = "JUMP_TO_DIE",
 }
+
 
 describe('FSM', () => {
-    let fsm: FSM<typeof testData>;
 
     beforeEach(() => {
-        fsm = new FSM();
-        fsm.addState('a', new StateA(fsm, 'a'));
-        fsm.addState('b', new StateB(fsm, 'b'));
     });
 
     test('tick should automatically transition between states', () => {
-        fsm.enterStateId('a');
-        fsm.exitStateId('b');
+        function jump() {
+            console.log("jumping");
+        }
 
-        const result1: StateChangeResult = fsm.tick(testData);
-        expect(result1.stateIdSequence).toEqual(['b']);
-        expect(result1.exitStateId).toBe('b');
-        expect(result1.stateIdCounterMap.get('b')).toBe(1);
+        function idle(): void {
+            console.log("idle");
+        }
 
-        const result2: StateChangeResult = fsm.tick(testData);
-        expect(result2.stateIdSequence).toEqual(['a']);
-        expect(result2.exitStateId).toBe('a');
-        expect(result2.stateIdCounterMap.get('a')).toBe(1);
-    });
+        function jumpDie(): void {
+            console.log("jumpDie");
+        }
+
+        function idleDie(): void {
+            console.log("idleDie");
+        }
+
+        let _fsm: FSM = new FSM();
+
+        // 创建状态
+        let idleState: FSMState = new FSMState(FSMStateType.Idle);
+        let jumpState: FSMState = new FSMState(FSMStateType.Jump);
+        let dieState: FSMState = new FSMState(FSMStateType.Die);
+
+        // 创建跳转
+        let idleToJumpTranslation: FSMTranslation = new FSMTranslation(FSMTranslationTypeEnum.IDLE_TO_JUMP, idleState, jumpState, jump, this);
+        let jumpToIdleTranslation: FSMTranslation = new FSMTranslation(FSMTranslationTypeEnum.JUMP_TO_IDLE, jumpState, idleState, idle, this);
+        let jumpToDieTranslation: FSMTranslation = new FSMTranslation(FSMTranslationTypeEnum.JUMP_TO_DIE, jumpState, dieState, jumpDie, this);
+        let idleToDieTranslation: FSMTranslation = new FSMTranslation(FSMTranslationTypeEnum.IDLE_TO_DIE, idleState, dieState, idleDie, this);
+
+        // 添加状态
+        _fsm.addState(idleState);
+        _fsm.addState(jumpState);
+        _fsm.addState(dieState);
+
+        // 添加跳转
+        _fsm.addTranslation(idleToJumpTranslation);
+        _fsm.addTranslation(jumpToIdleTranslation);
+        _fsm.addTranslation(idleToDieTranslation);
+        _fsm.addTranslation(jumpToDieTranslation);
+
+        _fsm.startFSM(idleState);
+
+        _fsm.handleTransition(FSMTranslationTypeEnum.IDLE_TO_JUMP)
+        _fsm.handleTransition(FSMTranslationTypeEnum.IDLE_TO_DIE)
+        _fsm.handleTransition(FSMTranslationTypeEnum.JUMP_TO_DIE)
+        _fsm.handleTransition(FSMTranslationTypeEnum.JUMP_TO_IDLE)
+
+        // ---------触发事件切换状态------------------------------------------------
+
+    })
 });
