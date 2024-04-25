@@ -6,21 +6,12 @@ export class FSMState {
     public stateId: string = null;
     //<过渡名，过渡逻辑>
     public translationMap: Map<string, FSMTranslation> = null;
-    public readonly enterCallback: Function | null = null
 
-    constructor(stateId: string,
-                enterCallback: Function | null = null,
-    ) {
+    constructor(stateId: string) {
         this.stateId = stateId;
         this.translationMap = new Map<string, FSMTranslation>();
-        this.enterCallback = enterCallback;
     }
 
-    executeEnterCallback(self: any) {
-        if (this.enterCallback) {
-            this.enterCallback.bind(self)()
-        }
-    }
 }
 
 /**
@@ -93,7 +84,7 @@ export class EasyFSM {
      * 执行过渡
      * @param transitionName
      */
-    public handleTransition(transitionName: string, self: any = null): StateChangeResult {
+    public handleTransition(transitionName: string): StateChangeResult {
         const oldState = this._currState
         if (!oldState) {
             console.error("FSM 未初始化")
@@ -112,7 +103,6 @@ export class EasyFSM {
 
         // 条件过渡触发的逻辑
         oldState.translationMap.get(transitionName).executeExitCallback();
-        newState.executeEnterCallback(self)
 
         const result = new StateChangeResult();
         result.changeStateFlag = changeFlag

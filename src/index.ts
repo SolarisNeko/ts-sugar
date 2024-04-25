@@ -28,6 +28,7 @@ export * from './decorator/TipsDecorator';
 export * from './enums/Enums';
 export * from './event/EventCenter';
 export * from './fsm/EasyFSM';
+export * from './fsm/FSM';
 export * from './functionText/DialogFunctionText';
 export * from './functionText/FunctionText';
 export * from './heartbeat/HeartbeatManager';
