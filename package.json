@@ -1,6 +1,6 @@
 {
   "name": "neko233-ts-sugar",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "typescript utils. 工具箱",
   "scripts": {
     "build": "tsc",
