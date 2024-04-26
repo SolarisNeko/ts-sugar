@@ -1,6 +1,3 @@
-// objectPool.test.ts
-
-
 import {ObjectPool} from "../../src/objectPool/ObjectPool";
 
 describe('ObjectPool', () => {
@@ -8,30 +5,32 @@ describe('ObjectPool', () => {
 
     beforeEach(() => {
         objectPool = new ObjectPool(
+            "demo",
+            5,
             () => ({id: 0}),
             (item) => {
                 // Mock cleanUp function
                 item.id = -1;
+                return item
             },
-            5
         );
     });
 
-    it('should acquire an object', () => {
-        const obj = objectPool.acquire();
+    it('should allocate an object', () => {
+        const obj = objectPool.allocate();
         expect(obj).toHaveProperty('id', 0);
     });
 
-    it('should release an object', () => {
-        const obj = objectPool.acquire();
-        objectPool.release(obj);
+    it('should free an object', () => {
+        const obj = objectPool.allocate();
+        objectPool.free(obj);
         expect(obj).toHaveProperty('id', -1);
     });
 
     it('should reuse released objects', () => {
-        const obj1 = objectPool.acquire();
-        objectPool.release(obj1);
-        const obj2 = objectPool.acquire();
+        const obj1 = objectPool.allocate();
+        objectPool.free(obj1);
+        const obj2 = objectPool.allocate();
         expect(obj2).toBe(obj1);
     });
 
@@ -42,16 +41,16 @@ describe('ObjectPool', () => {
 
         // Acquire objects until maxSize is reached
         for (let i = 0; i < 10; i++) {
-            let items = objectPool.acquire();
+            let items = objectPool.allocate();
             items.id = i
             objArray.push(items);
         }
 
         // Release one object
-        objectPool.release(objArray[0]);
+        objectPool.free(objArray[0]);
 
         // Acquiring one more should not exceed maxSize
-        const newObj = objectPool.acquire();
+        const newObj = objectPool.allocate();
         expect(objArray).toContain(newObj);
     });
 });
