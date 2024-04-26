@@ -56,6 +56,7 @@ export * from './redDot/RedDotTree';
 export * from './router/CmdHandler';
 export * from './router/CmdRouter';
 export * from './stream/Stream';
+export * from './structs/BinaryHeap';
 export * from './task/MyTaskManager';
 export * from './task/Task';
 export * from './time/DateTimeUtils';
