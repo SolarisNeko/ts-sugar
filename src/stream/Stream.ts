@@ -9,6 +9,7 @@ type ConvertFunction<T, U> = (item: T) => U;
 // 判断函数
 type PredicateFunc<T> = ConvertFunction<T, boolean>;
 
+
 /**
  * 数据流操作工具
  * 给 typescript 提供类似 C# LINQ / Java Stream 风格的数据流式操作

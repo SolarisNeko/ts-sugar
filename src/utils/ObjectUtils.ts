@@ -15,7 +15,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is null or undefined, false otherwise.
      */
-    static isNullOrUndefined(obj) {
+    static isNullOrUndefined(obj: any): boolean {
         return obj === null || typeof obj === 'undefined';
     }
 
@@ -23,7 +23,7 @@ export class ObjectUtils {
      * 非空
      * @param obj
      */
-    static isNotNullOrUndefined(obj) {
+    static isNotNullOrUndefined(obj: any): boolean {
         return !this.isNullOrUndefined(obj);
     }
 
@@ -33,7 +33,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an array, false otherwise.
      */
-    static isArray(obj) {
+    static isArray(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
 
@@ -43,7 +43,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an object, false otherwise.
      */
-    static isObject(obj) {
+    static isObject(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Object]';
     }
 
@@ -53,7 +53,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a string, false otherwise.
      */
-    static isString(obj) {
+    static isString(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object String]';
     }
 
@@ -63,7 +63,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a number, false otherwise.
      */
-    static isNumber(obj) {
+    static isNumber(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Number]';
     }
 
@@ -73,7 +73,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a boolean, false otherwise.
      */
-    static isBoolean(obj) {
+    static isBoolean(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Boolean]';
     }
 
@@ -83,7 +83,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is a function, false otherwise.
      */
-    static isFunction(obj) {
+    static isFunction(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Function]';
     }
 
@@ -93,7 +93,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an date, false otherwise.
      */
-    static isDate(obj) {
+    static isDate(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Date]';
     }
 
@@ -103,7 +103,7 @@ export class ObjectUtils {
      * @param {Object} obj The object to check.
      * @returns {boolean} True if the object is an error, false otherwise.
      */
-    static isError(obj) {
+    static isError(obj: any): boolean {
         return Object.prototype.toString.call(obj) === '[object Error]';
     }
 
