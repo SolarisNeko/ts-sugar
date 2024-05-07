@@ -1,20 +1,37 @@
 // Lambda
-import {Kv, KvUtils} from "../kv/Kv";
-import {ObjectUtils} from "../utils/ObjectUtils";
+import { Kv, KvUtils } from "../kv/Kv";
+import { ObjectUtils } from "../utils/ObjectUtils";
 
-type Func<T, U> = (item: T) => U;
-type PredicateFunc<T> = Func<T, boolean>;
-type KeyFunc<T> = Func<T, any>;
-type Dict<T> = { [key: string]: T };
+
+// 转换函数
+type ConvertFunction<T, U> = (item: T) => U;
+
+// 判断函数
+type PredicateFunc<T> = ConvertFunction<T, boolean>;
 
 /**
- * 数据流
+ * 数据流操作工具
+ * 给 typescript 提供类似 C# LINQ / Java Stream 风格的数据流式操作
+ * 用法:
+ * const list = Stream.from([1,2,3,4])
+ *  .filter(item => item > 2)
+ *  .toList()
+ *
+ * @author luohaojun
  */
 export class Stream<T> {
 
     private readonly data: Iterable<T>;
 
-    static from<V>(data: V[] | Set<V> | Dict<V>): Stream<V> {
+    constructor(data: Iterable<T>) {
+        this.data = data;
+    }
+    
+    /**
+     * 创建流 by 数组、Set
+     * @param data
+     */
+    static from<V>(data: V[] | Set<V>): Stream<V> {
         if (Array.isArray(data)) {
             return new Stream(data);
         } else if (data instanceof Set) {
@@ -24,17 +41,23 @@ export class Stream<T> {
         }
     }
 
+    /**
+     * 创建流 by Map
+     * @param data
+     */
     static fromMap<K, V>(data: Map<K, V>): Stream<Kv<K, V>> {
         // entry 就是 T
         const mapEntryArray: Kv<K, V>[] = KvUtils.generateKvArrayByMap(data)
         return new Stream(mapEntryArray);
     }
 
-    constructor(data: Iterable<T>) {
-        this.data = data;
-    }
 
-    sort(toSortNumFunc: Func<T, number> | null = null,
+    /**
+     *  排序
+     * @param toSortNumFunc 排序函数，返回数字，默认按照数字排序
+     * @param reverse 是否倒序
+     */
+    sort(toSortNumFunc: ConvertFunction<T, number> | null = null,
          reverse = false
     ): Stream<T> {
         return new Stream([...this.data]
@@ -55,34 +78,54 @@ export class Stream<T> {
             }));
     }
 
-    map<U>(func: Func<T, U>): Stream<U> {
-        return new Stream((function* () {
+    /**
+     *  映射 | 将每一个对象转换
+     * @param mapFunc 映射函数
+     */
+    map<U>(mapFunc: ConvertFunction<T, U>): Stream<U> {
+        const iterator = (function* () {
             for (const item of this.data) {
-                yield func(item);
+                yield mapFunc(item);
             }
-        }).bind(this)());
+        }).bind(this)();
+        return new Stream(iterator);
     }
 
-    flatMap<U>(func: Func<T, Iterable<U>>): Stream<U> {
+    /**
+     * 将 stream 的每一个元素转换成一个新的 stream，然后将这些 stream 合并成一个新的 stream
+     * 例如: [[1,2,3], [4,5]] -> [1,2,3,4,5]
+     * @param flatMapFunc 平铺函数
+     */
+    flatMap<U>(flatMapFunc: ConvertFunction<T, Iterable<U>>): Stream<U> {
         return new Stream((function* () {
             for (const sublist of this.data) {
-                for (const item of func(sublist)) {
+                for (const item of flatMapFunc(sublist)) {
                     yield item;
                 }
             }
         }).bind(this)());
     }
 
-    filter(func: PredicateFunc<T>): Stream<T> {
-        return new Stream((function* () {
+    /**
+     * 过滤函数
+     * @param filterFunction 过滤函数 true = 保留, false = 剔除
+     */
+    filter(filterFunction: PredicateFunc<T>): Stream<T> {
+        const filterDataIterator = (function* () {
             for (const item of this.data) {
-                if (func(item)) {
+                if (filterFunction(item)) {
                     yield item;
                 }
             }
-        }).bind(this)());
+        }).bind(this)();
+        return new Stream(filterDataIterator);
     }
 
+    /**
+     * 聚合函数
+     * @param reduceFunc 将2个元素聚合成1个
+     * @param initial 初始合并元素
+     */
     reduce<U>(reduceFunc: (reduceValue: U,
                            currentValue: T
               ) => U,
@@ -95,19 +138,29 @@ export class Stream<T> {
         return accumulator;
     }
 
-    groupBy(key_func: KeyFunc<T>): Dict<T[]> {
-        const groups: Dict<T[]> = {};
+    /**
+     *  分组函数
+     * @param getKeyFunction 键函数
+     */
+    groupBy<K>(getKeyFunction: ConvertFunction<T, K>): Map<K, T[]> {
+        const map = new Map<K, T[]>()
         for (const item of this.data) {
-            const key = key_func(item);
-            if (key in groups) {
-                groups[key].push(item);
-            } else {
-                groups[key] = [item];
+            const key: K = getKeyFunction(item);
+
+            const isHasKey = map.has(key);
+            let valueArray = map.get(key)
+            if (!isHasKey) {
+                map.set(key, []);
+                valueArray = map.get(key)
             }
+            valueArray.push(item);
         }
-        return groups;
+        return map;
     }
 
+    /**
+     * 第一个元素
+     */
     first(): T | null {
         for (const item of this.data) {
             return item;
@@ -115,6 +168,9 @@ export class Stream<T> {
         return null;
     }
 
+    /**
+     * 数量
+     */
     count(): number {
         let count = 0;
         for (const _ of this.data) {
@@ -123,25 +179,49 @@ export class Stream<T> {
         return count;
     }
 
+    /**
+     * 转为数组
+     */
     toList(): T[] {
         return [...this.data];
     }
 
-    toDictionary<U>(key_func: KeyFunc<T>,
-                    value_func: Func<T, U>
-    ): Dict<U> {
-        const dictionary: Dict<U> = {};
-        for (const item of this.data) {
-            dictionary[key_func(item)] = value_func(item);
-        }
-        return dictionary;
+    /**
+     * 转为数组
+     */
+    toArray(): T[] {
+        return this.toList()
     }
 
+    /**
+     * 转为字典
+     * @param keyFunction
+     * @param valueFunction
+     */
+    toMap<K, V>(keyFunction: ConvertFunction<T, K>,
+                valueFunction: ConvertFunction<T, V>
+    ): Map<K, V> {
+        const map1 = new Map<K, V>();
+        for (const item of this.data) {
+            const key: K = keyFunction(item);
+            const value: V = valueFunction(item);
+            map1.set(key, value);
+        }
+        return map1;
+    }
+
+    /**
+     * 转为 Set
+     */
     toSet(): Set<T> {
         return new Set(this.toList());
     }
 
-    max(compareFunc: Func<T, T>): T | null {
+    /**
+     * 最大
+     * @param compareFunc 比较函数 | 根据 item 生成权重值
+     */
+    max(compareFunc: ConvertFunction<T, number>): T | null {
         let maxVal: T | null = null;
         for (const item of this.data) {
             if (maxVal === null || compareFunc(item) > compareFunc(maxVal)) {
@@ -151,7 +231,11 @@ export class Stream<T> {
         return maxVal;
     }
 
-    min(compareFunc: Func<T, T>): T | null {
+    /**
+     * 最小
+     * @param compareFunc  比较函数 | 根据 item 生成权重值
+     */
+    min(compareFunc: ConvertFunction<T, number>): T | null {
         let minVal: T | null = null;
         for (const item of this.data) {
             if (minVal === null || compareFunc(item) < compareFunc(minVal)) {
