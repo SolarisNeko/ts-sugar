@@ -55,7 +55,7 @@ export * from './reactive/ReactiveObj';
 export * from './redDot/RedDotTree';
 export * from './router/CmdHandler';
 export * from './router/CmdRouter';
-export * from './stream/Stream';
+export * from './dataStream/DataStream';
 export * from './structs/BinaryHeap';
 export * from './task/MyTaskManager';
 export * from './task/Task';

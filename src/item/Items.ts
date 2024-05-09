@@ -1,4 +1,4 @@
-import {Stream} from "../stream/Stream";
+import {DataStream} from "../dataStream/DataStream";
 import {MapUtils} from "../utils/MapUtils";
 import {ObjectUtils} from "../utils/ObjectUtils";
 import {FromDataGenerateField} from "../decorator/TipsDecorator";
@@ -156,7 +156,7 @@ export class PlayerBackpack {
     getItemsByType(itemType: string): PlayerItem[] {
         const itemIdMap = this.itemTypeToItemIdMap.get(itemType);
         if (itemIdMap) {
-            return Stream.from(Array.from(itemIdMap.values()))
+            return DataStream.from(Array.from(itemIdMap.values()))
                 .flatMap((it) => Array.from(it))
                 .toList()
         }

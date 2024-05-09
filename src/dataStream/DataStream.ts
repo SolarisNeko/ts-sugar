@@ -1,6 +1,6 @@
 // Lambda
-import { Kv, KvUtils } from "../kv/Kv";
-import { ObjectUtils } from "../utils/ObjectUtils";
+import {Kv, KvUtils} from "../kv/Kv";
+import {ObjectUtils} from "../utils/ObjectUtils";
 
 
 // 转换函数
@@ -8,6 +8,8 @@ type ConvertFunction<T, U> = (item: T) => U;
 
 // 判断函数
 type PredicateFunc<T> = ConvertFunction<T, boolean>;
+
+type DistinctFunction<T, U> = ConvertFunction<T, U>;
 
 
 /**
@@ -18,56 +20,144 @@ type PredicateFunc<T> = ConvertFunction<T, boolean>;
  *  .filter(item => item > 2)
  *  .toList()
  *
- * @author luohaojun
+ * @author LuoHaoJun
  */
-export class Stream<T> {
+export class DataStream<T> {
 
     private readonly data: Iterable<T>;
 
     constructor(data: Iterable<T>) {
         this.data = data;
     }
-    
+
     /**
      * 创建流 by 数组、Set
      * @param data
      */
-    static from<V>(data: V[] | Set<V>): Stream<V> {
+    static from<V>(data: V[] | Set<V>): DataStream<V> {
         if (Array.isArray(data)) {
-            return new Stream(data);
+            return new DataStream(data);
         } else if (data instanceof Set) {
-            return new Stream(Array.from(data));
+            return new DataStream(Array.from(data));
         } else {
             throw new Error(`[Stream] Unsupported data type = ${typeof data}`);
         }
     }
 
     /**
+     * 创建流 by 多个对象
+     * @param data
+     */
+    static of<V>(...data: V[]): DataStream<V> {
+        return new DataStream(data);
+    }
+
+    /**
      * 创建流 by Map
      * @param data
      */
-    static fromMap<K, V>(data: Map<K, V>): Stream<Kv<K, V>> {
+    static fromMap<K, V>(data: Map<K, V>): DataStream<Kv<K, V>> {
         // entry 就是 T
         const mapEntryArray: Kv<K, V>[] = KvUtils.generateKvArrayByMap(data)
-        return new Stream(mapEntryArray);
+        return new DataStream(mapEntryArray);
+    }
+
+    /**
+     * 空的流
+     */
+    static empty() {
+        return new DataStream([]);
+    }
+
+    /**
+     * 合并数据流
+     * @param stream
+     */
+    mergeStream(stream: DataStream<T>): DataStream<T> {
+        const self = this
+        const mergeIterator = (function* () {
+            for (const item of self.data) {
+                yield item;
+            }
+            for (const item of stream.data) {
+                yield item;
+            }
+        })();
+        return new DataStream(mergeIterator);
+    }
+
+    /**
+     * 文本
+     */
+    toSting(): string {
+        return this.toPrintString();
     }
 
 
+    public toPrintString() {
+        if (this.data) {
+            // 将迭代器转换为数组
+            const dataArray = Array.from(this.data);
+            return `Stream[${dataArray.join(",")}]`;
+        }
+        return "[]";
+    }
+
     /**
-     *  排序
-     * @param toSortNumFunc 排序函数，返回数字，默认按照数字排序
+     * 去重
+     * @param distinctFunction 去重函数, 提取 obj 的某个属性作为 key | null = 直接使用 obj 作为 key
+     */
+    distinct<U>(distinctFunction: DistinctFunction<T, U> | null = null): DataStream<T> {
+        const set = new Set();
+        const iterator = (function* () {
+            for (const item of this.data) {
+                if (distinctFunction) {
+                    // 有去重函数
+                    const key = distinctFunction(item);
+                    if (!set.has(key)) {
+                        set.add(key);
+                        yield item;
+                    }
+                } else {
+                    // 没有去重函数
+                    const key = item;
+                    if (!set.has(key)) {
+                        set.add(key);
+                        yield item;
+                    }
+                }
+            }
+        }).bind(this)();
+        return new DataStream(iterator);
+    };
+
+    /**
+     * 比较器进行排序
+     * @param comparator 比较两个函数
+     */
+    sortByComparator(comparator: (a: T, b: T) => number): DataStream<T> {
+        const sortedArray = [...this.data]
+            .sort((a, b) => {
+                return comparator(a, b)
+            });
+        return new DataStream(sortedArray);
+    }
+
+    /**
+     *  排序 | 默认从小到大
+     * @param objToWeightNumberFunc 将对象转为权重 weight 的函数
      * @param reverse 是否倒序
      */
-    sort(toSortNumFunc: ConvertFunction<T, number> | null = null,
-         reverse = false
-    ): Stream<T> {
-        return new Stream([...this.data]
+    sortByWeight(objToWeightNumberFunc: ConvertFunction<T, number> = null,
+                 reverse = false
+    ): DataStream<T> {
+        return new DataStream([...this.data]
             .sort((a, b) => {
-                let keyA: number = toSortNumFunc ? toSortNumFunc(a) : 0;
-                let keyB: number = toSortNumFunc ? toSortNumFunc(b) : 0;
+                let keyA: number = objToWeightNumberFunc ? objToWeightNumberFunc(a) : 0;
+                let keyB: number = objToWeightNumberFunc ? objToWeightNumberFunc(b) : 0;
 
                 // 默认排序
-                if (!toSortNumFunc) {
+                if (!objToWeightNumberFunc) {
                     if (ObjectUtils.isNumber(a)
                         && ObjectUtils.isNumber(b)
                     ) {
@@ -80,25 +170,45 @@ export class Stream<T> {
     }
 
     /**
+     * 倒序牌序
+     * @param objToWeightNumberFunc 将对象转为权重 weight 的函数
+     */
+    sortByWeightReverse(objToWeightNumberFunc: ConvertFunction<T, number> = null): DataStream<T> {
+        return this.sortByWeight(objToWeightNumberFunc, true);
+    }
+
+    /**
      *  映射 | 将每一个对象转换
      * @param mapFunc 映射函数
      */
-    map<U>(mapFunc: ConvertFunction<T, U>): Stream<U> {
+    map<U>(mapFunc: ConvertFunction<T, U>): DataStream<U> {
         const iterator = (function* () {
             for (const item of this.data) {
                 yield mapFunc(item);
             }
         }).bind(this)();
-        return new Stream(iterator);
+        return new DataStream(iterator);
     }
 
     /**
-     * 将 stream 的每一个元素转换成一个新的 stream，然后将这些 stream 合并成一个新的 stream
+     * 处理每一个对象
+     * @param handlerFunction 处理函数
+     */
+    handle(handlerFunction: (item: T | null) => void): DataStream<T> {
+        for (const item of this.data) {
+            // 处理每一个对象
+            handlerFunction(item)
+        }
+        return this
+    }
+
+    /**
+     * 将 dataStream 的每一个元素转换成一个新的 dataStream，然后将这些 dataStream 合并成一个新的 dataStream
      * 例如: [[1,2,3], [4,5]] -> [1,2,3,4,5]
      * @param flatMapFunc 平铺函数
      */
-    flatMap<U>(flatMapFunc: ConvertFunction<T, Iterable<U>>): Stream<U> {
-        return new Stream((function* () {
+    flatMap<U>(flatMapFunc: ConvertFunction<T, Iterable<U>>): DataStream<U> {
+        return new DataStream((function* () {
             for (const sublist of this.data) {
                 for (const item of flatMapFunc(sublist)) {
                     yield item;
@@ -111,7 +221,7 @@ export class Stream<T> {
      * 过滤函数
      * @param filterFunction 过滤函数 true = 保留, false = 剔除
      */
-    filter(filterFunction: PredicateFunc<T>): Stream<T> {
+    filter(filterFunction: PredicateFunc<T>): DataStream<T> {
         const filterDataIterator = (function* () {
             for (const item of this.data) {
                 if (filterFunction(item)) {
@@ -119,7 +229,7 @@ export class Stream<T> {
                 }
             }
         }).bind(this)();
-        return new Stream(filterDataIterator);
+        return new DataStream(filterDataIterator);
     }
 
     /**
@@ -245,5 +355,5 @@ export class Stream<T> {
         }
         return minVal;
     }
-}
 
+}
