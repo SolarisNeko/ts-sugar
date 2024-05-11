@@ -143,7 +143,8 @@ export class ConditionFactory<T = any> {
 
     createConditionChecker(
         jsonConfig: string,
-        defaultResult: ConditionResult = ConditionResult.fail()
+        defaultResult: ConditionResult = ConditionResult.fail(),
+        eatErrorFlag: boolean = true
     ): ConditionChecker<T> {
         try {
             const conditionData: ConditionData = JsonUtils.deserialize(jsonConfig, ConditionData);
@@ -170,7 +171,9 @@ export class ConditionFactory<T = any> {
 
             return new ConditionChecker(checkType, conditions, defaultResult);
         } catch (error) {
-            console.error('Error creating ConditionChecker from JSON:', error);
+            if (!eatErrorFlag) {
+                console.error(`创建条件检查器失败! create ConditionChecker error! JSON = ${jsonConfig}`, error);
+            }
             return new ConditionChecker("and", new Map(), defaultResult);
         }
     }

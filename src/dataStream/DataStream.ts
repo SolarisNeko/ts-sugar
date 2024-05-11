@@ -20,7 +20,7 @@ type DistinctFunction<T, U> = ConvertFunction<T, U>;
  *  .filter(item => item > 2)
  *  .toList()
  *
- * @author LuoHaoJun
+ * @author luohaojun
  */
 export class DataStream<T> {
 
@@ -45,6 +45,14 @@ export class DataStream<T> {
     }
 
     /**
+     * 创建数据流 by 迭代器
+     * @param iterator
+     */
+    static fromIterable<T>(iterator: IterableIterator<T>): DataStream<T> {
+        return new DataStream(iterator)
+    }
+
+    /**
      * 创建流 by 多个对象
      * @param data
      */
@@ -63,9 +71,9 @@ export class DataStream<T> {
     }
 
     /**
-     * 空的流
+     * 创建一个新的空白流
      */
-    static empty() {
+    static createNew<T>(): DataStream<T> {
         return new DataStream([]);
     }
 
@@ -203,7 +211,7 @@ export class DataStream<T> {
     }
 
     /**
-     * 将 dataStream 的每一个元素转换成一个新的 dataStream，然后将这些 dataStream 合并成一个新的 dataStream
+     * 将 stream 的每一个元素转换成一个新的 stream，然后将这些 stream 合并成一个新的 stream
      * 例如: [[1,2,3], [4,5]] -> [1,2,3,4,5]
      * @param flatMapFunc 平铺函数
      */
@@ -271,12 +279,16 @@ export class DataStream<T> {
 
     /**
      * 第一个元素
+     * @param defaultValue 找不到时的默认值
      */
-    first(): T | null {
+    first(defaultValue: T | null = null): T | null {
+        if (!this.data) {
+            return defaultValue;
+        }
         for (const item of this.data) {
             return item;
         }
-        return null;
+        return defaultValue;
     }
 
     /**
@@ -354,6 +366,10 @@ export class DataStream<T> {
             }
         }
         return minVal;
+    }
+
+    merge(otherArray: T[] | Set<T>): DataStream<T> {
+        return this.mergeStream(otherArray.toDataStream())
     }
 
 }
