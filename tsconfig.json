@@ -1,31 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ES6",
     "module": "es6",
-    "moduleResolution": "node",
+    "target": "es6",
     "outDir": "./dist",
-    "declarationDir": "./dist/typings",
-    "rootDir": "./src",
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "declaration": true,
-    "types": [
-      "jest"
-    ]
+    "declarationDir": "./dist/typings",
+    "experimentalDecorators": true,
+    "noEmitHelpers": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
   },
-  // 只包含浏览器相关的标准库
-  "lib": [
-    "DOM"
-  ],
-  "include": [
-    "./src/**/*.ts"
-  ],
-  // 排除测试文件夹下的所有 TypeScript 文件
   "exclude": [
-    "node_modules/",
-    "test/**/*.ts"
+    "node_modules"
   ]
 }
