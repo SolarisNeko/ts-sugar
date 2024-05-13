@@ -17,16 +17,16 @@
    在你的项目中，你可以添加一个 npm 脚本来运行压缩过程。修改你的 `package.json` 文件，在 `scripts` 部分添加一个新脚本：
    ```json
    "scripts": {
-     "build": "tsc && terser ./dist/*.js -o ./dist/main.min.js -c -m"
+     "build": "tsc && terser ./dist/*.js -o ./dist/index.min.js -c -m"
    }
    ```
-   这个脚本首先编译 TypeScript 文件，然后使用 Terser 压缩 `dist` 目录下的所有 JavaScript 文件，并将输出的压缩文件保存为 `main.min.js`。
+   这个脚本首先编译 TypeScript 文件，然后使用 Terser 压缩 `dist` 目录下的所有 JavaScript 文件，并将输出的压缩文件保存为 `index.min.js`。
 
 4. **运行构建脚本**：
    在你的终端或命令行中，运行以下命令来执行压缩过程：
    ```bash
    npm run build
    ```
-   这将生成一个压缩后的 `main.min.js` 文件在你的 `dist` 目录下。
+   这将生成一个压缩后的 `index.min.js` 文件在你的 `dist` 目录下。
 
 这样，你就可以得到一个压缩的 `.min.js` 文件，适用于生产环境。你可以根据需要调整命令和脚本，以适应你的项目结构和特定需求。
