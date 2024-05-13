@@ -1,18 +1,27 @@
 {
   "compilerOptions": {
+    "target": "ES6",
     "module": "es6",
-    "target": "es6",
-    "rootDir": "./src",
+    "moduleResolution": "node",
     "outDir": "./dist",
-    "declaration": true,
     "declarationDir": "./dist/typings",
-    "experimentalDecorators": true,
-    "noEmitHelpers": false,
-    "skipLibCheck": true,
+    "rootDir": "./src",
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
-
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "types": [
+      "jest"
+    ]
   },
+  "include": [
+    "./src/**/*.ts"
+  ],
+  // 排除测试文件夹下的所有 TypeScript 文件
   "exclude": [
-    "node_modules"
+    "node_modules/",
+    "test/**/*.ts"
   ]
 }
