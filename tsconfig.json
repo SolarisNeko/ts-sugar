@@ -4,6 +4,7 @@
     "module": "es6",
     "moduleResolution": "node",
     "outDir": "./dist",
+    "declarationDir": "./dist/typings",
     "rootDir": "./src",
     "strict": false,
     "forceConsistentCasingInFileNames": true,
