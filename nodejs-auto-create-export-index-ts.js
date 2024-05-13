@@ -18,7 +18,7 @@ function generateExportStatements(dirPath) {
             if (fileContent.includes('export')) {
                 const fileName = path.basename(file, '.ts');
                 const relativePath = path.relative(srcDir, filePath).slice(0, -3).replace(/\\/g, '/'); // 将反斜杠替换为斜杠
-                exportStatements += `export * from '../dist/${relativePath}';\n`;
+                exportStatements += `export * from './${relativePath}';\n`;
             }
         }
     });
