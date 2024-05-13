@@ -10,7 +10,7 @@ describe("JsonCodec", () => {
 
     it("should encode SocketReqData to Uint8Array", () => {
         const reqData: SocketReqData = {
-            cmdCode: 1,
+            packetId: "1",
             encryptType: 0,
             desc: "Hello, WebSocket!",
             data: {key: "value"},
@@ -28,7 +28,7 @@ describe("JsonCodec", () => {
 
     it("should decode Uint8Array to SocketRespData", () => {
         const respData: SocketRespData = {
-            cmdCode: 2,
+            packetId: "2",
             encryptType: 1,
             desc: "Response Data",
             data: {result: "success"},

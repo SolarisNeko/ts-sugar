@@ -1,26 +1,40 @@
 {
   "name": "neko233-ts-sugar",
-  "version": "1.0.20",
+  "type": "module",
+  "version": "1.0.38",
   "description": "typescript utils. 工具箱",
+  "eslintConfig": {
+    "env": {
+      "es6": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 6
+    }
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest",
     "compile": "node nodejs-auto-create-export-index-ts.js && tsc",
-    "publishToNpm": "node nodejs-auto-create-export-index-ts.js && git add . && git commit -m \"deploy now\" && git push && npm version patch && tsc && npm publish --production ",
+    "gitPush": "git add . && git commit -m \"deploy version\" && git push ",
+    "publishToNpm": "node nodejs-auto-create-export-index-ts.js  && npm version patch && tsc && npm publish --production ",
     "nextPublishVersion": " npm version patch  "
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts"
+    "index.js",
+    "index.d.ts",
+    "light.d.ts",
+    "light.js",
+    "minimal.d.ts",
+    "minimal.js",
+    "package-lock.json",
+    "tsconfig.json",
+    "scripts/postinstall.js",
+    "dist/**",
+    "ext/**",
+    "google/**",
+    "src/**"
   ],
   "repository": {
     "type": "git",
@@ -30,13 +44,13 @@
     "typescript",
     "ts",
     "common",
-    "utils"
+    "utils",
+    "neko233",
+    "sugar"
   ],
-  "author": "solarisneko",
+  "author": "SolarisNeko",
   "license": "ISC",
-  "dependencies": {
-    "reflect-metadata": "^0.2.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "ts-jest": "^29.1.1",
