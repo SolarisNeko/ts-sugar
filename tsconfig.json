@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "commonjs",
+    "module": "es6",
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
@@ -12,7 +12,6 @@
     "emitDecoratorMetadata": true,
     "declaration": true,
     "types": [
-      "reflect-metadata",
       "jest"
     ]
   },
