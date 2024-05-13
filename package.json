@@ -3,6 +3,14 @@
   "type": "module",
   "version": "1.0.27",
   "description": "typescript utils. 工具箱",
+  "eslintConfig": {
+    "env": {
+      "es6": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 6
+    }
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest",
@@ -11,18 +19,22 @@
     "publishToNpm": "node nodejs-auto-create-export-index-ts.js  && npm version patch && tsc && npm publish --production ",
     "nextPublishVersion": " npm version patch  "
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "main": "index.js",
+  "types": "index.d.ts",
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts"
+    "index.js",
+    "index.d.ts",
+    "light.d.ts",
+    "light.js",
+    "minimal.d.ts",
+    "minimal.js",
+    "package-lock.json",
+    "tsconfig.json",
+    "scripts/postinstall.js",
+    "dist/**",
+    "ext/**",
+    "google/**",
+    "src/**"
   ],
   "repository": {
     "type": "git",
@@ -32,9 +44,11 @@
     "typescript",
     "ts",
     "common",
-    "utils"
+    "utils",
+    "neko233",
+    "sugar"
   ],
-  "author": "solarisneko",
+  "author": "SolarisNeko",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
