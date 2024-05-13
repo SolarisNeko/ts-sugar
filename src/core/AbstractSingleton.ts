@@ -1,21 +1,39 @@
+import {Clazz} from "../types/Types";
+
 /**
- * 基类
+ * 抽象单例
  */
 export class AbstractSingleton {
-    public constructor() {
+
+    /**
+     * 单例
+     * lazy singleton
+     *
+     * @return self
+     */
+    static instance<T extends any>(this: Clazz<T>): T {
+        if (!(<any>this)._instance) {
+            (<any>this)._instance = new this();
+            (<any>this)._instance.onInit();
+        }
+        return (<any>this)._instance;
     }
 
     /**
-     * 获取一个单例
-     * @returns {any}
+     * 一般用不到, 调用需谨慎
      */
-    public static getInstance<T>(...args: any[]): T {
-        let self: any = this;
-
-        // hack 一个字段
-        if (!self._instance) {
-            self._instance = new self(...args);
+    static destroy(): void {
+        if ((<any>this)._instance) {
+            (<any>this)._instance.onDestroy();
+            (<any>this)._instance = null;
         }
-        return self._instance;
     }
+
+    protected onInit(): void {
+        // 子类实现
+    };
+
+    protected onDestroy(): void {
+        // 子类实现
+    };
 }
