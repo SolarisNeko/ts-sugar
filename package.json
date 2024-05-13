@@ -37,7 +37,6 @@
   "author": "solarisneko",
   "license": "ISC",
   "dependencies": {
-    "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
