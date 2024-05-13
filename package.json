@@ -19,8 +19,8 @@
     "publishToNpm": "node nodejs-auto-create-export-index-ts.js  && npm version patch && tsc && npm publish --production ",
     "nextPublishVersion": " npm version patch  "
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "index.js",
     "index.d.ts",
