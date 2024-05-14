@@ -24,10 +24,10 @@ type DistinctFunction<T, U> = ConvertFunction<T, U>;
  */
 export class DataStream<T> {
 
-    private readonly data: Iterable<T>;
+    private readonly dataIterator: Iterable<T>;
 
-    constructor(data: Iterable<T>) {
-        this.data = data;
+    private constructor(data: Iterable<T>) {
+        this.dataIterator = data;
     }
 
     /**
@@ -83,15 +83,14 @@ export class DataStream<T> {
      */
     mergeStream(stream: DataStream<T>): DataStream<T> {
         const self = this
-        const mergeIterator = (function* () {
-            for (const item of self.data) {
-                yield item;
-            }
-            for (const item of stream.data) {
-                yield item;
-            }
-        })();
-        return new DataStream(mergeIterator);
+        const array = new Array<T>();
+        for (const item of self.dataIterator) {
+            array.push(item);
+        }
+        for (const item of stream.dataIterator) {
+            array.push(item);
+        }
+        return new DataStream(array);
     }
 
     /**
@@ -103,9 +102,9 @@ export class DataStream<T> {
 
 
     public toPrintString() {
-        if (this.data) {
+        if (this.dataIterator) {
             // 将迭代器转换为数组
-            const dataArray = Array.from(this.data);
+            const dataArray = Array.from(this.dataIterator);
             return `Stream[${dataArray.join(",")}]`;
         }
         return "[]";
@@ -116,27 +115,26 @@ export class DataStream<T> {
      * @param distinctFunction 去重函数, 提取 obj 的某个属性作为 key | null = 直接使用 obj 作为 key
      */
     distinct<U>(distinctFunction: DistinctFunction<T, U> | null = null): DataStream<T> {
-        const set = new Set();
-        const iterator = (function* () {
-            for (const item of this.data) {
-                if (distinctFunction) {
-                    // 有去重函数
-                    const key = distinctFunction(item);
-                    if (!set.has(key)) {
-                        set.add(key);
-                        yield item;
-                    }
-                } else {
-                    // 没有去重函数
-                    const key = item;
-                    if (!set.has(key)) {
-                        set.add(key);
-                        yield item;
-                    }
+        const set = new Set<any>();
+        const distinctArray = new Array<T>();
+        for (const item of this.dataIterator) {
+            if (distinctFunction) {
+                // 有去重函数
+                const key = distinctFunction(item);
+                if (!set.has(key)) {
+                    set.add(key);
+                    distinctArray.push(item)
+                }
+            } else {
+                // 没有去重函数
+                const key = item;
+                if (!set.has(key)) {
+                    set.add(key);
+                    distinctArray.push(item)
                 }
             }
-        }).bind(this)();
-        return new DataStream(iterator);
+        }
+        return DataStream.from(set);
     };
 
     /**
@@ -144,7 +142,7 @@ export class DataStream<T> {
      * @param comparator 比较两个函数
      */
     sortByComparator(comparator: (a: T, b: T) => number): DataStream<T> {
-        const sortedArray = [...this.data]
+        const sortedArray = [...this.dataIterator]
             .sort((a, b) => {
                 return comparator(a, b)
             });
@@ -159,7 +157,7 @@ export class DataStream<T> {
     sortByWeight(objToWeightNumberFunc: ConvertFunction<T, number> = null,
                  reverse = false
     ): DataStream<T> {
-        return new DataStream([...this.data]
+        return new DataStream([...this.dataIterator]
             .sort((a, b) => {
                 let keyA: number = objToWeightNumberFunc ? objToWeightNumberFunc(a) : 0;
                 let keyB: number = objToWeightNumberFunc ? objToWeightNumberFunc(b) : 0;
@@ -191,7 +189,7 @@ export class DataStream<T> {
      */
     map<U>(mapFunc: ConvertFunction<T, U>): DataStream<U> {
         const iterator = (function* () {
-            for (const item of this.data) {
+            for (const item of this.dataIterator) {
                 yield mapFunc(item);
             }
         }).bind(this)();
@@ -203,7 +201,7 @@ export class DataStream<T> {
      * @param handlerFunction 处理函数
      */
     handle(handlerFunction: (item: T | null) => void): DataStream<T> {
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             // 处理每一个对象
             handlerFunction(item)
         }
@@ -216,13 +214,13 @@ export class DataStream<T> {
      * @param flatMapFunc 平铺函数
      */
     flatMap<U>(flatMapFunc: ConvertFunction<T, Iterable<U>>): DataStream<U> {
-        return new DataStream((function* () {
-            for (const sublist of this.data) {
-                for (const item of flatMapFunc(sublist)) {
-                    yield item;
-                }
+        const flatMapArray = new Array<U>()
+        for (const sublist of this.dataIterator) {
+            for (const item of flatMapFunc(sublist)) {
+                flatMapArray.push(item);
             }
-        }).bind(this)());
+        }
+        return DataStream.from(flatMapArray)
     }
 
     /**
@@ -230,14 +228,13 @@ export class DataStream<T> {
      * @param filterFunction 过滤函数 true = 保留, false = 剔除
      */
     filter(filterFunction: PredicateFunc<T>): DataStream<T> {
-        const filterDataIterator = (function* () {
-            for (const item of this.data) {
-                if (filterFunction(item)) {
-                    yield item;
-                }
+        const filterArray = new Array<T>();
+        for (const item of this.dataIterator) {
+            if (filterFunction(item)) {
+                filterArray.push(item)
             }
-        }).bind(this)();
-        return new DataStream(filterDataIterator);
+        }
+        return DataStream.from(filterArray);
     }
 
     /**
@@ -251,7 +248,7 @@ export class DataStream<T> {
               initial: U
     ): U {
         let accumulator = initial;
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             accumulator = reduceFunc(accumulator, item);
         }
         return accumulator;
@@ -263,7 +260,7 @@ export class DataStream<T> {
      */
     groupBy<K>(getKeyFunction: ConvertFunction<T, K>): Map<K, T[]> {
         const map = new Map<K, T[]>()
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             const key: K = getKeyFunction(item);
 
             const isHasKey = map.has(key);
@@ -282,10 +279,10 @@ export class DataStream<T> {
      * @param defaultValue 找不到时的默认值
      */
     first(defaultValue: T | null = null): T | null {
-        if (!this.data) {
+        if (!this.dataIterator) {
             return defaultValue;
         }
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             return item;
         }
         return defaultValue;
@@ -296,7 +293,7 @@ export class DataStream<T> {
      */
     count(): number {
         let count = 0;
-        for (const _ of this.data) {
+        for (const _ of this.dataIterator) {
             count++;
         }
         return count;
@@ -306,7 +303,8 @@ export class DataStream<T> {
      * 转为数组
      */
     toList(): T[] {
-        return [...this.data];
+        // slice() 方法用于复制数组
+        return Array.from(this.dataIterator);
     }
 
     /**
@@ -325,7 +323,7 @@ export class DataStream<T> {
                 valueFunction: ConvertFunction<T, V>
     ): Map<K, V> {
         const map1 = new Map<K, V>();
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             const key: K = keyFunction(item);
             const value: V = valueFunction(item);
             map1.set(key, value);
@@ -346,7 +344,7 @@ export class DataStream<T> {
      */
     max(compareFunc: ConvertFunction<T, number>): T | null {
         let maxVal: T | null = null;
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             if (maxVal === null || compareFunc(item) > compareFunc(maxVal)) {
                 maxVal = item;
             }
@@ -360,7 +358,7 @@ export class DataStream<T> {
      */
     min(compareFunc: ConvertFunction<T, number>): T | null {
         let minVal: T | null = null;
-        for (const item of this.data) {
+        for (const item of this.dataIterator) {
             if (minVal === null || compareFunc(item) < compareFunc(minVal)) {
                 minVal = item;
             }
