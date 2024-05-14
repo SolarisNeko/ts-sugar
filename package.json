@@ -17,7 +17,8 @@
     "compile": "node nodejs-auto-create-export-index-ts.js && tsc",
     "gitPush": "git add . && git commit -m \"deploy version\" && git push ",
     "publishToNpm": "node nodejs-auto-create-export-index-ts.js  && npm version patch && tsc && npm publish --production ",
-    "nextPublishVersion": " npm version patch  "
+    "nextPublishVersion": " npm version patch  ",
+    "minjs": "tsc && terser ./dist/**.js -o ./dist/index.min.js -c -m"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
