@@ -148,5 +148,47 @@ export class DiffTime {
         return text + "前";
     }
 
+
+    /**
+     * 邮件发送时间的描述文本 | 策划特定逻辑
+     */
+    toMailSendTimeDescText(): string {
+        if (this.type != DiffTimeType.PAST) {
+            return "未来";
+        }
+
+        if (this.diffDays > 0) {
+            if (this.diffDays > 7) {
+                return "超过7天"
+            }
+            return `${this.diffDays}天前`;
+        }
+        if (this.diffHours > 0) {
+            return `${this.diffHours}小时前`;
+        }
+        if (this.diffMinutes > 0) {
+            return `${this.diffMinutes}分钟前`;
+        }
+        return "刚刚";
+    }
+
+    /**
+     * 邮件过期时间的描述文本 | 策划特定逻辑
+     */
+    toMailExpireTimeDescText(): string {
+        if (this.type == DiffTimeType.PAST) {
+            return "已过期";
+        }
+
+        if (this.diffDays > 0) {
+            return `${this.diffDays}天后过期`;
+        }
+        if (this.diffHours > 0) {
+            return `${this.diffHours}小时后过期`;
+        }
+        return `${this.diffMinutes}分钟后过期`;
+    }
+
+
 }
 
