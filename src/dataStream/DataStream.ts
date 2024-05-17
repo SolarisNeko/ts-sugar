@@ -1,6 +1,7 @@
 // Lambda
 import {Kv, KvUtils} from "../kv/Kv";
 import {ObjectUtils} from "../utils/ObjectUtils";
+import {BiFunction, MergeFunction} from "../utils/LambdaExtension";
 
 
 // 转换函数
@@ -115,26 +116,27 @@ export class DataStream<T> {
      * @param distinctFunction 去重函数, 提取 obj 的某个属性作为 key | null = 直接使用 obj 作为 key
      */
     distinct<U>(distinctFunction: DistinctFunction<T, U> | null = null): DataStream<T> {
+        const outputArray = new Array<T>();
+
         const set = new Set<any>();
-        const distinctArray = new Array<T>();
         for (const item of this.dataIterator) {
             if (distinctFunction) {
                 // 有去重函数
                 const key = distinctFunction(item);
                 if (!set.has(key)) {
                     set.add(key);
-                    distinctArray.push(item)
+                    outputArray.push(item)
                 }
             } else {
                 // 没有去重函数
                 const key = item;
                 if (!set.has(key)) {
                     set.add(key);
-                    distinctArray.push(item)
+                    outputArray.push(item)
                 }
             }
         }
-        return DataStream.from(set);
+        return DataStream.from(outputArray);
     };
 
     /**
@@ -316,17 +318,29 @@ export class DataStream<T> {
 
     /**
      * 转为字典
-     * @param keyFunction
-     * @param valueFunction
+     * @param keyFunction 获取 key
+     * @param valueFunction 获取 value
+     * @param mergeFunction 如果 key 冲突的合并函数 | null = 覆盖
      */
     toMap<K, V>(keyFunction: ConvertFunction<T, K>,
-                valueFunction: ConvertFunction<T, V>
+                valueFunction: ConvertFunction<T, V>,
+                mergeFunction: MergeFunction<V> = null
     ): Map<K, V> {
         const map1 = new Map<K, V>();
         for (const item of this.dataIterator) {
             const key: K = keyFunction(item);
             const value: V = valueFunction(item);
-            map1.set(key, value);
+            const oldValue = map1.get(key);
+            if (oldValue) {
+                if (mergeFunction) {
+                    const mergeValue = mergeFunction(oldValue, value);
+                    map1.set(key, mergeValue);
+                } else {
+                    map1.set(key, value);
+                }
+            } else {
+                map1.set(key, value);
+            }
         }
         return map1;
     }
@@ -341,11 +355,20 @@ export class DataStream<T> {
     /**
      * 最大
      * @param compareFunc 比较函数 | 根据 item 生成权重值
+     * @param defaultValue
      */
-    max(compareFunc: ConvertFunction<T, number>): T | null {
-        let maxVal: T | null = null;
+    max(compareFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
+        let maxVal: T | null = defaultValue;
         for (const item of this.dataIterator) {
-            if (maxVal === null || compareFunc(item) > compareFunc(maxVal)) {
+            if (maxVal === null) {
+                maxVal = item
+                continue
+            }
+            if (item == null) {
+                continue
+            }
+            // 比较
+            if (compareFunc(item) > compareFunc(maxVal)) {
                 maxVal = item;
             }
         }
@@ -355,19 +378,32 @@ export class DataStream<T> {
     /**
      * 最小
      * @param compareFunc  比较函数 | 根据 item 生成权重值
+     * @param defaultValue
      */
-    min(compareFunc: ConvertFunction<T, number>): T | null {
-        let minVal: T | null = null;
+    min(compareFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
+        let minVal: T | null = defaultValue;
         for (const item of this.dataIterator) {
-            if (minVal === null || compareFunc(item) < compareFunc(minVal)) {
+            if (minVal === null) {
+                minVal = item
+                continue
+            }
+            if (item == null) {
+                continue
+            }
+            if (compareFunc(item) < compareFunc(minVal)) {
                 minVal = item;
             }
         }
         return minVal;
     }
 
-    merge(otherArray: T[] | Set<T>): DataStream<T> {
-        return this.mergeStream(otherArray.toDataStream())
+    /**
+     * 合并其他数据
+     * @param otherArray
+     */
+    mergeData(otherArray: T[] | Set<T>): DataStream<T> {
+        const otherStream = DataStream.from(otherArray);
+        return this.mergeStream(otherStream)
     }
 
 }

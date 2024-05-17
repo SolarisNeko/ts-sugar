@@ -1,4 +1,4 @@
-import {BiFunction, BinaryOperator, KeyExtractor} from "./LambdaExtension";
+import {BiFunction, MergeFunction, KeyExtractor} from "./LambdaExtension";
 
 export class MapEntry<K, V> {
     key!: K
@@ -70,7 +70,7 @@ export class MapUtils {
 
     static toLevel1Map<K1, T>(dataList: T[],
                               keyExtractor1: KeyExtractor<T, K1>,
-                              mergeFunction: BinaryOperator<T>,
+                              mergeFunction: MergeFunction<T>,
     ): Map<K1, T> {
         return dataList == null ? this.empty() : dataList.reduce((map, item) => {
             const key = keyExtractor1(item);
@@ -82,7 +82,7 @@ export class MapUtils {
     static toLevel2Map<K1, K2, T>(dataList: T[],
                                   keyExtractor1: KeyExtractor<T, K1>,
                                   keyExtractor2: KeyExtractor<T, K2>,
-                                  mergeFunction: BinaryOperator<T>,
+                                  mergeFunction: MergeFunction<T>,
     ): Map<K1, Map<K2, T>> {
         return dataList == null ? this.empty() : dataList.reduce((map, item) => {
             const key1 = keyExtractor1(item);
@@ -107,7 +107,7 @@ export class MapUtils {
         keyExtractor1: KeyExtractor<T, K1>,
         keyExtractor2: KeyExtractor<T, K2>,
         keyExtractor3: KeyExtractor<T, K3>,
-        mergeFunction: BinaryOperator<T>,
+        mergeFunction: MergeFunction<T>,
     ): Map<K1, Map<K2, Map<K3, T>>> {
         return dataList == null ? this.empty() : dataList.reduce((map, item) => {
             const key1 = keyExtractor1(item);
