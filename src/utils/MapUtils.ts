@@ -1,4 +1,4 @@
-import {BiFunction, MergeFunction, KeyExtractor} from "./LambdaExtension";
+import {BiFunction, KeyExtractor, MergeFunction} from "./LambdaExtension";
 
 export class MapEntry<K, V> {
     key!: K
@@ -12,7 +12,7 @@ export class MapUtils {
     }
 
     public static mergeAll<K, V>(output: Map<K, V>,
-                                 biConsumer: BiFunction<V, V>,
+                                 biConsumer: BiFunction<V, V, V>,
                                  ...otherMaps: Map<K, V>[]
     ): Map<K, V> {
         return this.mergeAllByRepeat(
@@ -24,7 +24,7 @@ export class MapUtils {
     }
 
     public static mergeAllByRepeat<K, V>(output: Map<K, V>,
-                                         biConsumer: BiFunction<V, V>,
+                                         biConsumer: BiFunction<V, V, V>,
                                          repeatCount: number,
                                          ...otherMaps: Map<K, V>[]
     ): Map<K, V> {
@@ -34,7 +34,9 @@ export class MapUtils {
             for (const kvMap of otherMaps) {
                 if (kvMap != null) {
                     for (let i = 0; i < repeatCount; ++i) {
-                        kvMap.forEach((value, key) => {
+                        kvMap.forEach((value,
+                                       key,
+                        ) => {
                             if (output.has(key)) {
                                 const newVar: V = output.get(key)!;
                                 let mergeValue: any = biConsumer(newVar, value);
@@ -59,7 +61,9 @@ export class MapUtils {
             const kvHashMap = new Map<K, V>();
             for (const kvMap of mapArray) {
                 if (kvMap != null) {
-                    kvMap.forEach((value, key) => {
+                    kvMap.forEach((value,
+                                   key,
+                    ) => {
                         kvHashMap.set(key, value);
                     });
                 }
@@ -72,7 +76,9 @@ export class MapUtils {
                               keyExtractor1: KeyExtractor<T, K1>,
                               mergeFunction: MergeFunction<T>,
     ): Map<K1, T> {
-        return dataList == null ? this.empty() : dataList.reduce((map, item) => {
+        return dataList == null ? this.empty() : dataList.reduce((map,
+                                                                  item,
+        ) => {
             const key = keyExtractor1(item);
             map.set(key, mergeFunction(map.get(key), item));
             return map;
@@ -84,7 +90,9 @@ export class MapUtils {
                                   keyExtractor2: KeyExtractor<T, K2>,
                                   mergeFunction: MergeFunction<T>,
     ): Map<K1, Map<K2, T>> {
-        return dataList == null ? this.empty() : dataList.reduce((map, item) => {
+        return dataList == null ? this.empty() : dataList.reduce((map,
+                                                                  item,
+        ) => {
             const key1 = keyExtractor1(item);
             const key2 = keyExtractor2(item);
             const innerMap = map.get(key1) || new Map<K2, T>();
@@ -109,7 +117,9 @@ export class MapUtils {
         keyExtractor3: KeyExtractor<T, K3>,
         mergeFunction: MergeFunction<T>,
     ): Map<K1, Map<K2, Map<K3, T>>> {
-        return dataList == null ? this.empty() : dataList.reduce((map, item) => {
+        return dataList == null ? this.empty() : dataList.reduce((map,
+                                                                  item,
+        ) => {
             const key1 = keyExtractor1(item);
             const key2 = keyExtractor2(item);
             const key3 = keyExtractor3(item);
@@ -132,7 +142,10 @@ export class MapUtils {
      * @param defaultValueCreator 默认值
      * @returns 指定键对应的值
      */
-    static getOrCreate<K, V>(map: Map<K, V>, key: K, defaultValueCreator: (() => V)): V {
+    static getOrCreate<K, V>(map: Map<K, V>,
+                             key: K,
+                             defaultValueCreator: (() => V),
+    ): V {
         if (!map.has(key)) {
             let value = defaultValueCreator();
             map.set(key, value);
@@ -150,21 +163,25 @@ export class MapUtils {
     static merge<K, V>(map: Map<K, V>,
                        key: K,
                        value: V,
-                       mergeFunc: (v1: V, v2: V) => V,
-    ): Map<K, V> {
+                       mergeFunc: (v1: V,
+                                   v2: V,
+                       ) => V,
+    ): V {
         if (!map) {
-            return map
+            return null;
         }
+        let newValue = value;
         if (map.has(key)) {
             const existingValue = map.get(key);
             if (existingValue !== undefined) {
                 const mergedValue = mergeFunc(existingValue, value);
                 map.set(key, mergedValue);
+                newValue = mergedValue
             }
         } else {
             map.set(key, value);
         }
-        return map
+        return newValue
     }
 
     static generateAllMapEntry<K, V>(data: Map<K, V>): MapEntry<K, V>[] {
