@@ -44,5 +44,6 @@ Number.prototype.withDecimalCount = function (decimalCount: number, addZeroToDec
         }
     }
 
+    // 超过指定的小数位数，截取小数部分
     return parseFloat(numberString.substring(0, decimalIndex + decimalCount + 1));
 };
