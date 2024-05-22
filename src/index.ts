@@ -41,6 +41,7 @@ export * from './iapp/ILifecycle';
 export * from './item/Items';
 export * from './json/JsonUtils';
 export * from './kv/Kv';
+export * from './kv/KvTemplate';
 export * from './lambda/ICallback';
 export * from './lazy/lazy';
 export * from './logger/ColorLogger';
