@@ -1,7 +1,7 @@
 import {PlayerLike} from "../player/PlayerLike";
 import {Clazz} from "../types/Types";
 import {ArrayUtils} from "../utils/ArrayUtils";
-import {ProgressBar} from "../core/ProgressBar";
+import {ProgressBar233} from "../core/ProgressBar233";
 
 import {IUnRegister, UnRegister} from "../unregister/UnRegister";
 
@@ -49,12 +49,12 @@ export class TaskTarget {
     // 任务目标数据
     readonly data?: any;
     // 进度条
-    private progressBar: ProgressBar
+    private progressBar: ProgressBar233
 
     constructor(config: TaskTargetConfig) {
         this.type = config.taskTargetType;
         this.data = config.data;
-        this.progressBar = new ProgressBar(config.maxProgressValue);
+        this.progressBar = new ProgressBar233(config.maxProgressValue);
     }
 
     // 更新任务目标状态
@@ -82,7 +82,7 @@ export class TaskTarget {
         return this.progressBar.isComplete()
     }
 
-    getProgressBarSingle(): ProgressBar {
+    getProgressBarSingle(): ProgressBar233 {
         return this.progressBar;
     }
 }
@@ -366,8 +366,8 @@ export class PlayerTask {
         }
     }
 
-    getAllTargetProgressMap(): Map<number, ProgressBar> {
-        const progressMap = new Map<number, ProgressBar>();
+    getAllTargetProgressMap(): Map<number, ProgressBar233> {
+        const progressMap = new Map<number, ProgressBar233>();
 
         this.taskTargets.forEach((target, index) => {
             progressMap.set(index, target.getProgressBarSingle());

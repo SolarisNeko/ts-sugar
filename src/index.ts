@@ -21,7 +21,7 @@ export * from './coordinate/Coordinate3D';
 export * from './coordinate/Direction';
 export * from './core/AbstractSingleton';
 export * from './core/LazySingleton';
-export * from './core/ProgressBar';
+export * from './core/ProgressBar233';
 export * from './core/VersionControlExecutor';
 export * from './csv/Csv';
 export * from './dataStream/DataStream';

@@ -7,7 +7,7 @@ import {
     TaskTargetTypeHandler,
 } from "../../src/task/Task";
 import {PlayerLike, TestPlayer} from "../../src/player/PlayerLike";
-import {ProgressBar} from "../../src/core/ProgressBar";
+import {ProgressBar233} from "../../src/core/ProgressBar233";
 import {JsonUtils} from "../../src/json/JsonUtils";
 import {Clazz} from "../../src/types/Types";
 
@@ -63,7 +63,7 @@ describe('任务进度测试', () => {
         const temporaryWatcher: TaskProgressWatcher = {
             onTaskProgressChange: (task: PlayerTask) => {
                 // 临时实现的具体逻辑
-                let allTargetProgressMap: Map<number, ProgressBar> = task.getAllTargetProgressMap();
+                let allTargetProgressMap: Map<number, ProgressBar233> = task.getAllTargetProgressMap();
                 let json: string = JsonUtils.serialize(allTargetProgressMap);
                 console.log(`Task progress changed for task ${json}`);
             },

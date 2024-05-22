@@ -1,7 +1,7 @@
 /**
  * 单个数值进度条
  */
-export class ProgressBar {
+export class ProgressBar233 {
     // 当前进度值
     private _curProgressValue: number = 0;
     // 最大进度值
