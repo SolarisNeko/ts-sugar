@@ -68,7 +68,7 @@ export * from './task/MyTaskManager';
 export * from './task/Task';
 export * from './time/DateTimeUtils';
 export * from './time/DiffTime';
-export * from './time/TimeUnit';
+export * from './time/WeekDay';
 export * from './types/Types';
 export * from './unregister/UnRegister';
 export * from './utils/ArrayUtils';
