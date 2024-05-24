@@ -1,7 +1,7 @@
 // Lambda
 import {Kv, KvUtils} from "../kv/Kv";
 import {ObjectUtils} from "../utils/ObjectUtils";
-import {BiFunction, MergeFunction} from "../utils/LambdaExtension";
+import {MergeFunction} from "../utils/LambdaExtension";
 
 
 // 转换函数
@@ -144,10 +144,7 @@ export class DataStream<T> {
      * @param comparator 比较两个函数
      */
     sortByComparator(comparator: (a: T, b: T) => number): DataStream<T> {
-        const sortedArray = [...this.dataIterator]
-            .sort((a, b) => {
-                return comparator(a, b)
-            });
+        const sortedArray = Array.from(this.dataIterator).sort(comparator);
         return new DataStream(sortedArray);
     }
 
@@ -159,7 +156,7 @@ export class DataStream<T> {
     sortByWeight(objToWeightNumberFunc: ConvertFunction<T, number> = null,
                  reverse = false
     ): DataStream<T> {
-        return new DataStream([...this.dataIterator]
+        const newArray: T[] = Array.from(this.dataIterator)
             .sort((a, b) => {
                 let keyA: number = objToWeightNumberFunc ? objToWeightNumberFunc(a) : 0;
                 let keyB: number = objToWeightNumberFunc ? objToWeightNumberFunc(b) : 0;
@@ -174,7 +171,8 @@ export class DataStream<T> {
                     }
                 }
                 return reverse ? keyB - keyA : keyA - keyB;
-            }));
+            })
+        return new DataStream(newArray);
     }
 
     /**
@@ -190,12 +188,12 @@ export class DataStream<T> {
      * @param mapFunc 映射函数
      */
     map<U>(mapFunc: ConvertFunction<T, U>): DataStream<U> {
-        const iterator = (function* () {
-            for (const item of this.dataIterator) {
-                yield mapFunc(item);
-            }
-        }).bind(this)();
-        return new DataStream(iterator);
+        let array = new Array<U>();
+        for (const item of this.dataIterator) {
+            const newItem = mapFunc(item);
+            array.push(newItem)
+        }
+        return new DataStream(array);
     }
 
     /**
@@ -213,17 +211,37 @@ export class DataStream<T> {
     /**
      * 将 stream 的每一个元素转换成一个新的 stream，然后将这些 stream 合并成一个新的 stream
      * 例如: [[1,2,3], [4,5]] -> [1,2,3,4,5]
-     * @param flatMapFunc 平铺函数
+     * @param flatMapFunc 平铺成 Array/Set 的函数 | 将 obj 转为 Array[]
      */
     flatMap<U>(flatMapFunc: ConvertFunction<T, Iterable<U>>): DataStream<U> {
         const flatMapArray = new Array<U>()
         for (const sublist of this.dataIterator) {
-            for (const item of flatMapFunc(sublist)) {
+            const subArray = flatMapFunc(sublist);
+            for (const item of subArray) {
                 flatMapArray.push(item);
             }
         }
         return DataStream.from(flatMapArray)
     }
+
+    /**
+     * 通过转为 DataStream 来进行平铺 DataStream 内部的所有元素
+     * @param flatMapFunc 平铺成 DataStream 的函数
+     */
+    flatMapByDataStream<U>(flatMapFunc: ConvertFunction<T, DataStream<U>>): DataStream<U> {
+        const flatMapArray = new Array<U>()
+        for (const sublist of this.dataIterator) {
+            const subArray = flatMapFunc(sublist);
+            if (!subArray) {
+                continue
+            }
+            subArray.handle(it => {
+                flatMapArray.push(it);
+            })
+        }
+        return DataStream.from(flatMapArray)
+    }
+
 
     /**
      * 过滤函数
@@ -237,6 +255,13 @@ export class DataStream<T> {
             }
         }
         return DataStream.from(filterArray);
+    }
+
+    /**
+     * 过滤非空
+     */
+    filterNotNull(): DataStream<T> {
+        return this.filter(it => it != null)
     }
 
     /**
