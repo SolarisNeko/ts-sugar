@@ -1,7 +1,7 @@
 {
   "name": "neko233-ts-sugar",
   "type": "module",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "description": "typescript utils. 工具箱",
   "eslintConfig": {
     "env": {
