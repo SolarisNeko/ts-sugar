@@ -1,153 +1,177 @@
-// CronOptions类型定义
-export type CronOptions = {
-    name?: string;                    // 任务名称
-    paused?: boolean;                 // 是否暂停任务
-    kill?: boolean;                   // 是否终止任务
-    catch?: boolean | CatchCallbackFn;// 是否捕获异常或捕获回调函数
-    unref?: boolean;                  // 是否解除引用
-    maxRuns?: number;                 // 最大运行次数
-    interval?: number;                // 间隔时间（毫秒）
-    protect?: boolean | ProtectCallbackFn; // 是否保护或保护回调函数
-    startAt?: string | Date;          // 任务开始时间
-    stopAt?: string | Date;           // 任务停止时间
-    timezone?: string;                // 时区
-    utcOffset?: number;               // UTC偏移量
-    legacyMode?: boolean;             // 旧模式兼容
-    context?: any;                    // 上下文
-};
-
-// 捕获异常回调函数类型定义
-export type CatchCallbackFn = (e: unknown, job: Cron233) => void;
-
-// 保护回调函数类型定义
-export type ProtectCallbackFn = (job: Cron233) => void;
-
-/**
- * Cron233 表达式解析器
- */
+// Cron233，解析和验证 6 位 cron 表达式，并计算未来的执行时间
 export class Cron233 {
-    // cron 表达式
-    private pattern: string;
-    // 时区
-    private timezone: string | undefined;
-    // 选项
-    private options: CronOptions;
+    private _cron: string = "";
+    private seconds: string;
+    private minutes: string;
+    private hours: string;
+    private dayOfMonth: string;
+    private month: string;
+    private dayOfWeek: string;
 
-    constructor(pattern: string, options: CronOptions = {}) {
-        this.pattern = pattern;
-        this.options = this.validateOptions(options);
-        this.timezone = this.options.timezone;
+    // 无参构造函数
+    constructor() {
+        this.seconds = '';
+        this.minutes = '';
+        this.hours = '';
+        this.dayOfMonth = '';
+        this.month = '';
+        this.dayOfWeek = '';
     }
 
-    // 校验选项并设置默认值
-    private validateOptions(options: CronOptions): CronOptions {
-        // 设置默认值
-        options.legacyMode = options.legacyMode ?? true;
-        options.paused = options.paused ?? false;
-        options.maxRuns = options.maxRuns ?? Infinity;
-        options.catch = options.catch ?? false;
-        options.interval = options.interval ?? 0;
-        options.unref = options.unref ?? false;
-
-        // 校验 interval
-        if (isNaN(options.interval)) {
-            throw new Error("CronOptions: Supplied value for interval is not a number");
-        } else if (options.interval < 0) {
-            throw new Error("CronOptions: Supplied value for interval can not be negative");
+    static create(cron: string): Cron233 {
+        const cron233 = new Cron233();
+        if (cron) {
+            cron233.setCron(cron)
         }
-
-        // 校验 utcOffset
-        if (options.utcOffset !== undefined) {
-            if (isNaN(options.utcOffset)) {
-                throw new Error("CronOptions: Invalid value passed for utcOffset, should be number representing minutes offset from UTC.");
-            } else if (options.utcOffset < -870 || options.utcOffset > 870) {
-                throw new Error("CronOptions: utcOffset out of bounds.");
-            }
-            if (options.utcOffset !== undefined && options.timezone) {
-                throw new Error("CronOptions: Combining 'utcOffset' with 'timezone' is not allowed.");
-            }
-        }
-
-        return options;
+        return cron233
     }
 
-    // 检查给定的日期是否匹配 Cron233 表达式
-    public matches(date: Date): boolean {
-        const parts = this.pattern.split(' ');
+    // 设置 cron 表达式
+    setCron(cron: string,
+            throwErrorIfNotValid: boolean = false,
+    ): void {
+        const parts = cron.split(' ');
         if (parts.length !== 6) {
-            throw new Error("Cron233 pattern must have exactly 6 parts");
+            throw new Error('Invalid cron expression. It must have 6 parts.');
         }
 
-        const [second, minute, hour, day, month, dayOfWeek] = parts;
+        this._cron = cron
 
+        this.seconds = parts[0];
+        this.minutes = parts[1];
+        this.hours = parts[2];
+        this.dayOfMonth = parts[3];
+        this.month = parts[4];
+        this.dayOfWeek = parts[5];
+
+        if (throwErrorIfNotValid) {
+
+            if (!this.validate()) {
+                throw new Error(`Error cron expression. cron = ${this._cron} `);
+            }
+        }
+    }
+
+    // 获取 cron 表达式的各部分
+    getSeconds(): string {
+        return this.seconds;
+    }
+
+    getMinutes(): string {
+        return this.minutes;
+    }
+
+    getHours(): string {
+        return this.hours;
+    }
+
+    getDayOfMonth(): string {
+        return this.dayOfMonth;
+    }
+
+    getMonth(): string {
+        return this.month;
+    }
+
+    getDayOfWeek(): string {
+        return this.dayOfWeek;
+    }
+
+    // 验证 cron 表达式的格式
+    validate(): boolean {
         return (
-            this.matchesPart(date.getSeconds(), second) &&
-            this.matchesPart(date.getMinutes(), minute) &&
-            this.matchesPart(date.getHours(), hour) &&
-            this.matchesPart(date.getDate(), day) &&
-            this.matchesPart(date.getMonth() + 1, month) &&
-            this.matchesPart(date.getDay(), dayOfWeek)
+            this.validatePart(this.seconds, 0, 59) &&
+            this.validatePart(this.minutes, 0, 59) &&
+            this.validatePart(this.hours, 0, 23) &&
+            this.validatePart(this.dayOfMonth, 1, 31) &&
+            this.validatePart(this.month, 1, 12) &&
+            this.validatePart(this.dayOfWeek, 0, 6)
         );
     }
 
-    // 检查单个部分是否匹配
-    private matchesPart(value: number, pattern: string): boolean {
-        if (pattern === '*') {
+    // 验证每个部分的有效性
+    private validatePart(part: string,
+                         min: number,
+                         max: number,
+    ): boolean {
+        const regex = /^(\*|([0-9]|[1-5][0-9])(\/[0-9]+)?|\?|\-|\,)+$/;
+        if (!regex.test(part)) {
+            return false;
+        }
+
+        const numbers = part.split(/[,\/\-]/).map(p => (p === '*' ? null : parseInt(p)));
+        for (const number of numbers) {
+            if (number !== null && (number < min || number > max)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // 计算未来第 n 次的执行时间
+    calculateNextRun(currentEpochTimeMs: number,
+                     nextCount: number = 1,
+    ): number[] {
+        const result: number[] = [];
+        const date = new Date(currentEpochTimeMs);
+
+        while (nextCount > 0) {
+            date.setUTCSeconds(date.getUTCSeconds() + 1); // 每次递增 1 秒来查找下一个有效时间
+            if (this.isValidDate(date)) {
+                result.push(date.getTime());
+                nextCount--;
+            }
+        }
+
+        return result;
+    }
+
+    // 检查日期是否符合 cron 表达式
+    private isValidDate(date: Date): boolean {
+        return this.isValidPart(date.getUTCSeconds(), this.seconds) &&
+            this.isValidPart(date.getUTCMinutes(), this.minutes) &&
+            this.isValidPart(date.getUTCHours(), this.hours) &&
+            this.isValidPart(date.getUTCDate(), this.dayOfMonth) &&
+            this.isValidPart(date.getUTCMonth() + 1, this.month) &&
+            this.isValidPart(date.getUTCDay(), this.dayOfWeek);
+    }
+
+    // 检查时间部分是否有效
+    private isValidPart(value: number,
+                        part: string,
+    ): boolean {
+        if (part === '*') {
             return true;
         }
 
-        if (pattern.includes('/')) {
-            const [range, step] = pattern.split('/');
-            if (range === '*') {
-                return value % parseInt(step) === 0;
-            }
-        }
+        const values = part.split(',').map(p => p.trim());
+        for (const val of values) {
+            if (val.includes('-')) {
+                const [start, end] = val.split('-').map(v => parseInt(v));
+                if (value >= start && value <= end) {
+                    return true;
+                }
+            } else if (val.includes('/')) {
+                const [baseStr, stepStr] = val.split('/');
+                const base = baseStr === '*' ? '*' : parseInt(baseStr);
+                const step = parseInt(stepStr);
 
-        return pattern.split(',').some(part => {
-            if (part.includes('-')) {
-                const [start, end] = part.split('-').map(Number);
-                return value >= start && value <= end;
-            }
-            return value === parseInt(part);
-        });
-    }
-
-    // 获取下 n 次的 Cron233 生效时间
-    public getNextRuns(startDate: Date, n: number): Date[] {
-        const nextRuns: Date[] = [];
-        let date = new Date(startDate.getTime());
-
-        // 循环查找下 n 次匹配的时间
-        while (nextRuns.length < n) {
-            // 增加时间，避免死循环
-            date = this.incrementDate(date);
-
-            if (this.matches(date)) {
-                nextRuns.push(new Date(date.getTime()));
-            }
-        }
-
-        return nextRuns;
-    }
-
-    // 按顺序递增时间，避免死循环
-    private incrementDate(date: Date): Date {
-        date.setSeconds(date.getSeconds() + 1);
-        if (date.getSeconds() === 0) {
-            date.setMinutes(date.getMinutes() + 1);
-            if (date.getMinutes() === 0) {
-                date.setHours(date.getHours() + 1);
-                if (date.getHours() === 0) {
-                    date.setDate(date.getDate() + 1);
-                    if (date.getDate() === 1) {
-                        date.setMonth(date.getMonth() + 1);
-                        if (date.getMonth() === 0) {
-                            date.setFullYear(date.getFullYear() + 1);
-                        }
+                if (typeof base === 'string' && base === '*') {
+                    if (value % step === 0) {
+                        return true;
+                    }
+                } else if (typeof base === 'number') {
+                    if ((value - base) % step === 0) {
+                        return true;
                     }
                 }
+            } else if (parseInt(val) === value) {
+                return true;
             }
         }
-        return date;
+
+        return false;
     }
 }
+
