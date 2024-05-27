@@ -281,6 +281,50 @@ export class DataStream<T> {
         return accumulator;
     }
 
+    // 限制数量 | 取前 count 个元素
+    limitInCount(count: number): DataStream<T> {
+        const limitArray = new Array<T>();
+        let index = 0;
+        for (const item of this.dataIterator) {
+            if (index >= count) {
+                break;
+            }
+            limitArray.push(item);
+            index++;
+        }
+        return DataStream.from(limitArray);
+    }
+
+    /**
+     * 类似 SQL 的 limit 语法
+     * @param startIndex
+     * @param count
+     */
+    limit(startIndex: number, count: number) {
+        const limitArray = new Array<T>();
+        let index = 0;
+        for (const item of this.dataIterator) {
+            // 取范围内
+            if (index >= startIndex && index < startIndex + count) {
+                limitArray.push(item);
+            }
+            index++;
+        }
+        return DataStream.from(limitArray);
+    }
+
+    /**
+     * 分页过滤数量
+     * @param pageNumber
+     * @param pageSize
+     */
+    limitInPage(pageNumber: number, pageSize: number) {
+        const pageStartIndex = Math.max(0, pageNumber - 1);
+        const startIndex = pageStartIndex * pageSize;
+        return this.limit(startIndex, pageSize);
+    }
+
+
     /**
      *  分组函数
      * @param getKeyFunction 键函数
