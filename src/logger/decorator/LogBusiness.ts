@@ -2,7 +2,7 @@ import {DateTimeUtils} from "../../time/DateTimeUtils";
 
 export class LogBusinessOptions {
     // 业务调用消息
-    message: string = "";
+    businessTitle: string = "";
 
     // 是否吞掉异常
     swallowErrorFlag: boolean = false;
@@ -28,11 +28,11 @@ export class LogBusinessOptions {
      * @param args
      */
     static create(args: {
-        message: string
+        businessTitle: string
         swallowErrorFlag: boolean
     }): LogBusinessOptions {
         const options = new LogBusinessOptions();
-        options.message = args.message;
+        options.businessTitle = args.businessTitle;
         options.swallowErrorFlag = args.swallowErrorFlag;
         return options;
     }
@@ -55,8 +55,7 @@ export function LogBusiness(options: LogBusinessOptions = LogBusinessOptions.emp
         const originalMethod = descriptor.value;
 
         descriptor.value = function (...args: any[]) {
-            const startTime = Date.now();
-            const formattedTime = DateTimeUtils.getDateTimeText(startTime, "yyyy-MM-dd HH:mm:ss,SSS")
+            const dateTimeStr = DateTimeUtils.getCurrentDateTimeText("yyyy-MM-dd HH:mm:ss,SSS")
 
             // // Get the stack trace
             // const stackTrace = new Error().stack;
@@ -75,16 +74,23 @@ export function LogBusiness(options: LogBusinessOptions = LogBusinessOptions.emp
             //     }
             // }
 
-            const message = options.message || "";
+            const businessTitle = options.businessTitle || "";
             try {
-                console.log(`[${formattedTime}] [${className}.${methodName}] ${message} | @LogBusiness | call args:`, args);
+                console.log(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | call args:`, args);
                 const result = originalMethod.apply(this, args);
-                console.log(`[${formattedTime}] [${className}.${methodName}] ${message} | @LogBusiness | return value:`, result);
+
+                // return void
+                if (result === undefined) {
+                    console.log(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | no return value`);
+                } else {
+                    console.log(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | return value:`, result);
+                }
+
                 return result;
             } catch (error) {
 
                 // cocos 捕捉异常会丢失正确的栈帧, 故改称这样捕获能够极快定位问题
-                console.error(`[${formattedTime}] [${className}.${methodName}] ${message} | @LogBusiness | unknown error:`, error);
+                console.error(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | unknown error:`, error);
 
                 // 继续抛出异常
                 throw error;
