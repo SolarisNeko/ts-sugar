@@ -1,6 +1,7 @@
 import {isIInit, isIRemoveBefore} from "./ILifecycle";
 import {Clazz} from "../types/Types";
 import {IUnRegister} from "../unregister/UnRegister";
+import {IAppUtils} from "./IAppUtils";
 
 
 /**
@@ -49,28 +50,36 @@ export interface IQuery<TResult> extends ICanGetApp, ICanSetApp {
 }
 
 
-/**
- * 获取 Class Type
- * @param instance 对象
- */
-export function getInstanceType<T>(instance: T): Clazz<T> {
-    return instance.constructor as Clazz<T>;
-}
 
 
 /**
  * IOC 容器
  */
-export class IocContainer {
-    /**
-     * singleton
-     * @private
-     */
+export class IocContainer implements ICanSetApp, ICanGetApp {
+
+    // <className, instance>
     private singletonMap: Map<Clazz<any>, any> = new Map();
+
+    // 所属的 App
     private _app: IApp;
 
-    register<T>(clazz: Clazz<T>,
-                instance: T,
+
+    setApp(app: IApp) {
+        this._app = app
+    }
+
+    getApp(): IApp {
+        return this._app;
+    }
+
+
+    /**
+     * 注册单例
+     * @param clazz
+     * @param instance
+     */
+    registerByClass<T>(clazz: Clazz<T>,
+                       instance: T,
     ): void {
         if (this.singletonMap.has(clazz)) {
             throw new Error(`Class ${clazz.name} is already registered in the IoC container.`);
@@ -85,11 +94,19 @@ export class IocContainer {
     }
 
 
-    get<T>(clazz: Clazz<T>): T | null {
+    /**
+     * 通过 class 获取单例
+     * @param clazz
+     */
+    getByClass<T>(clazz: Clazz<T>): T | null {
         return this.singletonMap.get(clazz) || null;
     }
 
-    remove<T>(clazz: Clazz<T>): void {
+    /**
+     * 通过 class 移除单例
+     * @param clazz
+     */
+    removeByClass<T>(clazz: Clazz<T>): void {
 
         let instance = this.singletonMap.get(clazz);
         if (!instance) {
@@ -104,10 +121,6 @@ export class IocContainer {
 
     }
 
-    setApp(app: IApp) {
-        this._app = app
-
-    }
 }
 
 /**
@@ -424,21 +437,21 @@ export abstract class AbstractApp
     }
 
     public registerComponent<T>(instance: T): void {
-        const type = getInstanceType(instance);
+        const type = IAppUtils.getObjectClass(instance);
 
         // 组件 ?
         if (instance instanceof AbstractComponent) {
             instance.setApp(this)
             instance.init()
         }
-        this._container.register<T>(type, instance);
+        this._container.registerByClass<T>(type, instance);
     }
 
 
     public getComponent<T>(
         type: Clazz<T>,
     ): T {
-        return this._container.get<T>(type);
+        return this._container.getByClass<T>(type);
     }
 
     /**
