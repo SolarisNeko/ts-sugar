@@ -23,9 +23,9 @@ declare global {
         /**
          * 获取/创建
          * @param key
-         * @param newValue 新的值
+         * @param newValueCreator 新的值
          */
-        getOrCreate(key: K, newValue: V): V
+        getOrCreate(key: K, newValueCreator: () => V): V
     }
 }
 
@@ -48,11 +48,12 @@ Map.prototype.merge = function <K, V>(key: K, value: V, mergeFunc: (v1: V, v2: V
     }
 };
 
-Map.prototype.getOrCreate = function <K, V>(key: K, newValue: V): V {
+Map.prototype.getOrCreate = function <K, V>(key: K, newValueCreator: () => V): V {
     let oldValue = this.get(key);
     if (oldValue) {
         return oldValue;
     } else {
+        let newValue = newValueCreator();
         this.set(key, newValue);
         return newValue;
     }
