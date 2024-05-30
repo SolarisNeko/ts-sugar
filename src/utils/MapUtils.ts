@@ -11,6 +11,25 @@ export class MapUtils {
         return new Map();
     }
 
+    /**
+     * 是否空的
+     * @param map
+     */
+    static isEmpty<K, V>(map: Map<K, V>): boolean {
+        if (!map) {
+            return true;
+        }
+        return map.size === 0;
+    }
+
+    /**
+     * 是否非空的
+     * @param map
+     */
+    static isNotEmpty<K, V>(map: Map<K, V>): boolean {
+        return !this.isEmpty(map);
+    }
+
     public static mergeAll<K, V>(output: Map<K, V>,
                                  biConsumer: BiFunction<V, V, V>,
                                  ...otherMaps: Map<K, V>[]
