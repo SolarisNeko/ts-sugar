@@ -39,6 +39,7 @@ export * from './http/Http233';
 export * from './iapp/IApp';
 export * from './iapp/IAppUtils';
 export * from './iapp/ILifecycle';
+export * from './idGenerator/IdGenerator';
 export * from './item/Items';
 export * from './json/JsonUtils';
 export * from './kv/Kv';
