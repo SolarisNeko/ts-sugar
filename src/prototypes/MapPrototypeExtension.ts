@@ -23,9 +23,17 @@ declare global {
         /**
          * 获取/创建
          * @param key
-         * @param newValue 新的值
+         * @param newValueCreator 新的值
          */
-        getOrCreate(key: K, newValue: V): V
+        getOrCreate(key: K, newValueCreator: () => V): V
+
+        /**
+         * 更新后获得新的 value
+         * @param key 键
+         * @param initValue 初始值
+         * @param updateFunc 更新函数
+         */
+        updateThenGet(key: K, initValue: V, updateFunc: (oldValue: V) => V): V
     }
 }
 
@@ -48,12 +56,21 @@ Map.prototype.merge = function <K, V>(key: K, value: V, mergeFunc: (v1: V, v2: V
     }
 };
 
-Map.prototype.getOrCreate = function <K, V>(key: K, newValue: V): V {
+Map.prototype.getOrCreate = function <K, V>(key: K, newValueCreator: () => V): V {
     let oldValue = this.get(key);
     if (oldValue) {
         return oldValue;
     } else {
+        let newValue = newValueCreator();
         this.set(key, newValue);
         return newValue;
     }
+}
+
+Map.prototype.updateThenGet = function <K, V>(key: K, initValue: V, updateFunc: (v: V) => V): V {
+    let oldValue = this.get(key) || initValue;
+    let newValue = updateFunc(oldValue);
+    this.set(key, newValue);
+    return newValue;
+
 }

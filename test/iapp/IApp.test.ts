@@ -15,9 +15,9 @@ describe('IocContainer.ts', () => {
         }
 
         const instance = new TestComponent();
-        container.register(TestComponent, instance);
+        container.registerByClass(TestComponent, instance);
 
-        const retrievedInstance = container.get(TestComponent);
+        const retrievedInstance = container.getByClass(TestComponent);
         expect(retrievedInstance).toBe(instance);
     });
 
@@ -30,9 +30,9 @@ describe('IocContainer.ts', () => {
 
         const instance1 = new TestComponent();
         const instance2 = new TestComponent();
-        container.register(TestComponent, instance1);
+        container.registerByClass(TestComponent, instance1);
 
-        expect(() => container.register(TestComponent, instance2)).toThrowError(
+        expect(() => container.registerByClass(TestComponent, instance2)).toThrowError(
             `Class ${TestComponent.name} is already registered in the IoC container.`,
         );
     });
@@ -43,7 +43,7 @@ describe('IocContainer.ts', () => {
             }
         }
 
-        const retrievedInstance = container.get(TestComponent);
+        const retrievedInstance = container.getByClass(TestComponent);
         expect(retrievedInstance).toBeNull();
     });
 
@@ -54,13 +54,13 @@ describe('IocContainer.ts', () => {
         }
 
         const instance = new TestComponent();
-        container.register(TestComponent, instance);
+        container.registerByClass(TestComponent, instance);
 
-        const retrievedInstance = container.get(TestComponent);
+        const retrievedInstance = container.getByClass(TestComponent);
         expect(retrievedInstance).toBe(instance);
 
-        container.remove(TestComponent);
-        const removedInstance = container.get(TestComponent);
+        container.removeByClass(TestComponent);
+        const removedInstance = container.getByClass(TestComponent);
         expect(removedInstance).toBeNull();
     });
 });
