@@ -1,7 +1,7 @@
 /**
  * ID 生成器
  */
-export class IdGenerator {
+export class IdGenerator233 {
 
     /**@private */
     private static _typeToCounterMap: Map<string, number> = new Map();
@@ -11,7 +11,7 @@ export class IdGenerator {
      * @param type 类型
      */
     static getNextUID(type: string = "default"): number {
-        return IdGenerator._typeToCounterMap.updateThenGet(type, 0, (value) => value + 1)
+        return IdGenerator233._typeToCounterMap.updateThenGet(type, 0, (value) => value + 1)
     }
 
     static getNextUidString(): string {
