@@ -2,6 +2,7 @@ import {Clazz} from "../types/Types";
 import {AbstractSingleton} from "../core/AbstractSingleton";
 import {ArrayUtils} from "../utils/ArrayUtils";
 import {CloneUtils233} from "../utils/CloneUtils233";
+import {DataStream} from "../dataStream/DataStream";
 
 /**
  * 配置管理器
@@ -10,7 +11,6 @@ import {CloneUtils233} from "../utils/CloneUtils233";
 export class ConfigManager233 extends AbstractSingleton {
 
     private _classToDataIdMap: Map<Clazz<any>, Map<number | string, any>> = new Map()
-
 
     /**
      * 获取已加载的数据列表
@@ -22,7 +22,7 @@ export class ConfigManager233 extends AbstractSingleton {
         if (!idMap) {
             return [];
         }
-        return idMap.toDataStream()
+        return DataStream.fromMap(idMap)
             .map(it => it.value as T)
             .toArray();
     }
@@ -46,7 +46,7 @@ export class ConfigManager233 extends AbstractSingleton {
     getDataById<T>(configClazz: Clazz<T>,
                    id: number | string,
     ): T | null {
-        return this._classToDataIdMap.get(configClazz)?.get(id) as T | null;
+        return this._classToDataIdMap.get(configClazz)?.get(id) as T || null;
     }
 
     /**
