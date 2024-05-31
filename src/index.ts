@@ -60,7 +60,6 @@ export * from './player/PlayerLike';
 export * from './prototypes/ArrayPrototypeExtension';
 export * from './prototypes/MapPrototypeExtension';
 export * from './prototypes/NumberPrototypeExtension';
-export * from './prototypes/ObjectPrototypeExtension';
 export * from './prototypes/SetPrototypeExtension';
 export * from './prototypes/StringPrototypeExtension';
 export * from './prototypes/UInt8ArrayPrototypeExtension';
