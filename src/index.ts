@@ -16,7 +16,7 @@ export * from './collection/TreeMap';
 export * from './collection/TypeMap';
 export * from './compare/ComparatorBuilder';
 export * from './condition/ConditionEngine';
-export * from './config/ConfigManager';
+export * from './config/ConfigManager233';
 export * from './coordinate/Coordinate3D';
 export * from './coordinate/Direction';
 export * from './core/AbstractSingleton';

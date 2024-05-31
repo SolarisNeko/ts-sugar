@@ -281,7 +281,10 @@ export class DataStream<T> {
         return accumulator;
     }
 
-    // 限制数量 | 取前 count 个元素
+    /**
+     * 限制数量 | 取前 count 个元素
+     * @param count
+     */
     limitInCount(count: number): DataStream<T> {
         const limitArray = new Array<T>();
         let index = 0;

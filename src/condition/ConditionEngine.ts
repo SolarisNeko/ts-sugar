@@ -1,33 +1,57 @@
 import {JsonUtils} from "../json/JsonUtils";
+import {AbstractSingleton} from "../core/AbstractSingleton";
 
+/**
+ * 条件数据
+ */
 export class ConditionData {
     checkType: string;
     conditionGroup: { [key: string]: ConditionConfig[] };
 }
 
+/**
+ * 条件配置
+ */
 export class ConditionConfig {
     type: string;
     data: any;
 }
 
-export abstract class Condition {
+/**
+ * 条件
+ */
+export abstract class AbstractCondition {
+    // 条件类型
     type: string;
+    // 条件数据
     data: any;
 
     abstract verify(target: any): boolean;
 }
 
+/**
+ * 条件 API
+ */
 export interface ConditionApi<T = any> {
     verify(target: T): ConditionResult;
 }
 
+/**
+ * 条件创造器
+ */
 export interface ConditionCreator {
     create(type: string, data: any): ConditionApi;
 }
 
+/**
+ * 条件检查器
+ */
 export class ConditionChecker<T = any> {
+    // 检查类型
     checkType: string;
+    // 条件组
     conditions: Map<string, ConditionApi<T>[]> = new Map();
+    // 默认结果
     defaultResult: ConditionResult;
 
     constructor(
@@ -40,6 +64,10 @@ export class ConditionChecker<T = any> {
         this.defaultResult = defaultResult;
     }
 
+    /**
+     * 校验对象, 返回结果
+     * @param target
+     */
     verify(target: T): ConditionResult {
         try {
             let success: boolean;
@@ -48,7 +76,7 @@ export class ConditionChecker<T = any> {
                 return this.defaultResult;
             }
 
-            const strategy = ConditionCheckerStrategyRegister.getStrategy(this.checkType);
+            const strategy = ConditionCheckerRegister.instance().getStrategy(this.checkType);
 
             if (strategy) {
                 success = strategy.verify(this.conditions, target);
@@ -65,11 +93,18 @@ export class ConditionChecker<T = any> {
     }
 }
 
-interface ConditionCheckerStrategy {
+/**
+ * 条件检查策略
+ */
+export interface IConditionCheckerStrategy {
+    // 检查条件
     verify<T>(conditions: Map<string, ConditionApi<T>[]>, target: T): boolean;
 }
 
-class AndConditionCheckerStrategy implements ConditionCheckerStrategy {
+/**
+ * 所有条件都满足
+ */
+class AndConditionCheckerStrategy implements IConditionCheckerStrategy {
     verify<T>(conditions: Map<string, ConditionApi<T>[]>, target: T): boolean {
         return Array.from(conditions.values()).every((conditionGroup) =>
             conditionGroup.every((condition) => condition.verify(target))
@@ -77,7 +112,10 @@ class AndConditionCheckerStrategy implements ConditionCheckerStrategy {
     }
 }
 
-class OrConditionCheckerStrategy implements ConditionCheckerStrategy {
+/**
+ * or 条件组任意一个即可
+ */
+class OrConditionCheckerStrategy implements IConditionCheckerStrategy {
     verify<T>(conditions: Map<string, ConditionApi<T>[]>, target: T): boolean {
         return Array.from(conditions.values()).some((conditionGroup) =>
             conditionGroup.some((condition) => condition.verify(target))
@@ -85,25 +123,31 @@ class OrConditionCheckerStrategy implements ConditionCheckerStrategy {
     }
 }
 
-class ConditionCheckerStrategyRegister {
-    private static strategies: Map<string, ConditionCheckerStrategy> = new Map();
+/**
+ * 条件检查策略注册
+ */
+export class ConditionCheckerRegister extends AbstractSingleton {
+    private _strategies: Map<string, IConditionCheckerStrategy> = new Map();
 
-    static initialize(): void {
+    init(): void {
         this.registerStrategy("and", new AndConditionCheckerStrategy());
         this.registerStrategy("or", new OrConditionCheckerStrategy());
     }
 
-    static registerStrategy(type: string, strategy: ConditionCheckerStrategy): void {
-        this.strategies.set(type, strategy);
+    registerStrategy(type: string, strategy: IConditionCheckerStrategy): void {
+        this._strategies.set(type, strategy);
     }
 
-    static getStrategy(type: string): ConditionCheckerStrategy | undefined {
-        return this.strategies.get(type);
+    getStrategy(type: string): IConditionCheckerStrategy | undefined {
+        return this._strategies.get(type);
     }
 }
 
-ConditionCheckerStrategyRegister.initialize();
+ConditionCheckerRegister.instance().init();
 
+/**
+ * 条件结果
+ */
 export class ConditionResult {
     success: boolean;
 
@@ -124,24 +168,29 @@ export class ConditionResult {
     }
 }
 
-export class ConditionFactory<T = any> {
-    private static _instance: ConditionFactory | null = null;
-    private conditionCreators: Map<string, ConditionCreator> = new Map();
+/**
+ * 条件工程
+ */
+export class ConditionFactory extends AbstractSingleton {
 
-    private constructor() {}
+    private _conditionCreators: Map<string, ConditionCreator> = new Map();
 
-    static get instance(): ConditionFactory {
-        if (!ConditionFactory._instance) {
-            ConditionFactory._instance = new ConditionFactory();
-        }
-        return ConditionFactory._instance;
-    }
-
+    /**
+     * 注册条件创造器
+     * @param type
+     * @param creator
+     */
     register(type: string, creator: ConditionCreator): void {
-        this.conditionCreators.set(type, creator);
+        this._conditionCreators.set(type, creator);
     }
 
-    createConditionChecker(
+    /**
+     * 创建检查器
+     * @param jsonConfig
+     * @param defaultResult
+     * @param eatErrorFlag
+     */
+    createConditionChecker<T>(
         jsonConfig: string,
         defaultResult: ConditionResult = ConditionResult.fail(),
         eatErrorFlag: boolean = true
@@ -178,7 +227,11 @@ export class ConditionFactory<T = any> {
         }
     }
 
-    createConditionApiFromJson(json: string): ConditionApi<T> | null {
+    /**
+     * 通过 JSON 创建条件
+     * @param json
+     */
+    createConditionApiFromJson<T>(json: string): ConditionApi<T> | null {
         try {
             const conditionConfig: ConditionConfig = JsonUtils.deserialize(
                 json,
@@ -186,7 +239,7 @@ export class ConditionFactory<T = any> {
             );
             const conditionType: string = conditionConfig.type;
             const data = conditionConfig.data;
-            const creator: ConditionCreator = this.conditionCreators.get(conditionType);
+            const creator: ConditionCreator = this._conditionCreators.get(conditionType);
 
             if (!creator) {
                 throw new Error(`No creator found for condition type: ${conditionType}`);
@@ -199,10 +252,15 @@ export class ConditionFactory<T = any> {
         }
     }
 
-    private createConditionApi(conditionConfig: ConditionConfig): ConditionApi<T> {
+    /**
+     * 创建条件 API
+     * @param conditionConfig
+     * @private
+     */
+    private createConditionApi<T>(conditionConfig: ConditionConfig): ConditionApi<T> {
         let conditionType: string = conditionConfig.type;
         let data = conditionConfig.data;
-        let creator: ConditionCreator = this.conditionCreators.get(conditionType);
+        let creator: ConditionCreator = this._conditionCreators.get(conditionType);
         if (!creator) {
             throw new Error(`没找到条件类型 creator. type = ${conditionType}`);
         }

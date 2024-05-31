@@ -26,7 +26,7 @@ class MockConditionCreator implements ConditionCreator {
 describe('ConditionFactory', () => {
 
     beforeEach(() => {
-        ConditionFactory.instance.register('mock', new MockConditionCreator());
+        ConditionFactory.instance().register('mock', new MockConditionCreator());
     });
 
     test('createConditionChecker should return a valid ConditionChecker', () => {
@@ -50,7 +50,7 @@ describe('ConditionFactory', () => {
             }
         `;
 
-        const conditionChecker: ConditionChecker<number> | null = ConditionFactory.instance.createConditionChecker(
+        const conditionChecker: ConditionChecker<number> | null = ConditionFactory.instance().createConditionChecker(
             jsonConfig);
 
         expect(conditionChecker).toBeDefined();
@@ -74,7 +74,7 @@ describe('ConditionFactory', () => {
     test('createConditionChecker should handle invalid JSON gracefully', () => {
         const invalidJsonConfig: string = 'invalid_json_config';
 
-        const conditionChecker: ConditionChecker<User> = ConditionFactory.instance.createConditionChecker(
+        const conditionChecker: ConditionChecker<User> = ConditionFactory.instance().createConditionChecker(
             invalidJsonConfig,
             ConditionResult.fail(),
         );

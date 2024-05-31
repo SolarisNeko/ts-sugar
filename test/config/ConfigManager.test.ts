@@ -1,16 +1,16 @@
-import {ConfigManager} from "../../src/config/ConfigManager";
+import {ConfigManager233} from "../../src/config/ConfigManager233";
 
 describe('ConfigManager', () => {
-    let configManager: ConfigManager;
+    let configManager: ConfigManager233;
 
     beforeEach(() => {
         // Initialize a new instance of ConfigManager before each test
-        configManager = ConfigManager.instance;
+        configManager = ConfigManager233.instance;
     });
 
     it('should be a singleton', () => {
-        const instance1 = ConfigManager.instance;
-        const instance2 = ConfigManager.instance;
+        const instance1 = ConfigManager233.instance;
+        const instance2 = ConfigManager233.instance;
 
         expect(instance1).toBe(instance2);
     });
@@ -20,7 +20,7 @@ describe('ConfigManager', () => {
         };
         const dataList = [{prop: 'value'}];
 
-        configManager.updateDataList(jsonObjType, dataList);
+        configManager.setDataListByClass(jsonObjType, dataList);
 
         const retrievedList = configManager.getDataListByType(jsonObjType);
 
@@ -33,7 +33,7 @@ describe('ConfigManager', () => {
         const dataList = [{prop: 'value'}];
 
         // Update the data list
-        configManager.updateDataList(jsonObjType, dataList);
+        configManager.setDataListByClass(jsonObjType, dataList);
 
         // Try to retrieve one data, should return the first item in the list
         const retrievedData = configManager.getDataOneByType(jsonObjType);
@@ -57,10 +57,10 @@ describe('ConfigManager', () => {
         const dataList = [{prop: 'value'}];
 
         // Update the data list
-        configManager.updateDataList(jsonObjType, dataList);
+        configManager.setDataListByClass(jsonObjType, dataList);
 
         // Delete the data list
-        configManager.deleteDataList(jsonObjType);
+        configManager.removeDataListByClass(jsonObjType);
 
         // Try to retrieve the deleted list, should be null
         const retrievedList = configManager.getDataListByType(jsonObjType);
