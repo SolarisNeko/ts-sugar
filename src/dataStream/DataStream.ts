@@ -10,6 +10,7 @@ type ConvertFunction<T, U> = (item: T) => U;
 // 判断函数
 type PredicateFunc<T> = ConvertFunction<T, boolean>;
 
+// 去重函数
 type DistinctFunction<T, U> = ConvertFunction<T, U>;
 
 
@@ -102,7 +103,7 @@ export class DataStream<T> {
     }
 
 
-    public toPrintString() {
+    public toPrintString(): string {
         if (this.dataIterator) {
             // 将迭代器转换为数组
             const dataArray = Array.from(this.dataIterator);
@@ -281,10 +282,7 @@ export class DataStream<T> {
         return accumulator;
     }
 
-    /**
-     * 限制数量 | 取前 count 个元素
-     * @param count
-     */
+    // 限制数量 | 取前 count 个元素
     limitInCount(count: number): DataStream<T> {
         const limitArray = new Array<T>();
         let index = 0;
@@ -426,10 +424,10 @@ export class DataStream<T> {
 
     /**
      * 最大
-     * @param compareFunc 比较函数 | 根据 item 生成权重值
+     * @param weightExtractFunc 比较函数 | 根据 item 生成权重值
      * @param defaultValue
      */
-    max(compareFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
+    maxByNum(weightExtractFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
         let maxVal: T | null = defaultValue;
         for (const item of this.dataIterator) {
             if (maxVal === null) {
@@ -440,7 +438,7 @@ export class DataStream<T> {
                 continue
             }
             // 比较
-            if (compareFunc(item) > compareFunc(maxVal)) {
+            if (weightExtractFunc(item) > weightExtractFunc(maxVal)) {
                 maxVal = item;
             }
         }
@@ -449,10 +447,12 @@ export class DataStream<T> {
 
     /**
      * 最小
-     * @param compareFunc  比较函数 | 根据 item 生成权重值
+     * @param weightExtractFunc  比较函数 | 根据 item 生成权重值
      * @param defaultValue
      */
-    min(compareFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
+    minByWeightNum(weightExtractFunc: ConvertFunction<T, number>,
+                   defaultValue: T = null
+    ): T | null {
         let minVal: T | null = defaultValue;
         for (const item of this.dataIterator) {
             if (minVal === null) {
@@ -462,11 +462,76 @@ export class DataStream<T> {
             if (item == null) {
                 continue
             }
-            if (compareFunc(item) < compareFunc(minVal)) {
+            if (weightExtractFunc(item) < weightExtractFunc(minVal)) {
                 minVal = item;
             }
         }
         return minVal;
+    }
+
+    /**
+     * 最大, 通过比较器函数
+     * @param comparator 比较函数 | 返回 1 表示 item1 大, 返回 -1 表示 item2 大, 返回 0 表示相等
+     * @param defaultValue
+     */
+    maxByComparator(comparator: (item1: T, item2: T) => number, defaultValue: T = null): T | null {
+        let maxVal: T | null = defaultValue;
+        for (const item of this.dataIterator) {
+            if (maxVal === null) {
+                maxVal = item;
+                continue;
+            }
+            if (item == null) {
+                continue;
+            }
+            // 比较
+            const compareResult = comparator(item, maxVal);
+            if (compareResult > 0) {
+                maxVal = item;
+            }
+        }
+        return maxVal;
+    }
+
+    /**
+     * 最小, 通过比较器函数
+     * @param comparator 比较函数 | 返回 1 表示 item1 大, 返回 -1 表示 item2 大, 返回 0 表示相等
+     * @param defaultValue
+     */
+    minByComparator(comparator: (item1: T, item2: T) => number, defaultValue: T = null): T | null {
+        let minVal: T | null = defaultValue;
+        for (const item of this.dataIterator) {
+            if (minVal === null) {
+                minVal = item;
+                continue;
+            }
+            if (item == null) {
+                continue;
+            }
+            const compareResult = comparator(item, minVal);
+            if (compareResult < 0) {
+                minVal = item;
+            }
+        }
+        return minVal;
+    }
+
+
+    /**
+     * 是否存在
+     * @param boolFunc
+     * @param defaultValue
+     */
+    check(boolFunc: PredicateFunc<T>, defaultValue: boolean = false): boolean {
+        if (!boolFunc) {
+            return defaultValue;
+        }
+        for (const item of this.dataIterator) {
+            if (boolFunc(item)) {
+                return true;
+            }
+        }
+        return defaultValue;
     }
 
     /**
