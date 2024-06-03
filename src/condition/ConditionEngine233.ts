@@ -40,7 +40,8 @@ export interface ConditionApi<T = any> {
  * 条件创造器
  */
 export interface ConditionCreator {
-    create(type: string, data: any): ConditionApi;
+    create(type: string,
+           data: any): ConditionApi;
 }
 
 /**
@@ -98,14 +99,16 @@ export class ConditionChecker<T = any> {
  */
 export interface IConditionCheckerStrategy {
     // 检查条件
-    verify<T>(conditions: Map<string, ConditionApi<T>[]>, target: T): boolean;
+    verify<T>(conditions: Map<string, ConditionApi<T>[]>,
+              target: T): boolean;
 }
 
 /**
  * 所有条件都满足
  */
 class AndConditionCheckerStrategy implements IConditionCheckerStrategy {
-    verify<T>(conditions: Map<string, ConditionApi<T>[]>, target: T): boolean {
+    verify<T>(conditions: Map<string, ConditionApi<T>[]>,
+              target: T): boolean {
         return Array.from(conditions.values()).every((conditionGroup) =>
             conditionGroup.every((condition) => condition.verify(target))
         );
@@ -116,7 +119,8 @@ class AndConditionCheckerStrategy implements IConditionCheckerStrategy {
  * or 条件组任意一个即可
  */
 class OrConditionCheckerStrategy implements IConditionCheckerStrategy {
-    verify<T>(conditions: Map<string, ConditionApi<T>[]>, target: T): boolean {
+    verify<T>(conditions: Map<string, ConditionApi<T>[]>,
+              target: T): boolean {
         return Array.from(conditions.values()).some((conditionGroup) =>
             conditionGroup.some((condition) => condition.verify(target))
         );
@@ -134,7 +138,8 @@ export class ConditionCheckerRegister extends AbstractSingleton {
         this.registerStrategy("or", new OrConditionCheckerStrategy());
     }
 
-    registerStrategy(type: string, strategy: IConditionCheckerStrategy): void {
+    registerStrategy(type: string,
+                     strategy: IConditionCheckerStrategy): void {
         this._strategies.set(type, strategy);
     }
 
@@ -171,26 +176,27 @@ export class ConditionResult {
 /**
  * 条件工程
  */
-export class ConditionFactory extends AbstractSingleton {
+export class ConditionEngine233 extends AbstractSingleton {
 
-    private _conditionCreators: Map<string, ConditionCreator> = new Map();
+    private _typeToCreatorMap: Map<string, ConditionCreator> = new Map();
 
     /**
      * 注册条件创造器
      * @param type
      * @param creator
      */
-    register(type: string, creator: ConditionCreator): void {
-        this._conditionCreators.set(type, creator);
+    register(type: string,
+             creator: ConditionCreator): void {
+        this._typeToCreatorMap.set(type, creator);
     }
 
     /**
-     * 创建检查器
+     * [Entry] 创建检查器
      * @param jsonConfig
      * @param defaultResult
      * @param eatErrorFlag
      */
-    createConditionChecker<T>(
+    createByJson<T>(
         jsonConfig: string,
         defaultResult: ConditionResult = ConditionResult.fail(),
         eatErrorFlag: boolean = true
@@ -211,7 +217,7 @@ export class ConditionFactory extends AbstractSingleton {
                     const conditionArray: ConditionConfig[] = conditionGroup[groupId];
                     const conditionApiArray: ConditionApi<T>[] = conditionArray.map(
                         (conditionConfig) => {
-                            return this.createConditionApi(conditionConfig);
+                            return this.createOneConditionByConfigObj(conditionConfig);
                         }
                     );
                     conditions.set(groupId, conditionApiArray);
@@ -229,17 +235,17 @@ export class ConditionFactory extends AbstractSingleton {
 
     /**
      * 通过 JSON 创建条件
-     * @param json
+     * @param oneConditionJson
      */
-    createConditionApiFromJson<T>(json: string): ConditionApi<T> | null {
+    createOneConditionByJson<T>(oneConditionJson: string): ConditionApi<T> | null {
         try {
             const conditionConfig: ConditionConfig = JsonUtils.deserialize(
-                json,
+                oneConditionJson,
                 ConditionConfig
             );
             const conditionType: string = conditionConfig.type;
             const data = conditionConfig.data;
-            const creator: ConditionCreator = this._conditionCreators.get(conditionType);
+            const creator: ConditionCreator = this._typeToCreatorMap.get(conditionType);
 
             if (!creator) {
                 throw new Error(`No creator found for condition type: ${conditionType}`);
@@ -257,10 +263,10 @@ export class ConditionFactory extends AbstractSingleton {
      * @param conditionConfig
      * @private
      */
-    private createConditionApi<T>(conditionConfig: ConditionConfig): ConditionApi<T> {
+    private createOneConditionByConfigObj<T>(conditionConfig: ConditionConfig): ConditionApi<T> {
         let conditionType: string = conditionConfig.type;
         let data = conditionConfig.data;
-        let creator: ConditionCreator = this._conditionCreators.get(conditionType);
+        let creator: ConditionCreator = this._typeToCreatorMap.get(conditionType);
         if (!creator) {
             throw new Error(`没找到条件类型 creator. type = ${conditionType}`);
         }

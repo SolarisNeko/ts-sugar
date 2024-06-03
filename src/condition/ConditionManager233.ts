@@ -8,7 +8,7 @@ import {Logger} from "../logger/Logger";
 export interface ISimpleCondition {
 
     // 初始化参数
-    initParams(params: string, targetCount: number): void
+    initParams(paramsStr: string): void
 
     // 检查条件
     check(): boolean;
@@ -29,30 +29,39 @@ export interface ISimpleCondition {
  * Code:
  * const isOK: boolean = ConditionManager.ins().checkCondition(条件文本)
  */
-export class SimpleConditionManager233 extends AbstractSingleton {
+export class ConditionManager233 extends AbstractSingleton {
 
     // <条件名, 条件类>
     private _typeToCreateConditionMap: Map<string, Clazz<ISimpleCondition>> = new Map();
-
-    // 后续缓存优化用 | 暂未用到
-    private _conditionCacheMap: Map<string, Array<ISimpleCondition>> = new Map();
-
 
     // 初始化注册所有枚举
     protected onInit() {
         super.onInit();
     }
 
-    registerCondition(conditionType: string, clazz: Clazz<ISimpleCondition>): void {
+    /**
+     * 注册条件处理器
+     * @param conditionType 条件类型. 例如: playerLvGte
+     * - "playerLvGte;1|"  ==  玩家等级>=1
+     * @param clazz 条件Class
+     */
+    registerByClass<T extends ISimpleCondition>(
+        conditionType: string,
+        clazz: Clazz<T>
+    ): void {
         this._typeToCreateConditionMap.set(conditionType, clazz);
     }
 
     /**
      * 解析条件文本
-     * @param conditionText 条件文本
+     * @param conditionText 条件文本. 格式 = ${conditionType};${argsStr}|...
+     * - "playerLvGte;1|"  ==  玩家等级>=1
      */
     parseConditionText(conditionText: string): Array<ISimpleCondition> {
-        const conditionTextArray = conditionText.split(";")
+        if (!conditionText) {
+            return []
+        }
+        const conditionTextArray = conditionText.split("|")
             .toDataStream()
             .filter((it) => it.trim().length > 0)
             .toArray();
@@ -63,14 +72,13 @@ export class SimpleConditionManager233 extends AbstractSingleton {
         const array = conditionTextArray.toDataStream()
             .filter((it) => it.trim().length > 0)
             .map((it) => {
-                const oneConditionArray = it.split(",");
-                if (oneConditionArray.length !== 3) {
+                const oneConditionArray = it.split(";");
+                if (oneConditionArray.length !== 2) {
                     return null;
                 }
 
                 const conditionType = oneConditionArray[0].trim();
                 const params = oneConditionArray[1].trim();
-                const targetValue = Number.parseInt(oneConditionArray[2].trim());
 
                 const conditionCreator = this._typeToCreateConditionMap.get(conditionType);
                 if (!conditionCreator) {
@@ -80,7 +88,7 @@ export class SimpleConditionManager233 extends AbstractSingleton {
                 const condition = new conditionCreator();
 
                 // 初始化条件
-                condition.initParams(params, targetValue)
+                condition.initParams(params)
 
                 return condition
             })
@@ -96,10 +104,12 @@ export class SimpleConditionManager233 extends AbstractSingleton {
 
     /**
      * 检查【游戏条件】是否满足
-     * @param conditionText 条件文本 | 参考 ItemComeFromConfig.unlockCondition: string = "[[1,0,100]]"
+     * @param conditionText 条件文本 | 参考 ItemComeFromConfig.unlockCondition: string =
+     *  "playerLvGte;1|"  ==  玩家等级>=1
      * @param defaultOkFlag 默认是否成功 | default true
      */
-    checkCondition(conditionText: string, defaultOkFlag: boolean = true): boolean {
+    checkCondition(conditionText: string,
+                   defaultOkFlag: boolean = true): boolean {
         if (!conditionText) {
             Logger.DEFAULT.warn(`条件文本为 null, defaultOkFlag = ${defaultOkFlag}, conditionText = ${conditionText}`);
             return defaultOkFlag
