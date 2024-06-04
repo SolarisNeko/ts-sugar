@@ -26,4 +26,25 @@ export class EnumUtils233 {
         return enumObj[value] as string;
     }
 
+    /**
+     * 获取枚举的所有键名
+     * @param enumObj 枚举对象
+     * @returns 枚举键名数组
+     */
+    static getAllKeys<T extends { [key: string]: any }>(enumObj: T): (keyof T)[] {
+        return Object.keys(enumObj)
+            .filter(key => !isNaN(Number(key))) // 过滤掉反向映射的值
+            .map(key => key as keyof T); // 类型断言为 keyof T
+    }
+
+    /**
+     * 获取枚举的所有值
+     * @param enumObj 枚举对象
+     * @returns 枚举值数组
+     */
+    static getAllValues<T extends { [key: string]: any }>(enumObj: T): T[keyof T][] {
+        const keys = this.getAllKeys(enumObj);
+        return keys.map(key => enumObj[key]);
+    }
+
 }
