@@ -209,6 +209,12 @@ export class DataStream<T> {
         return this
     }
 
+    // 语法糖
+    forEach(handlerFunction: (item: T) => void): DataStream<T> {
+        this.handle(handlerFunction)
+        return this;
+    }
+
     /**
      * 将 stream 的每一个元素转换成一个新的 stream，然后将这些 stream 合并成一个新的 stream
      * 例如: [[1,2,3], [4,5]] -> [1,2,3,4,5]
@@ -427,7 +433,7 @@ export class DataStream<T> {
      * @param weightExtractFunc 比较函数 | 根据 item 生成权重值
      * @param defaultValue
      */
-    maxByNum(weightExtractFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
+    maxByWeightNumber(weightExtractFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
         let maxVal: T | null = defaultValue;
         for (const item of this.dataIterator) {
             if (maxVal === null) {
@@ -450,8 +456,8 @@ export class DataStream<T> {
      * @param weightExtractFunc  比较函数 | 根据 item 生成权重值
      * @param defaultValue
      */
-    minByWeightNum(weightExtractFunc: ConvertFunction<T, number>,
-                   defaultValue: T = null
+    minByWeightNumber(weightExtractFunc: ConvertFunction<T, number>,
+                      defaultValue: T = null
     ): T | null {
         let minVal: T | null = defaultValue;
         for (const item of this.dataIterator) {
