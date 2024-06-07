@@ -433,8 +433,10 @@ export class DataStream<T> {
      * @param weightExtractFunc 比较函数 | 根据 item 生成权重值
      * @param defaultValue
      */
-    maxByWeightNumber(weightExtractFunc: ConvertFunction<T, number>, defaultValue: T = null): T | null {
-        let maxVal: T | null = defaultValue;
+    maxByWeightNumber(weightExtractFunc: ConvertFunction<T, number>,
+                      defaultValue: T = null
+    ): T | null {
+        let maxVal: T | null = null;
         for (const item of this.dataIterator) {
             if (maxVal === null) {
                 maxVal = item
@@ -448,6 +450,9 @@ export class DataStream<T> {
                 maxVal = item;
             }
         }
+        if (maxVal == null) {
+            return defaultValue;
+        }
         return maxVal;
     }
 
@@ -459,7 +464,7 @@ export class DataStream<T> {
     minByWeightNumber(weightExtractFunc: ConvertFunction<T, number>,
                       defaultValue: T = null
     ): T | null {
-        let minVal: T | null = defaultValue;
+        let minVal: T | null = null;
         for (const item of this.dataIterator) {
             if (minVal === null) {
                 minVal = item
@@ -472,8 +477,12 @@ export class DataStream<T> {
                 minVal = item;
             }
         }
+        if (minVal == null) {
+            return defaultValue;
+        }
         return minVal;
     }
+
 
     /**
      * 最大, 通过比较器函数
