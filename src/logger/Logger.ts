@@ -37,7 +37,12 @@ export enum LogColor {
 export class Logger {
 
     // 默认日志器
-    public static readonly DEFAULT = new Logger("default");
+    public static readonly DEFAULT = new Logger(
+        "default",
+        Object.assign(new LoggerOptions(), {
+            preStackLineNum: 4,
+        }),
+    );
 
     // 日志分类
     private readonly loggerName: string;
@@ -56,7 +61,7 @@ export class Logger {
      * @param options 配置选项
      */
     constructor(loggerName: string,
-                options: LoggerOptions = new LoggerOptions()
+                options: LoggerOptions = new LoggerOptions(),
     ) {
         this.loggerName = loggerName;
         this.options = options;
@@ -199,7 +204,7 @@ export class LoggerFactory {
      * @returns Logger 实例
      */
     static getLogger(loggerName: string,
-                     options: LoggerOptions = new LoggerOptions()
+                     options: LoggerOptions = new LoggerOptions(),
     ): Logger {
         return new Logger(loggerName, options);
     }
