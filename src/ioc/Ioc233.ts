@@ -14,20 +14,20 @@ export enum EnumIocType233 {
 export class Ioc233 {
 
     // <className, typeMode>
-    private static readonly classNameToTypeModeMap: Map<string, any> = new Map();
+    private static readonly _classNameToTypeModeMap: Map<string, any> = new Map();
     // <className, instance>
-    private static readonly singletons: Map<string, any> = new Map();
+    private static readonly _classNameToSingletonMap: Map<string, any> = new Map();
     // <className, 模板Class>
-    private static readonly templates: Map<string, Clazz<any>> = new Map();
+    private static readonly _classNameToClassMap: Map<string, Clazz<any>> = new Map();
 
     static registerSingleton<T>(type: Clazz<T>): void {
-        this.singletons.set(type.name, new type());
-        this.classNameToTypeModeMap.set(type.name, EnumIocType233.Singleton);
+        this._classNameToSingletonMap.set(type.name, new type());
+        this._classNameToTypeModeMap.set(type.name, EnumIocType233.Singleton);
     }
 
     static registerTemplate<T>(type: Clazz<T>): void {
-        this.templates.set(type.name, type);
-        this.classNameToTypeModeMap.set(type.name, EnumIocType233.Template);
+        this._classNameToClassMap.set(type.name, type);
+        this._classNameToTypeModeMap.set(type.name, EnumIocType233.Template);
     }
 
     /**
@@ -39,12 +39,12 @@ export class Ioc233 {
      */
     static getObject<T>(clazz: Clazz<T>): T {
         let className = clazz.name;
-        let typeModeEnum = this.classNameToTypeModeMap.get(className);
+        let typeModeEnum = this._classNameToTypeModeMap.get(className);
         if (typeModeEnum === EnumIocType233.Singleton) {
-            return this.singletons.get(className) as T;
+            return this._classNameToSingletonMap.get(className) as T;
         }
         if (typeModeEnum === EnumIocType233.Template) {
-            const template = this.templates.get(className);
+            const template = this._classNameToClassMap.get(className);
             if (!template) {
                 throw new Error(`Service not found: ${className}`);
             }
