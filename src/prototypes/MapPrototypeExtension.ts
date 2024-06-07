@@ -3,7 +3,9 @@ import {DataStream} from "../dataStream/DataStream";
 import {MapEntry} from "../utils/MapUtils";
 
 export class MapPrototypeExtension {
-
+    static init() {
+        console.log("MapPrototypeExtension init")
+    }
 }
 
 // 全局扩展 Map 原型
@@ -74,3 +76,5 @@ Map.prototype.updateThenGet = function <K, V>(key: K, initValue: V, updateFunc: 
     return newValue;
 
 }
+
+MapPrototypeExtension.init()

@@ -1,54 +1,19 @@
 import {DateTimeUtils} from "../../time/DateTimeUtils";
 
-export class LogBusinessOptions {
-    // 业务调用消息
-    businessTitle: string = "";
-
-    // 是否吞掉异常
-    swallowErrorFlag: boolean = false;
-
-    private static readonly DEFAULT_OPTIONS = new LogBusinessOptions();
-
-    /**
-     * 获取默认配置
-     */
-    static empty(): LogBusinessOptions {
-        return LogBusinessOptions.DEFAULT_OPTIONS;
-    }
-
-    /**
-     * 创建新的配置
-     */
-    static createNew(): LogBusinessOptions {
-        return new LogBusinessOptions();
-    }
-
-    /**
-     * 创建配置
-     * @param args
-     */
-    static create(args: {
-        businessTitle: string
-        swallowErrorFlag: boolean
-    }): LogBusinessOptions {
-        const options = new LogBusinessOptions();
-        options.businessTitle = args.businessTitle;
-        options.swallowErrorFlag = args.swallowErrorFlag;
-        return options;
-    }
-}
-
 /**
  * 高性能记录业务日志的装饰器
  * 1. 高性能, 减少栈帧
  * 2. 自动记录调用参数和返回值
  *
  * @decorator @LogBusiness
- * @param options 配置
  * @constructor
+ * @param title
  */
-export function LogBusiness(options: LogBusinessOptions = LogBusinessOptions.empty()) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+export function LogBusiness(title: string) {
+    return function (target: any,
+                     propertyKey: string,
+                     descriptor: PropertyDescriptor
+    ): void {
         const className = target?.constructor?.name || "null";
         const methodName = propertyKey || "null";
 
@@ -74,7 +39,7 @@ export function LogBusiness(options: LogBusinessOptions = LogBusinessOptions.emp
             //     }
             // }
 
-            const businessTitle = options.businessTitle || "";
+            const businessTitle = title || "";
             try {
                 console.log(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | call args:`, args);
                 const result = originalMethod.apply(this, args);

@@ -2,9 +2,9 @@ import {
     ConditionApi,
     ConditionChecker,
     ConditionCreator,
-    ConditionFactory,
+    ConditionEngine233,
     ConditionResult,
-} from "../../src/condition/ConditionEngine"; // 请根据实际文件路径调整
+} from "../../src/condition/ConditionEngine233"; // 请根据实际文件路径调整
 
 class User {
 
@@ -18,7 +18,8 @@ class MockConditionApi implements ConditionApi {
 }
 
 class MockConditionCreator implements ConditionCreator {
-    create(type: string, data: any): ConditionApi {
+    create(type: string,
+           data: any): ConditionApi {
         return new MockConditionApi();
     }
 }
@@ -26,7 +27,7 @@ class MockConditionCreator implements ConditionCreator {
 describe('ConditionFactory', () => {
 
     beforeEach(() => {
-        ConditionFactory.instance.register('mock', new MockConditionCreator());
+        ConditionEngine233.instance().register('mock', new MockConditionCreator());
     });
 
     test('createConditionChecker should return a valid ConditionChecker', () => {
@@ -50,8 +51,8 @@ describe('ConditionFactory', () => {
             }
         `;
 
-        const conditionChecker: ConditionChecker<number> | null = ConditionFactory.instance.createConditionChecker(
-            jsonConfig);
+        const conditionChecker: ConditionChecker<number> = ConditionEngine233.instance()
+            .createByJson(jsonConfig);
 
         expect(conditionChecker).toBeDefined();
         expect(conditionChecker?.checkType).toBe('and');
@@ -74,7 +75,7 @@ describe('ConditionFactory', () => {
     test('createConditionChecker should handle invalid JSON gracefully', () => {
         const invalidJsonConfig: string = 'invalid_json_config';
 
-        const conditionChecker: ConditionChecker<User> = ConditionFactory.instance.createConditionChecker(
+        const conditionChecker: ConditionChecker<User> = ConditionEngine233.instance().createByJson(
             invalidJsonConfig,
             ConditionResult.fail(),
         );

@@ -31,10 +31,14 @@ export enum LogColor {
  * Logger 类，用于记录日志。
  */
 export class Logger {
+
+    // 默认日志器
+    public static readonly DEFAULT = new Logger("default");
+
     // 日志分类
     private readonly loggerName: string;
     // 日志级别
-    private readonly level: LogLevel;
+    private level: LogLevel;
     // 日志颜色
     private readonly color: string;
     // 配置选项
@@ -46,7 +50,7 @@ export class Logger {
      * @param options 配置选项
      */
     constructor(loggerName: string,
-                options: LoggerOptions = new LoggerOptions ()
+                options: LoggerOptions = new LoggerOptions()
     ) {
         this.loggerName = loggerName;
         this.options = options;
@@ -54,8 +58,14 @@ export class Logger {
         this.color = options.color;
     }
 
-    private get logLevel(): LogLevel {
+    public get logLevel(): LogLevel {
         return this.level
+    }
+
+    public setLogLevel(level: LogLevel) {
+        let oldLevel = this.level;
+        Logger.DEFAULT.info(`logger name = ${this.loggerName}, level change! old level = ${oldLevel}, new level = ${level}`, this)
+        this.level = level;
     }
 
     private getCallLocation(): string {
@@ -109,6 +119,8 @@ export class Logger {
 
         switch (level) {
             case LogLevel.DEBUG:
+                console.debug(logMessage, colorStyle, ...args);
+                break;
             case LogLevel.INFO:
                 console.log(logMessage, colorStyle, ...args);
                 break;
