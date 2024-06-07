@@ -11,7 +11,11 @@ export enum LogLevel {
 
 // Logger 配置选项接口
 export class LoggerOptions {
+    // 前几行堆栈信息
+    preStackLineNum: number = 3
+    // 日志级别
     level: LogLevel = LogLevel.DEBUG
+    // 日志颜色
     color: string = LogColor.None
 }
 
@@ -41,8 +45,10 @@ export class Logger {
     private level: LogLevel;
     // 日志颜色
     private readonly color: string;
+    private readonly preStackLineNum: number;
     // 配置选项
     private readonly options: LoggerOptions;
+
 
     /**
      * 创建 Logger 实例。
@@ -54,6 +60,8 @@ export class Logger {
     ) {
         this.loggerName = loggerName;
         this.options = options;
+
+        this.preStackLineNum = options.preStackLineNum || 3;
         this.level = options.level;
         this.color = options.color;
     }
@@ -112,7 +120,8 @@ export class Logger {
 
         let colorStyle: string = this.color;
         let dateTimeText = DateTimeUtils.getCurrentDateTimeText();
-        const callLine = StackFrameUtils.getPreStackFrame(3);
+        // 获取前 N 行调用栈信息
+        const callLine = StackFrameUtils.getPreStackFrame(this.preStackLineNum);
 
 
         let logMessage = `%c${dateTimeText} | ${this.loggerName} | ${level.toString()} | ${callLine} - ${message}`;
