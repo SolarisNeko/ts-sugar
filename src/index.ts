@@ -41,6 +41,7 @@ export * from './iapp/IApp';
 export * from './iapp/IAppUtils';
 export * from './iapp/ILifecycle';
 export * from './idGenerator/IdGenerator233';
+export * from './ioc/Ioc233';
 export * from './item/Items';
 export * from './json/JsonUtils';
 export * from './kv/Kv';
