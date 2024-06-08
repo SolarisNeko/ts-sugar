@@ -1,5 +1,5 @@
 import {
-    Http233, HttpMethod,
+    Http233, EnumHttpMethod,
     HttpResponse,
 } from "../../src/http/Http233";
 
@@ -7,7 +7,7 @@ describe('Http', () => {
     it('should send a GET request', async () => {
         const builder = Http233.builder()
             .url('https://jsonplaceholder.typicode.com/posts/1')
-            .method(HttpMethod.GET);
+            .method(EnumHttpMethod.GET);
 
         const response: HttpResponse = await builder.send();
 
@@ -25,7 +25,7 @@ describe('Http', () => {
 
         const builder = Http233.builder()
             .url('https://jsonplaceholder.typicode.com/posts')
-            .method(HttpMethod.POST)
+            .method(EnumHttpMethod.POST)
             .headers({'Content-Type': 'application/json'})
             .data(data);
 

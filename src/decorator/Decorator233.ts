@@ -1,3 +1,5 @@
+import {LogBusiness} from "../logger/decorator/LogBusiness";
+
 /**
  * 通用装饰器
  */
@@ -11,7 +13,7 @@ export class Decorator233 {
     public static AntiShakeCallFunc(timeMs: number) {
         return function (target: any,
                          propKey: string,
-                         descriptor: PropertyDescriptor
+                         descriptor: PropertyDescriptor,
         ) {
             let oldFunc = descriptor.value
             let timer = null;
@@ -35,7 +37,7 @@ export class Decorator233 {
     public static LimitCallFuncPerTimeMs(timeMs: number) {
         return function (target: any,
                          propKey: string,
-                         descriptor: PropertyDescriptor
+                         descriptor: PropertyDescriptor,
         ) {
             let oldFunc = descriptor.value
             let isLock = false;
@@ -60,7 +62,10 @@ export class Decorator233 {
      * @param expireMs 缓存过期时间，单位毫秒，默认永不过期
      */
     public static CacheReturnValue(expireMs: number = -1) {
-        return function (target: any, propKey: string, descriptor: PropertyDescriptor) {
+        return function (target: any,
+                         propKey: string,
+                         descriptor: PropertyDescriptor,
+        ) {
             const cacheKey = Symbol(propKey); // 使用 Symbol 作为唯一的缓存键
             const oldFunc = descriptor.value;
 
@@ -82,5 +87,19 @@ export class Decorator233 {
                 return result;
             };
         };
+    }
+
+
+    /**
+     * 高性能记录业务日志的装饰器
+     * 1. 高性能, 减少栈帧
+     * 2. 自动记录调用参数和返回值
+     *
+     * @decorator @LogBusiness
+     * @constructor
+     * @param title
+     */
+    static LogBusiness(title: string) {
+        return LogBusiness(title);
     }
 }

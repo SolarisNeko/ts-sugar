@@ -1,7 +1,7 @@
 /**
  * HTTP 请求方法
  */
-export enum HttpMethod {
+export enum EnumHttpMethod {
     GET = 'GET',
     POST = 'POST',
     PUT = 'PUT',
@@ -14,7 +14,7 @@ export enum HttpMethod {
  */
 export interface HttpRequestConfig {
     url: string;
-    method: HttpMethod;
+    method: EnumHttpMethod;
     headers?: Record<string, string>;
     data?: any;
     timeoutMs?: any;
@@ -36,7 +36,7 @@ export class Http233 {
     // 配置
     private config: HttpRequestConfig = {
         url: '',
-        method: HttpMethod.GET,
+        method: EnumHttpMethod.GET,
         // 默认超时时间 10s
         timeoutMs: 10 * 1000,
     };
@@ -51,7 +51,7 @@ export class Http233 {
         return this;
     }
 
-    method(method: HttpMethod): Http233 {
+    method(method: EnumHttpMethod): Http233 {
         this.config.method = method;
         return this;
     }
@@ -138,18 +138,18 @@ export class Http233 {
 
 
     sendGet(): Promise<HttpResponse> {
-        return this.method(HttpMethod.GET).send();
+        return this.method(EnumHttpMethod.GET).send();
     }
 
     sendPost(): Promise<HttpResponse> {
-        return this.method(HttpMethod.POST).send();
+        return this.method(EnumHttpMethod.POST).send();
     }
 
     sendPut(): Promise<HttpResponse> {
-        return this.method(HttpMethod.PUT).send();
+        return this.method(EnumHttpMethod.PUT).send();
     }
 
     sendDelete(): Promise<HttpResponse> {
-        return this.method(HttpMethod.DELETE).send();
+        return this.method(EnumHttpMethod.DELETE).send();
     }
 }

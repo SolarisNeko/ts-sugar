@@ -45,9 +45,7 @@ export function LogBusiness(title: string) {
                 const result = originalMethod.apply(this, args);
 
                 // return void
-                if (result === undefined) {
-                    console.log(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | no return value`);
-                } else {
+                if (result !== undefined) {
                     console.log(`[${dateTimeStr}] [${className}.${methodName}] ${businessTitle} | @LogBusiness | return value:`, result);
                 }
 

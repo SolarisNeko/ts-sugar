@@ -37,6 +37,7 @@ export * from './fsm/FSM';
 export * from './functionText/DialogFunctionText';
 export * from './functionText/FunctionText';
 export * from './heartbeat/HeartbeatManager';
+export * from './http/decorator/Http233Decorator';
 export * from './http/Http233';
 export * from './iapp/IApp';
 export * from './iapp/IAppUtils';

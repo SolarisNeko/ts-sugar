@@ -10,6 +10,7 @@ class TestUseService {
 }
 
 @Provider233()
+
 class MyComponent {
 
     @Inject233(TestUseService)
