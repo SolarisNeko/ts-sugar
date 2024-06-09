@@ -1,82 +1,121 @@
 import {EnumHttpMethod} from "../Http233";
+import {Logger} from "../../logger/Logger";
+import {JsonUtils} from "../../json/JsonUtils";
 
 export class HttpSendRequestOptions {
     // 域名 = ${IP}:${port}
-    domain: string = "localhost";
+    domain?: string | null = "localhost";
+    // 端口 ｜ 0 = 不需要
+    port?: number | null;
     // 域名下子路径
-    uri: string = "";
+    uri?: string | null = "";
     // httpMethod
-    httpMethod: EnumHttpMethod = EnumHttpMethod.POST;
+    httpMethod?: EnumHttpMethod = EnumHttpMethod.POST;
     // 可选的请求头
-    headers?: Record<string, string> = null;
+    headers?: Record<string, string> | null = null;
     // 超时时间
-    timeoutMs: number = 60 * 1000
+    timeoutMs?: number | null = 60 * 1000;
+    // 安全证书
+    sslFlag?: boolean | null = false;
 }
 
 
 export class Http233Decorator {
 
+    private static sslFlag = false
+
+    public static setSSLFlag(flag: boolean) {
+        this.sslFlag = flag;
+    }
+
 
     private static readonly DEFAULT_HTTP_SEND_REQUEST_OPTIONS: HttpSendRequestOptions = {
         domain: "localhost",
-        uri: "/",
+        port: 0,
+        uri: "",
         httpMethod: EnumHttpMethod.POST,
         headers: null,
         timeoutMs: 60 * 1000,
+        sslFlag: true
     }
 
-    static SendHttpJsonRequest(options: HttpSendRequestOptions = Http233Decorator.DEFAULT_HTTP_SEND_REQUEST_OPTIONS) {
-        return function (target: any,
-                         propertyKey: string,
-                         descriptor: TypedPropertyDescriptor<(...args: any) => any>,
+
+    /**
+     * @sendHttpJsonRequestAsync
+     * 发送异步 HTTP JSON 请求
+     * @param options
+     */
+    static sendHttpJsonRequestAsync<T>(
+        options: HttpSendRequestOptions = Http233Decorator.DEFAULT_HTTP_SEND_REQUEST_OPTIONS
+    ) {
+        return function (
+            target: any,
+            propertyKey: string,
+            descriptor: TypedPropertyDescriptor<(...args: any) => Promise<T>>
         ) {
-            // 获取原始方法
             const originalMethod = descriptor.value!;
 
-            descriptor.value = function (...args: any[]): any {
+            descriptor.value = async function (...args: any[]): Promise<any> {
+                // 合并默认选项和传入的选项
+                const finalOptions: HttpSendRequestOptions = {
+                    ...Http233Decorator.DEFAULT_HTTP_SEND_REQUEST_OPTIONS,
+                    ...options,
+                };
 
-                const fullUrl = `${options.domain}${options.uri}`;
-                const xhr = new XMLHttpRequest();
-                // 设置超时时间
-                xhr.timeout = options.timeoutMs;
+                return new Promise<any>((resolve,
+                                         reject) => {
+                    let responseObj: any = null;
+                    let portStr = Http233Decorator.getPort(finalOptions);
+                    let httpStr = Http233Decorator.getHttpDeclare(finalOptions);
 
+                    const fullUrl = `${httpStr}${finalOptions.domain}${portStr}/${finalOptions.uri}`;
+                    const requestArg = args[0];
+                    let timeoutMs = finalOptions.timeoutMs;
 
-                // http request obj
-                const httpRequestObj = args[0];
+                    Logger.DEFAULT.debug(`http request! fullUrl=${fullUrl}, timeout=${timeoutMs}`, requestArg);
 
-                return new Promise((resolve,
-                                    reject,
-                ) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.timeout = timeoutMs!;
+
                     xhr.onreadystatechange = () => {
                         if (xhr.readyState === 4) {
                             if (xhr.status >= 200 && xhr.status < 300) {
+                                let text = "";
                                 try {
-                                    const response = JSON.parse(xhr.responseText);
-                                    resolve(response);
+                                    text = xhr.responseText;
+                                    responseObj = JsonUtils.deserialize(text, Object);
+
+                                    Logger.DEFAULT.debug(`解析 http response 成功! response obj = `, responseObj);
+                                    resolve(responseObj);
                                 } catch (error) {
-                                    reject(new Error(`Invalid JSON response: ${xhr.responseText}`));
+                                    Logger.DEFAULT.error(`解析响应失败. responseText = ${text}`);
+                                    reject(error);
                                 }
                             } else {
-                                reject(new Error(`HTTP request failed with status ${xhr.status}`));
+                                reject(xhr.status);
                             }
                         }
                     };
 
-                    xhr.onerror = () => reject(new Error('[Http] Network error'));
-                    xhr.ontimeout = () => reject(new Error('[Http] Request timeout'));
+                    xhr.onerror = (error) => {
+                        Logger.DEFAULT.error(`Network error`, error);
+                        reject(error);
+                    };
+                    xhr.ontimeout = () => {
+                        Logger.DEFAULT.error(`Request timeout. obj = `, requestArg);
+                        reject("Request timeout");
+                    };
 
-                    xhr.open(options.httpMethod, fullUrl, true);
-                    if (options.headers) {
-                        const entries = Object.keys(options.headers);
-                        for (const [key] of entries) {
-                            const value: string = entries[key];
+                    xhr.open(finalOptions.httpMethod!, fullUrl, true);
+                    if (finalOptions.headers) {
+                        for (const key in finalOptions.headers) {
+                            const value: string = finalOptions.headers[key];
                             xhr.setRequestHeader(key, value);
                         }
                     }
-                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader("Content-Type", "application/json");
 
-                    // 如果是 POST/PUT/DELETE 请求，将参数转换为 JSON 字符串发送
-                    const data = JSON.stringify(httpRequestObj ?? {});
+                    const data = JSON.stringify(requestArg ?? {});
                     xhr.send(data);
 
                     originalMethod.apply(this, args);
@@ -85,4 +124,22 @@ export class Http233Decorator {
         };
     }
 
+
+    private static getPort(options: HttpSendRequestOptions) {
+        let port = options.port;
+        let portStr = ""
+        if (port > 0) {
+            portStr = ":" + port
+        }
+        return portStr;
+    }
+
+    private static getHttpDeclare(options: HttpSendRequestOptions): string {
+        if (options.sslFlag) {
+            return "https://"
+        } else {
+            return "http://"
+
+        }
+    }
 }
