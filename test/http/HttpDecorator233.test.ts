@@ -8,9 +8,10 @@ class HttpJsonObj {
 
 class Demo {
 
-    @Http233Decorator.SendHttpJsonRequest()
-    public testHttpDecorator(obj: HttpJsonObj) {
+    @Http233Decorator.sendHttpJsonRequestAsync()
+    public testHttpDecorator(obj: HttpJsonObj): Promise<void> {
         console.debug("http 请求完成")
+        return null
     }
 }
 
