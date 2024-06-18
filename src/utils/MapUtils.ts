@@ -1,4 +1,4 @@
-import {BiFunction, KeyExtractor, MergeFunction} from "./LambdaExtension";
+import { BiFunction, KeyExtractor, MergeFunction } from "./LambdaExtension";
 
 export class MapEntry<K, V> {
     key!: K
@@ -7,6 +7,10 @@ export class MapEntry<K, V> {
 
 export class MapUtils {
 
+    /**
+     * 
+     * @returns 空的Map
+     */
     static empty<K, V>(): Map<K, V> {
         return new Map();
     }
@@ -31,8 +35,8 @@ export class MapUtils {
     }
 
     public static mergeAll<K, V>(output: Map<K, V>,
-                                 biConsumer: BiFunction<V, V, V>,
-                                 ...otherMaps: Map<K, V>[]
+        biConsumer: BiFunction<V, V, V>,
+        ...otherMaps: Map<K, V>[]
     ): Map<K, V> {
         return this.mergeAllByRepeat(
             output,
@@ -43,9 +47,9 @@ export class MapUtils {
     }
 
     public static mergeAllByRepeat<K, V>(output: Map<K, V>,
-                                         biConsumer: BiFunction<V, V, V>,
-                                         repeatCount: number,
-                                         ...otherMaps: Map<K, V>[]
+        biConsumer: BiFunction<V, V, V>,
+        repeatCount: number,
+        ...otherMaps: Map<K, V>[]
     ): Map<K, V> {
         if (repeatCount <= 0 || output == null || biConsumer == null) {
             return output;
@@ -54,7 +58,7 @@ export class MapUtils {
                 if (kvMap != null) {
                     for (let i = 0; i < repeatCount; ++i) {
                         kvMap.forEach((value,
-                                       key,
+                            key,
                         ) => {
                             if (output.has(key)) {
                                 const newVar: V = output.get(key)!;
@@ -81,7 +85,7 @@ export class MapUtils {
             for (const kvMap of mapArray) {
                 if (kvMap != null) {
                     kvMap.forEach((value,
-                                   key,
+                        key,
                     ) => {
                         kvHashMap.set(key, value);
                     });
@@ -92,11 +96,11 @@ export class MapUtils {
     }
 
     static toLevel1Map<K1, T>(dataList: T[],
-                              keyExtractor1: KeyExtractor<T, K1>,
-                              mergeFunction: MergeFunction<T>,
+        keyExtractor1: KeyExtractor<T, K1>,
+        mergeFunction: MergeFunction<T>,
     ): Map<K1, T> {
         return dataList == null ? this.empty() : dataList.reduce((map,
-                                                                  item,
+            item,
         ) => {
             const key = keyExtractor1(item);
             map.set(key, mergeFunction(map.get(key), item));
@@ -105,12 +109,12 @@ export class MapUtils {
     }
 
     static toLevel2Map<K1, K2, T>(dataList: T[],
-                                  keyExtractor1: KeyExtractor<T, K1>,
-                                  keyExtractor2: KeyExtractor<T, K2>,
-                                  mergeFunction: MergeFunction<T>,
+        keyExtractor1: KeyExtractor<T, K1>,
+        keyExtractor2: KeyExtractor<T, K2>,
+        mergeFunction: MergeFunction<T>,
     ): Map<K1, Map<K2, T>> {
         return dataList == null ? this.empty() : dataList.reduce((map,
-                                                                  item,
+            item,
         ) => {
             const key1 = keyExtractor1(item);
             const key2 = keyExtractor2(item);
@@ -137,7 +141,7 @@ export class MapUtils {
         mergeFunction: MergeFunction<T>,
     ): Map<K1, Map<K2, Map<K3, T>>> {
         return dataList == null ? this.empty() : dataList.reduce((map,
-                                                                  item,
+            item,
         ) => {
             const key1 = keyExtractor1(item);
             const key2 = keyExtractor2(item);
@@ -162,8 +166,8 @@ export class MapUtils {
      * @returns 指定键对应的值
      */
     static getOrCreate<K, V>(map: Map<K, V>,
-                             key: K,
-                             defaultValueCreator: (() => V),
+        key: K,
+        defaultValueCreator: (() => V),
     ): V {
         if (!map.has(key)) {
             let value = defaultValueCreator();
@@ -180,11 +184,9 @@ export class MapUtils {
      * @param mergeFunc 合并value函数
      */
     static merge<K, V>(map: Map<K, V>,
-                       key: K,
-                       value: V,
-                       mergeFunc: (v1: V,
-                                   v2: V,
-                       ) => V,
+        key: K,
+        value: V,
+        mergeFunc: (v1: V, v2: V,) => V,
     ): V {
         if (!map) {
             return null;
@@ -203,15 +205,45 @@ export class MapUtils {
         return newValue
     }
 
-    static generateAllMapEntry<K, V>(data: Map<K, V>): MapEntry<K, V>[] {
-        const entryList = Array<MapEntry<K, V>>(data.size);
+    /**
+     * 将 map 的所有 kv 转为 Array
+     * @param map map
+     * @returns MapEntry<K, V>[]
+     */
+    static generateAllMapEntry<K, V>(map: Map<K, V>): Array<MapEntry<K, V>> {
+        const entryList = Array<MapEntry<K, V>>(map.size);
         let count = 0
-        for (let obj of data.entries()) {
+        for (let obj of map.entries()) {
             let entry = new MapEntry<K, V>();
             entry.key = obj[0]
             entry.value = obj[1]
             entryList[count++] = entry
         }
         return entryList
+    }
+
+
+    /**
+     * 计算两个 Map 的差异 Map = A - B
+     * @param mapA 
+     * @param mapB
+     * @param mergeFunc 合并差异函数
+     */
+    static diff<K, V>(
+        mapA: Map<K, V>,
+        mapB: Map<K, V>,
+        mergeFunc: (v1: V, v2: V) => V
+    ) {
+        const diffMap = new Map<K, V>();
+        for (let [itemId, valueA] of mapA.entries()) {
+            if (!mapB.has(itemId)) {
+                diffMap.set(itemId, valueA);
+            } else {
+                const valueB = mapB.get(itemId);
+                const diffCount = mergeFunc(valueA, valueB);
+                diffMap.set(itemId, diffCount);
+            }
+        }
+        return diffMap
     }
 }
