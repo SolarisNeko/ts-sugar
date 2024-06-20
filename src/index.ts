@@ -3,7 +3,6 @@
 export * from './action/ActionChain';
 export * from './activity/Activity';
 export * from './actor/actor';
-export * from './architecture/architecture';
 export * from './attr/AttrTree';
 export * from './behaviorTree/BehaviorTree';
 export * from './bytes/ByteArrayData';
@@ -49,6 +48,7 @@ export * from './json/JsonUtils';
 export * from './kv/Kv';
 export * from './kv/KvTemplate';
 export * from './lambda/ICallback';
+export * from './lambda/LambdaApi233';
 export * from './lazy/lazy';
 export * from './logger/ColorLogger';
 export * from './logger/decorator/LogBusiness';
