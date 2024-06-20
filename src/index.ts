@@ -53,6 +53,7 @@ export * from './lazy/lazy';
 export * from './logger/ColorLogger';
 export * from './logger/decorator/LogBusiness';
 export * from './logger/Logger';
+export * from './math/MathUtils';
 export * from './mvvm/mvvm';
 export * from './network/codec/JsonCodec';
 export * from './network/ICodec';

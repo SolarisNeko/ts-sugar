@@ -14,6 +14,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "generate": "node nodejs-auto-create-export-index-ts.js",
     "compile": "node nodejs-auto-create-export-index-ts.js && tsc",
     "gitPush": "git add . && git commit -m \"deploy version\" && git push ",
     "createIndexJs": "node nodejs-auto-create-export-index-ts.js",
