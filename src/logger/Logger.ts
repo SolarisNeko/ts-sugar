@@ -47,7 +47,7 @@ export class Logger {
     // 日志分类
     private readonly loggerName: string;
     // 日志级别
-    private level: LogLevel;
+    private level: LogLevel = LogLevel.DEBUG;
     // 日志颜色
     private readonly color: string;
     private readonly preStackLineNum: number;

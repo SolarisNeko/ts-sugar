@@ -12,6 +12,13 @@ export class EnumUtils233 {
 
     /**
      * 根据 enum value(后端通信用) 获取 enum keyName(策划配置用)
+     * - 泛型约束
+     *
+     * @param enumObj 枚举对象
+     * @param value 枚举值
+     * @returns 枚举键名，如果找不到则返回 undefined
+     *
+     * @demo         const bigTalentName = EnumUtils.getEnumKeyNameByValue(ServerEnums.TalentType, ServerEnums.TalentType.ADVANCED);
      */
     static getEnumKeyNameByValue<T extends { [key: string]: string | number }>(
         enumObj: T,

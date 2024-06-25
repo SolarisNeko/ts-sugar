@@ -1,3 +1,6 @@
+/**
+ * Lambda 函数通用接口
+ */
 export namespace LambdaApi233 {
 
     /**

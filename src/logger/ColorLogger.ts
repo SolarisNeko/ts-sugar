@@ -1,3 +1,5 @@
+import {ObjectUtils} from "../utils/ObjectUtils";
+
 enum LogType {
     /**
      * 默认
@@ -259,6 +261,9 @@ export class ColorLogger {
                     list = splitList.concat();
                 } else {
                     value = result[index][a];
+                    if (!(ObjectUtils.isString(value))) {
+                        continue;
+                    }
                     var start = value!.lastIndexOf("/");
                     var end = value!.lastIndexOf(".");
                     if (start > -1 && end > -1) {
