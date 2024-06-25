@@ -84,6 +84,7 @@ export * from './types/Types';
 export * from './unregister/UnRegister';
 export * from './utils/ArrayUtils';
 export * from './utils/BeanUtils';
+export * from './utils/CdUtils';
 export * from './utils/ClassUtils';
 export * from './utils/CloneUtils233';
 export * from './utils/CollectionUtils';
