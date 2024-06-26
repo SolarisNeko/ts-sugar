@@ -29,7 +29,11 @@ export class Ioc233 {
         this._classNameToTypeModeMap.set(clazz.name, EnumIocType233.Singleton);
     }
 
-    static registerSingleton<T>(instance: T): void {
+    /**
+     * 注册单例 by object
+     * @param instance
+     */
+    static registerSingletonByObject<T>(instance: T): void {
         let constructor = instance.constructor;
         if (constructor === undefined) {
             console.error("[Ioc233] registerSingleton error: instance.constructor is undefined")
