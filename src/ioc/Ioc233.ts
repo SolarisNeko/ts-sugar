@@ -20,15 +20,36 @@ export class Ioc233 {
     // <className, 模板Class>
     private static readonly _classNameToClassMap: Map<string, Clazz<any>> = new Map();
 
-    static registerSingleton<T>(type: Clazz<T>): void {
-        this._classNameToSingletonMap.set(type.name, new type());
-        this._classNameToTypeModeMap.set(type.name, EnumIocType233.Singleton);
+    /**
+     * 注册单例
+     * @param clazz
+     */
+    static registerSingletonByClass<T>(clazz: Clazz<T>): void {
+        this._classNameToSingletonMap.set(clazz.name, new clazz());
+        this._classNameToTypeModeMap.set(clazz.name, EnumIocType233.Singleton);
     }
 
-    static registerTemplate<T>(type: Clazz<T>): void {
-        this._classNameToClassMap.set(type.name, type);
-        this._classNameToTypeModeMap.set(type.name, EnumIocType233.Template);
+    static registerSingleton<T>(instance: T): void {
+        let constructor = instance.constructor;
+        if (constructor === undefined) {
+            console.error("[Ioc233] registerSingleton error: instance.constructor is undefined")
+            return;
+        }
+        const className = constructor.name;
+
+        this._classNameToSingletonMap.set(className, instance);
+        this._classNameToTypeModeMap.set(className, EnumIocType233.Singleton);
     }
+
+    /**
+     * 注册模板
+     * @param clazz
+     */
+    static registerTemplateByClass<T>(clazz: Clazz<T>): void {
+        this._classNameToClassMap.set(clazz.name, clazz);
+        this._classNameToTypeModeMap.set(clazz.name, EnumIocType233.Template);
+    }
+
 
     /**
      * 从容器中获取服务实例
@@ -59,9 +80,9 @@ export class Ioc233 {
 export function Provider233(scope: EnumIocType233 = EnumIocType233.Singleton) {
     return <T extends Clazz<any>>(target: T) => {
         if (scope === EnumIocType233.Singleton) {
-            Ioc233.registerSingleton(target);
+            Ioc233.registerSingletonByClass(target);
         } else {
-            Ioc233.registerTemplate(target);
+            Ioc233.registerTemplateByClass(target);
         }
     };
 }
