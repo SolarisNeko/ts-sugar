@@ -246,4 +246,25 @@ export class MapUtils {
         }
         return diffMap
     }
+
+
+    /**
+     * 获取首个 key
+     * @param map
+     * @param defaultKey 默认值
+     */
+    static getFirstKey<K, V>(map: Map<K, V>, defaultKey: K = null): K {
+        if (map == null) {
+            return defaultKey;
+        }
+        if (map.size === 0) {
+            // Return the default value if the map is empty
+            return defaultKey;
+        }
+
+        for (const key of map.keys()) {
+            // Return the first key encountered
+            return key;
+        }
+    }
 }
