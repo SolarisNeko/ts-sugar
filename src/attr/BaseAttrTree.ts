@@ -1,4 +1,4 @@
-import { MapUtils } from "../utils/MapUtils";
+import {MapUtils} from "../utils/MapUtils";
 
 export type IConvertAttrToOtherAttrMap = (thisValue: number, totalMap: Map<AttrType, number>) => Map<AttrType, number> | null;
 
@@ -35,6 +35,20 @@ export class AttrType {
         this.calculateFinalLambda = calculateFinalLambda;
     }
 
+    /**
+     * 创建
+     * @param id
+     * @param name
+     * @param order
+     * @param calculateFinalLambda
+     */
+    static create(id: number,
+                  name: string,
+                  order: number = 1,
+                  calculateFinalLambda: IConvertAttrToOtherAttrMap = null
+    ): AttrType {
+        return new AttrType(id, name, order, calculateFinalLambda);
+    }
 
     /**
      * 计算转换成什么属性 Map
