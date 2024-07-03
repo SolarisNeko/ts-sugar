@@ -36,4 +36,11 @@ export class AbstractSingleton {
     protected onDestroy(): void {
         // 子类实现
     };
+
+    /**
+     * 主动初始化
+     */
+    public init(): void {
+
+    }
 }
