@@ -1,4 +1,4 @@
-import {AttrTree, AttrTreeChangeResult, AttrTreeCompareResult, AttrType} from "../../src/attr/AttrTree";
+import {BaseAttrTree, AttrTreeChangeResult, AttrTreeCompareResult, AttrType} from "../../src/attr/BaseAttrTree";
 import {MapUtils} from "../../src/utils/MapUtils";
 
 export namespace AttrTypeEnum {
@@ -51,11 +51,11 @@ describe('AttrType', () => {
 });
 
 describe('AttrTree', () => {
-    let attrTree: AttrTree<string>;
+    let attrTree: BaseAttrTree<string>;
     let listenerMock: jest.Mock;
 
     beforeEach(() => {
-        attrTree = new AttrTree();
+        attrTree = new BaseAttrTree();
         listenerMock = jest.fn();
     });
 
@@ -88,10 +88,10 @@ describe('AttrTree', () => {
     });
 
     test('compare should return correct result', () => {
-        const myAttrTree = new AttrTree();
+        const myAttrTree = new BaseAttrTree();
         myAttrTree.setAttrs('player1', new Map([[AttrTypeEnum.ATTACK, 50], [AttrTypeEnum.DEFENSE, 30]]));
 
-        const targetAttrTree = new AttrTree();
+        const targetAttrTree = new BaseAttrTree();
         targetAttrTree.setAttrs('player1', new Map([[AttrTypeEnum.ATTACK, 70], [AttrTypeEnum.DEFENSE, 30]]));
 
         const compareResult: AttrTreeCompareResult<AttrType> = myAttrTree.compare(targetAttrTree);

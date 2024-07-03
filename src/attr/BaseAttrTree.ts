@@ -84,7 +84,7 @@ export interface AttrTreeChangeListener<AttrType> {
     (result: AttrTreeChangeResult<AttrType>): void;
 }
 
-export class AttrTree<Path> {
+export class BaseAttrTree<Path> {
     // 原生属性
     private pathToAttrMap: Map<Path, Map<AttrType, number>> = new Map();
     // 汇总属性. 用于展示用
@@ -202,7 +202,7 @@ export class AttrTree<Path> {
         })
     }
 
-    compare(targetAttrTree: AttrTree<Path>): AttrTreeCompareResult<AttrType> {
+    compare(targetAttrTree: BaseAttrTree<Path>): AttrTreeCompareResult<AttrType> {
         const result: AttrTreeCompareResult<AttrType> = new AttrTreeCompareResult();
 
         for (const [attrType, value] of this.totalAttrMap.entries()) {
