@@ -33,6 +33,22 @@ export class AttrType {
     }
 
 
+    /**
+     * 创建
+     * @param id
+     * @param name
+     * @param order
+     * @param calculateFinalLambda
+     */
+    static create(id: number,
+                  name: string,
+                  order: number = 1,
+                  calculateFinalLambda: (totalMap: Map<AttrType, number>) => Map<AttrType, number> = null
+    ): AttrType {
+        return new AttrType(id, name, order, calculateFinalLambda);
+    }
+
+
     calcChangeAttrMap(totalMap: Map<AttrType, number>): Map<AttrType, number> {
         if (!totalMap) {
             return new Map()
