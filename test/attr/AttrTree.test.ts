@@ -11,13 +11,13 @@ describe('AttrType', () => {
         const attrType = new AttrType(1, 'test', 2);
         const totalMap = new Map([[attrType, 10]]);
 
-        const result = attrType.calcChangeAttrMap(totalMap);
+        const result = attrType.calcAddExtraAttrMap(totalMap);
 
         expect(result).toEqual(totalMap);
     });
 
     test('calcChangeAttrMap should apply calculateFinalLambda if present', () => {
-        const calculateFinalLambda = (totalMap: Map<AttrType, number>) => {
+        const calculateFinalLambda = (value: number, totalMap: Map<AttrType, number>) => {
             const result = new Map<AttrType, number>();
             totalMap.forEach((value, key) => result.set(key, value * 2));
             return result;
@@ -26,7 +26,7 @@ describe('AttrType', () => {
         const attrType = new AttrType(1, 'test', 2, calculateFinalLambda);
         const totalMap = new Map([[attrType, 10]]);
 
-        const result = attrType.calcChangeAttrMap(totalMap);
+        const result = attrType.calcAddExtraAttrMap(totalMap);
 
         expect(result.get(attrType)).toBe(20);
     });

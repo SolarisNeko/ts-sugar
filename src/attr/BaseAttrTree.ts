@@ -1,4 +1,7 @@
-import {MapUtils} from "../utils/MapUtils";
+import { MapUtils } from "../utils/MapUtils";
+
+export type IConvertAttrToOtherAttrMap = (thisValue: number, totalMap: Map<AttrType, number>) => Map<AttrType, number> | null;
+
 
 /**
  * 定义一个属性
@@ -10,8 +13,8 @@ export class AttrType {
     readonly name: string;
     // 计算先后顺序
     readonly order: number;
-    // 将最终属性 -> 战斗用的属性
-    private readonly calculateFinalLambda?: (totalMap: Map<AttrType, number>) => Map<AttrType, number>;
+    // 将最终属性 -> 新增的战斗用的属性
+    private readonly calculateFinalLambda?: IConvertAttrToOtherAttrMap;
 
     /**
      *
@@ -24,7 +27,7 @@ export class AttrType {
         id: number,
         name: string,
         order: number = 1,
-        calculateFinalLambda: (totalMap: Map<AttrType, number>) => Map<AttrType, number> = null,
+        calculateFinalLambda: IConvertAttrToOtherAttrMap = null,
     ) {
         this.id = id;
         this.name = name;
@@ -34,29 +37,24 @@ export class AttrType {
 
 
     /**
-     * 创建
-     * @param id
-     * @param name
-     * @param order
-     * @param calculateFinalLambda
+     * 计算转换成什么属性 Map
+     * - hp 百分比 -> 基于 hp 基本值计算出 -> 额外加成 Map[[HP, 100]]
+     * @param totalMap
      */
-    static create(id: number,
-                  name: string,
-                  order: number = 1,
-                  calculateFinalLambda: (totalMap: Map<AttrType, number>) => Map<AttrType, number> = null
-    ): AttrType {
-        return new AttrType(id, name, order, calculateFinalLambda);
-    }
-
-
-    calcChangeAttrMap(totalMap: Map<AttrType, number>): Map<AttrType, number> {
+    calcAddExtraAttrMap(totalMap: Map<AttrType, number>): Map<AttrType, number> | null {
         if (!totalMap) {
-            return new Map()
+            return null;
         }
         if (this.calculateFinalLambda == null) {
             return totalMap
         }
-        return this.calculateFinalLambda(totalMap);
+
+        const value = totalMap.get(this);
+        if (value == null || value == 0) {
+            return null;
+        }
+        // 计算转换成什么属性
+        return this.calculateFinalLambda(value, totalMap);
     }
 
     isEqualsTo(other: AttrType): boolean {
@@ -120,7 +118,7 @@ export class BaseAttrTree<Path> {
         }
     }
 
-    setAttrs(path: Path, attrs: Map<AttrType, number>): void {
+    setAttrs(path: Path, attrTypeToValueMap: Map<AttrType, number>): void {
         const oldAttrMap = new Map(this.finalAttrMap);
         let attrMap = this.pathToAttrMap.get(path);
         if (!attrMap) {
@@ -128,7 +126,7 @@ export class BaseAttrTree<Path> {
             this.pathToAttrMap.set(path, attrMap);
         }
 
-        attrs.forEach((value, attrType) => {
+        attrTypeToValueMap.forEach((value, attrType) => {
             attrMap!.set(attrType, value);
         });
 
@@ -200,18 +198,24 @@ export class BaseAttrTree<Path> {
     private calculateFinal(): void {
         this.finalAttrMap.clear();
 
+        // 排序后的执行顺序
         const sortedAttrTypes = [...this.totalAttrMap.keys()].sort((a, b) => {
             return a.order - b.order
         });
 
+        // 每个类型, 特殊转化的其他属性
         let typeToChangeMap: Map<AttrType, Map<AttrType, number>> = new Map<AttrType, Map<AttrType, number>>();
         for (const attrType of sortedAttrTypes) {
-            const changeMap = attrType.calcChangeAttrMap(this.totalAttrMap);
-            typeToChangeMap.set(attrType, changeMap)
+            const translateAttrMap = attrType.calcAddExtraAttrMap(this.totalAttrMap);
+            if (translateAttrMap == null) {
+                continue;
+            }
+            typeToChangeMap.set(attrType, translateAttrMap)
         }
 
         typeToChangeMap.forEach((changeMap, type) => {
-            MapUtils.mergeAll(this.finalAttrMap,
+            MapUtils.mergeAll(
+                this.finalAttrMap,
                 (v1, v2) => v1 + v2,
                 changeMap,
             )
