@@ -26,6 +26,7 @@ export * from './core/VersionControlExecutor';
 export * from './cron/Cron233';
 export * from './csv/Csv';
 export * from './dataStream/DataStream';
+export * from './dataStream/DataStreamV1';
 export * from './decorator/AutoLogFunctionInvoke';
 export * from './decorator/Decorator233';
 export * from './decorator/TipsDecorator';
