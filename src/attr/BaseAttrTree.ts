@@ -1,4 +1,5 @@
-import { MapUtils } from "../utils/MapUtils";
+import {MapUtils} from "../utils/MapUtils";
+import {IAttrTreePath} from "./AttrTreePath";
 
 /**
  * 单个属性, 转化成其他属性 new Map
@@ -6,12 +7,6 @@ import { MapUtils } from "../utils/MapUtils";
 export type IConvertAttrToOtherAttrMap = (thisValue: number,
                                           totalMap: Map<AttrType, number>
 ) => Map<AttrType, number> | null;
-
-
-export interface IAttrTreePath {
-
-    getAttrPathString(): string;
-}
 
 
 /**
@@ -147,7 +142,6 @@ export interface AttrTreeChangeListener<AttrType> {
 
 export class BaseAttrTree<Path extends IAttrTreePath> {
 
-
     static readonly SPLIT: string = "/";
 
     // 原生属性
@@ -169,7 +163,7 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
         }
     }
 
-    setAttrs(path: Path, newAttrMap: Map<AttrType, number>): void {
+    setAttrMapByPath(path: Path, newAttrMap: Map<AttrType, number>): void {
         const pathKey = path.getAttrPathString();
 
         const oldFinalAttrMap = new Map(this._finalAttrMap);
@@ -222,7 +216,7 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
     setAttrValue(path: Path, attrType: AttrType, value: number): void {
         const attrs = new Map<AttrType, number>();
         attrs.set(attrType, value);
-        this.setAttrs(path, attrs);
+        this.setAttrMapByPath(path, attrs);
     }
 
     getAttrValue(path: Path, attrType: AttrType): number | undefined {

@@ -1,10 +1,12 @@
-import {BaseAttrTree, AttrTreeChangeResult, AttrTreeCompareResult, AttrType} from "../../src/attr/BaseAttrTree";
+import {AttrTreeChangeResult, AttrTreeCompareResult, AttrType, BaseAttrTree,} from "../../src/attr/BaseAttrTree";
 import {MapUtils} from "../../src/utils/MapUtils";
+import {AttrTreePath} from "../../src/attr/AttrTreePath";
 
 export namespace AttrTypeEnum {
     export const ATTACK = new AttrType(1, "atk");
     export const DEFENSE = new AttrType(2, "defense");
 }
+
 
 describe('AttrType', () => {
     test('calcChangeAttrMap should return totalMap if calculateFinalLambda is null', () => {
@@ -51,7 +53,7 @@ describe('AttrType', () => {
 });
 
 describe('AttrTree', () => {
-    let attrTree: BaseAttrTree<string>;
+    let attrTree: BaseAttrTree<AttrTreePath>;
     let listenerMock: jest.Mock;
 
     beforeEach(() => {
@@ -59,18 +61,18 @@ describe('AttrTree', () => {
         listenerMock = jest.fn();
     });
 
-    test('setAttrs should set attributes for a path', () => {
-        const path = 'player1';
+    test('setAttrMapByPath should set attributes for a path', () => {
+        const path = AttrTreePath.create('player1');
         const attrs = new Map([[AttrTypeEnum.ATTACK, 50], [AttrTypeEnum.DEFENSE, 30]]);
 
-        attrTree.setAttrs(path, attrs);
+        attrTree.setAttrMapByPath(path, attrs);
 
         expect(attrTree.getAttrValue(path, AttrTypeEnum.ATTACK)).toBe(50);
         expect(attrTree.getAttrValue(path, AttrTypeEnum.DEFENSE)).toBe(30);
     });
 
     test('setAttrValue should set a single attribute for a path', () => {
-        const path = 'player1';
+        const path = AttrTreePath.create('player1');
 
         attrTree.setAttrValue(path, AttrTypeEnum.ATTACK, 50);
 
@@ -78,21 +80,23 @@ describe('AttrTree', () => {
     });
 
     test('getTotalAttrValue should return total attribute value', () => {
-        const path = 'player1';
+        const path = AttrTreePath.create('player1');
         const attrs = new Map([[AttrTypeEnum.ATTACK, 50], [AttrTypeEnum.DEFENSE, 30]]);
 
-        attrTree.setAttrs(path, attrs);
+        attrTree.setAttrMapByPath(path, attrs);
 
         expect(attrTree.getTotalAttrValue(AttrTypeEnum.ATTACK)).toBe(50);
         expect(attrTree.getTotalAttrValue(AttrTypeEnum.DEFENSE)).toBe(30);
     });
 
     test('compare should return correct result', () => {
+        const path = AttrTreePath.create('player1');
+
         const myAttrTree = new BaseAttrTree();
-        myAttrTree.setAttrs('player1', new Map([[AttrTypeEnum.ATTACK, 50], [AttrTypeEnum.DEFENSE, 30]]));
+        myAttrTree.setAttrMapByPath(path, new Map([[AttrTypeEnum.ATTACK, 50], [AttrTypeEnum.DEFENSE, 30]]));
 
         const targetAttrTree = new BaseAttrTree();
-        targetAttrTree.setAttrs('player1', new Map([[AttrTypeEnum.ATTACK, 70], [AttrTypeEnum.DEFENSE, 30]]));
+        targetAttrTree.setAttrMapByPath(path, new Map([[AttrTypeEnum.ATTACK, 70], [AttrTypeEnum.DEFENSE, 30]]));
 
         const compareResult: AttrTreeCompareResult<AttrType> = myAttrTree.compare(targetAttrTree);
 
@@ -101,7 +105,7 @@ describe('AttrTree', () => {
     });
 
     test('notifyChangeListeners should call all listeners with correct result', () => {
-        const path = 'player1';
+        const path = AttrTreePath.create('player1');
         const attrs = new Map([[AttrTypeEnum.ATTACK, 50]]);
         const result: AttrTreeChangeResult<AttrType> = {
             addPart: new Map([[AttrTypeEnum.ATTACK, 50]]),
@@ -112,13 +116,13 @@ describe('AttrTree', () => {
         };
 
         attrTree.addChangeListener(listenerMock);
-        attrTree.setAttrs(path, attrs);
+        attrTree.setAttrMapByPath(path, attrs);
 
         expect(listenerMock).toHaveBeenCalledWith(result);
     });
 
     test('attrTree change listener', () => {
-        const path = 'player1/equip/3';
+        const path = AttrTreePath.create('player1/equip/3');
 
         const attrs1 = new Map([[AttrTypeEnum.ATTACK, 50]]);
         const attrs2 = new Map([[AttrTypeEnum.ATTACK, 100]]);
@@ -128,8 +132,8 @@ describe('AttrTree', () => {
             r = result
         });
 
-        attrTree.setAttrs(path, attrs1);
-        attrTree.setAttrs(path, attrs2);
+        attrTree.setAttrMapByPath(path, attrs1);
+        attrTree.setAttrMapByPath(path, attrs2);
 
 
         const diffMap = new Map();
