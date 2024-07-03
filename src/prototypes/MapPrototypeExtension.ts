@@ -29,6 +29,8 @@ declare global {
          */
         getOrCreate(key: K, newValueCreator: () => V): V
 
+        getOrDefault(key: K, defaultValue: V): V
+
         /**
          * 更新后获得新的 value
          * @param key 键
@@ -66,6 +68,14 @@ Map.prototype.getOrCreate = function <K, V>(key: K, newValueCreator: () => V): V
         let newValue = newValueCreator();
         this.set(key, newValue);
         return newValue;
+    }
+}
+Map.prototype.getOrDefault = function <K, V>(key: K, defaultValue: V): V {
+    let oldValue = this.get(key);
+    if (oldValue) {
+        return oldValue;
+    } else {
+        return defaultValue;
     }
 }
 

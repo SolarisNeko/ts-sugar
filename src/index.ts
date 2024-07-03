@@ -60,7 +60,7 @@ export * from './network/codec/JsonCodec';
 export * from './network/ICodec';
 export * from './network/ISocket';
 export * from './numbers/NumberFormatter';
-export * from './objectPool/ObjectPool';
+export * from './objectPool/ObjectPool233';
 export * from './player/PlayerLike';
 export * from './prototypes/ArrayPrototypeExtension';
 export * from './prototypes/MapPrototypeExtension';
