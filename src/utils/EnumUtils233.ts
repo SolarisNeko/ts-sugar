@@ -51,7 +51,6 @@ export class EnumUtils233 {
      */
     static getAllKeys<T extends { [key: string]: any }>(enumObj: T): (keyof T)[] {
         return Object.keys(enumObj)
-            .filter(key => !isNaN(Number(key))) // 过滤掉反向映射的值
             .map(key => key as keyof T); // 类型断言为 keyof T
     }
 
