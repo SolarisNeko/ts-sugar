@@ -147,4 +147,26 @@ export class ObjectUtils {
     static cloneDataObject<T>(item: T): T {
         return JSON.parse(JSON.stringify(item));
     }
+
+
+    /**
+     * 将对象转换为map
+     * @param obj
+     * @param keyConvertor
+     * @param valueConvertor
+     */
+    static toMap<K, V>(obj: Object,
+                       keyConvertor: (key: string) => K,
+                       valueConvertor: (value: any) => V,
+    ): Map<K,V> {
+        const map = new Map<K,V>();
+        for (let key in obj) {
+            const value: any = obj[key];
+
+            const k = keyConvertor(key);
+            const v = valueConvertor(value);
+            map.set(k, v);
+        }
+        return map;
+    }
 }

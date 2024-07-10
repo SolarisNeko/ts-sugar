@@ -3,6 +3,7 @@
 export * from './action/ActionChain';
 export * from './activity/Activity';
 export * from './actor/actor';
+export * from './attr/AttrTreePath';
 export * from './attr/BaseAttrTree';
 export * from './behaviorTree/BehaviorTree';
 export * from './bytes/ByteArrayData';
