@@ -91,6 +91,7 @@ export * from './utils/CloneUtils233';
 export * from './utils/CollectionUtils';
 export * from './utils/EnumUtils233';
 export * from './utils/LambdaExtension';
+export * from './utils/LocalStorageUtils';
 export * from './utils/MapUtils';
 export * from './utils/NumberUtils';
 export * from './utils/ObjectUtils';
