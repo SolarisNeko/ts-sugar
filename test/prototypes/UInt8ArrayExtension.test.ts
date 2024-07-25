@@ -1,9 +1,9 @@
-import {UInt8ArrayPrototypeExtension} from "../../src/prototypes/UInt8ArrayPrototypeExtension";
+import {UInt8ArrayExtension} from "../../src/prototypes/UInt8ArrayExtension";
 
 describe('UInt8ArrayOperator', () => {
     it('should add and read int correctly', () => {
         const uint8Array = new Uint8Array(10);
-        const operator = new UInt8ArrayPrototypeExtension(uint8Array);
+        const operator = new UInt8ArrayExtension(uint8Array);
 
         operator.addInt(123);
         let read = operator.readInt();
@@ -12,7 +12,7 @@ describe('UInt8ArrayOperator', () => {
 
     it('should add and read float correctly', () => {
         const uint8Array = new Uint8Array(10);
-        const operator = new UInt8ArrayPrototypeExtension(uint8Array);
+        const operator = new UInt8ArrayExtension(uint8Array);
 
         operator.addFloat(123.45);
         let read = operator.readFloat();
@@ -21,7 +21,7 @@ describe('UInt8ArrayOperator', () => {
 
     it('should add and read double correctly', () => {
         const uint8Array = new Uint8Array(20); // 8 bytes for double
-        const operator = new UInt8ArrayPrototypeExtension(uint8Array);
+        const operator = new UInt8ArrayExtension(uint8Array);
 
         operator.addDouble(123.456);
         let read = operator.readDouble();
@@ -30,7 +30,7 @@ describe('UInt8ArrayOperator', () => {
 
     it('should add and read short correctly', () => {
         const uint8Array = new Uint8Array(10);
-        const operator = new UInt8ArrayPrototypeExtension(uint8Array);
+        const operator = new UInt8ArrayExtension(uint8Array);
 
         operator.addShort(123);
         operator.addShort(456);
@@ -42,7 +42,7 @@ describe('UInt8ArrayOperator', () => {
 
     it('should add and read boolean correctly', () => {
         const uint8Array = new Uint8Array(10);
-        const operator = new UInt8ArrayPrototypeExtension(uint8Array);
+        const operator = new UInt8ArrayExtension(uint8Array);
 
         operator.addBoolean(true);
         operator.addBoolean(false);

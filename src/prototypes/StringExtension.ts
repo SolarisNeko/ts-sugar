@@ -1,5 +1,5 @@
 // string 原型扩展类
-export class StringPrototypeExtension {
+export class StringExtension {
 
     static init() {
         // nothing

@@ -1,4 +1,4 @@
-export class NumberPrototypeExtension {
+export class NumberExtension {
     static init(): void {
         // just import 
     }
@@ -9,12 +9,20 @@ declare global {
     interface Number {
         // 取整
         toInt(): number;
-        
+
         // 向上取整
         toRoundUp(): number
 
         // 保留多少位小数 | 不足补 0
         withDecimalCount(decimalCount: number, addZeroToDecimal: boolean): number;
+
+
+        /**
+         * 转为百分比文本 | 默认万分比
+         * @param baseValue 分母 | 1 = 1% = 百分比 | 100 = 1% = 万分比
+         * @param maxPercentValue 最大百分比值
+         */
+        toPercentText(baseValue?: number, maxPercentValue?: number): string
     }
 }
 
@@ -47,3 +55,13 @@ Number.prototype.withDecimalCount = function (decimalCount: number, addZeroToDec
     // 超过指定的小数位数，截取小数部分
     return parseFloat(numberString.substring(0, decimalIndex + decimalCount + 1));
 };
+
+// 转为百分比文本
+Number.prototype.toPercentText = function (baseValue: number = 100, maxPercentValue: number = 100): string {
+    if (this <= 0) {
+        return "0%";
+    }
+    const percentValue: number = (this / baseValue).withDecimalCount(2, false);
+    const finalPercentValue: number = Math.min(maxPercentValue, percentValue);
+    return finalPercentValue + "%";
+}

@@ -2,9 +2,9 @@
 import {DataStream} from "../dataStream/DataStream";
 import {MapEntry} from "../utils/MapUtils";
 
-export class MapPrototypeExtension {
+export class MapExtension {
     static init() {
-        console.log("MapPrototypeExtension init")
+        console.log("MapExtension init")
     }
 }
 
@@ -87,4 +87,4 @@ Map.prototype.updateThenGet = function <K, V>(key: K, initValue: V, updateFunc: 
 
 }
 
-MapPrototypeExtension.init()
+MapExtension.init()

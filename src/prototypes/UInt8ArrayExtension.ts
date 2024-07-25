@@ -4,13 +4,13 @@ declare global {
         toUtf8String(): string;
 
         // 转为操作实例
-        toUInt8ArrayExtension(): UInt8ArrayPrototypeExtension;
+        toUInt8ArrayExtension(): UInt8ArrayExtension;
     }
 }
 
 // Uint8Array 原型扩展函数：获取 Uint8ArrayExtension 实例
-Uint8Array.prototype.toUInt8ArrayExtension = function (): UInt8ArrayPrototypeExtension {
-    return new UInt8ArrayPrototypeExtension(this);
+Uint8Array.prototype.toUInt8ArrayExtension = function (): UInt8ArrayExtension {
+    return new UInt8ArrayExtension(this);
 };
 
 
@@ -22,7 +22,7 @@ Uint8Array.prototype.toUtf8String = function (): string {
 
 
 // UInt8Array 扩展操作器
-export class UInt8ArrayPrototypeExtension {
+export class UInt8ArrayExtension {
     // bytes
     private uint8Array: Uint8Array;
     // 读索引
@@ -107,7 +107,7 @@ export class UInt8ArrayPrototypeExtension {
     }
 
     // 添加一个整数到 Uint8Array
-    addInt(number: number): UInt8ArrayPrototypeExtension {
+    addInt(number: number): UInt8ArrayExtension {
         const buffer = new ArrayBuffer(4);
         const view = new DataView(buffer);
         view.setInt32(0, number);
@@ -121,7 +121,7 @@ export class UInt8ArrayPrototypeExtension {
     }
 
     // 添加一个浮点数到 Uint8Array
-    addFloat(number: number): UInt8ArrayPrototypeExtension {
+    addFloat(number: number): UInt8ArrayExtension {
         const buffer = new ArrayBuffer(4);
         const view = new DataView(buffer);
         view.setFloat32(0, number);
@@ -135,7 +135,7 @@ export class UInt8ArrayPrototypeExtension {
     }
 
     // 添加一个双精度浮点数到 Uint8Array
-    addDouble(number: number): UInt8ArrayPrototypeExtension {
+    addDouble(number: number): UInt8ArrayExtension {
         const buffer = new ArrayBuffer(8);
         const view = new DataView(buffer);
         view.setFloat64(0, number);
@@ -149,7 +149,7 @@ export class UInt8ArrayPrototypeExtension {
     }
 
     // 添加一个短整数到 Uint8Array
-    addShort(number: number): UInt8ArrayPrototypeExtension {
+    addShort(number: number): UInt8ArrayExtension {
         const buffer = new ArrayBuffer(2);
         const view = new DataView(buffer);
         view.setInt16(0, number);
@@ -163,14 +163,14 @@ export class UInt8ArrayPrototypeExtension {
     }
 
     // 添加一个布尔值到 Uint8Array
-    addBoolean(value: boolean): UInt8ArrayPrototypeExtension {
+    addBoolean(value: boolean): UInt8ArrayExtension {
         this.uint8Array[this.writeIndex] = value ? 1 : 0;
         this.writeIndex += 1;
         return this;
     }
 
     // 添加一个字符串到 Uint8Array
-    addString(content: string): UInt8ArrayPrototypeExtension {
+    addString(content: string): UInt8ArrayExtension {
         const strArray = new TextEncoder().encode(content);
 
         this.extendArrayIfNeeded(strArray.length);
