@@ -16,6 +16,8 @@ declare global {
         // 保留多少位小数 | 不足补 0
         withDecimalCount(decimalCount: number, addZeroToDecimal: boolean): number;
 
+        // 转为百分比数字 | 默认万分比
+        toPercentNumber(baseValue?: number, maxPercentValue?: number): number
 
         /**
          * 转为百分比文本 | 默认万分比
@@ -56,12 +58,17 @@ Number.prototype.withDecimalCount = function (decimalCount: number, addZeroToDec
     return parseFloat(numberString.substring(0, decimalIndex + decimalCount + 1));
 };
 
+
+// 转为百分比数字
+Number.prototype.toPercentNumber = function (baseValue: number = 100, maxPercentValue: number = 100): number {
+    if (this <= 0) {
+        return 0;
+    }
+    const percentValue = (this / baseValue).withDecimalCount(2, false);
+    return Math.min(maxPercentValue, percentValue);
+}
+
 // 转为百分比文本
 Number.prototype.toPercentText = function (baseValue: number = 100, maxPercentValue: number = 100): string {
-    if (this <= 0) {
-        return "0%";
-    }
-    const percentValue: number = (this / baseValue).withDecimalCount(2, false);
-    const finalPercentValue: number = Math.min(maxPercentValue, percentValue);
-    return finalPercentValue + "%";
+    return this.toPercentNumber(baseValue, maxPercentValue) + "%";
 }

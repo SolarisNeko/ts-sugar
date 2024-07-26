@@ -10,7 +10,7 @@ export class MapExtension {
 
 // 全局扩展 Map 原型
 declare global {
-    interface Map<K, V> {
+    interface Map<K, V> {i
         // 转为数据流
         toDataStream(): DataStream<MapEntry<K, V>>;
 

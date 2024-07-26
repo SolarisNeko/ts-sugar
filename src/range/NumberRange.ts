@@ -1,3 +1,6 @@
+/**
+ * 数字范围
+ */
 export class NumberRange {
     readonly start: number;
     readonly end: number;
@@ -9,43 +12,33 @@ export class NumberRange {
 
     public static create(start: number, end: number): NumberRange {
         if (start > end) {
-            throw new Error('Invalid range: start must be less than or equal to end');
+            console.error("start should not be greater than end. [start, end]", start, end);
+            return new NumberRange(0, 0);
         }
 
         return new NumberRange(start, end);
     }
 
-    public isIn(num: number): boolean {
-        return num >= this.start && num <= this.end;
-    }
-    public isNotIn(num: number): boolean {
-        return !this.isIn(num);
-    }
-}
-
-
-type NumberCallback = (num: number) => void;
-
-export class NumberRangeSelector {
-    private ranges: { range: NumberRange; callback: NumberCallback }[] = [];
-
-    add(range: NumberRange, callback: NumberCallback): void {
-        this.ranges.push({ range, callback });
-    }
-
-    remove(range: NumberRange, callback: NumberCallback): void {
-        this.ranges = this.ranges.filter(
-            (entry) => entry.range.start !== range.start || entry.range.end !== range.end || entry.callback !== callback
-        );
-    }
-
-    handle(num: number): void {
-        for (const { range, callback } of this.ranges) {
-            if (range.isIn(num)) {
-                callback(num);
-                // Assuming only one callback should be triggered for a given number
-                return;
+    public isIn(num: number,
+                isLeftClosed: boolean = true,
+                isRightClosed: boolean = true
+    ): boolean {
+        if (isLeftClosed) {
+            if (isRightClosed) {
+                return num >= this.start && num <= this.end;
             }
+            return num >= this.start && num < this.end;
         }
+        if (isRightClosed) {
+            return num > this.start && num <= this.end;
+        }
+        return num > this.start && num < this.end;
+    }
+
+    public isNotIn(num: number,
+                   isLeftClosed: boolean = true,
+                   isRightClosed: boolean = true
+    ): boolean {
+        return !this.isIn(num, isLeftClosed, isRightClosed);
     }
 }
