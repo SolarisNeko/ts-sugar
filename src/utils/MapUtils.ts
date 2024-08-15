@@ -267,4 +267,38 @@ export class MapUtils {
             return key;
         }
     }
+
+
+
+    /**
+     * 将一个对象转换为 Map
+     * @param obj 需要转换的对象
+     * @param keyExtractor
+     * @param valueExtractor
+     * @returns 转换后的 Map
+     */
+    static fromObject<K, V>(obj: any,
+                            keyExtractor: KeyExtractor<string, K>,
+                            valueExtractor: KeyExtractor<any, V>,
+    ): Map<K, V> {
+        const map = new Map<K, V>();
+        if (obj == null) {
+            return map;
+        }
+
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                const newKey = keyExtractor(key);
+                const value = obj[key];
+                if (value == null) {
+                    map.set(newKey, null);
+                }
+                const newValue = valueExtractor(value);
+                map.set(newKey, newValue);
+            }
+        }
+
+        return map;
+    }
+
 }
