@@ -69,6 +69,10 @@ export class KvTemplate {
         }
     }
 
+    /**
+     * 对象当 Map
+     * @param obj
+     */
     putObj(obj: any) {
         if (!obj) {
             return;
@@ -82,6 +86,37 @@ export class KvTemplate {
         }
     }
 
+
+    /**
+     * 自动识别 key, 手动转为 value
+     * @param keyToValue
+     */
+    replaceKey(keyToValue: (key: string) => string): KvTemplate {
+        if (!keyToValue) {
+            return this;
+        }
+
+        // 使用正则表达式匹配出所有的 ${xxx} 模板变量
+        const regex = /\$\{(.*?)\}/g;
+
+        // 遍历模板中的所有匹配项
+        let matchArray: Array<string>;
+        while ((matchArray = regex.exec(this.template)) !== null) {
+            // 原始的 key, 即 ${xxx} 中的 xxx
+            const keyName: string = matchArray[1];
+            // 使用转换函数处理 key
+            const value = keyToValue(keyName);
+
+            this.kvMap.set(keyName, value);
+        }
+
+        return this;
+    }
+
+    /**
+     * 删除 key
+     * @param key
+     */
     remove(key: string) {
         this.kvMap.delete(key);
     }

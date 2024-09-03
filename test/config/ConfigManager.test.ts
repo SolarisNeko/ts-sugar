@@ -9,12 +9,12 @@ describe('ConfigManager', () => {
 
     beforeEach(() => {
         // Initialize a new instance of ConfigManager before each test
-        configManager = ConfigManager233.instance();
+        configManager = ConfigManager233.ins();
     });
 
     it('should be a singleton', () => {
-        const instance1 = ConfigManager233.instance();
-        const instance2 = ConfigManager233.instance();
+        const instance1 = ConfigManager233.ins();
+        const instance2 = ConfigManager233.ins();
 
         expect(instance1).toBe(instance2);
     });

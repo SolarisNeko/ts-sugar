@@ -77,7 +77,7 @@ export class ConditionChecker<T = any> {
                 return this.defaultResult;
             }
 
-            const strategy = ConditionCheckerRegister.instance().getStrategy(this.checkType);
+            const strategy = ConditionCheckerRegister.ins().getStrategy(this.checkType);
 
             if (strategy) {
                 success = strategy.verify(this.conditions, target);
@@ -148,7 +148,7 @@ export class ConditionCheckerRegister extends AbstractSingleton {
     }
 }
 
-ConditionCheckerRegister.instance().init();
+ConditionCheckerRegister.ins().init();
 
 /**
  * 条件结果

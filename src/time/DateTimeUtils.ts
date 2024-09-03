@@ -24,7 +24,7 @@ export class DateTimeUtils {
         const minute: number = date.getMinutes();
         const second: number = date.getSeconds();
         const ms: number = date.getMilliseconds();
-        const msStr: string = StringUtils.padLeft(ms.toString(), 3,'0');
+        const msStr: string = StringUtils.padLeft(ms.toString(), 3, '0');
 
         const tokens = {
             'yyyy': year,
@@ -128,11 +128,56 @@ export class DateTimeUtils {
         return new Date().getTime();
     }
 
+    /**
+     * 当前时间戳
+     */
     static getCurrentTimeMs(): number {
         return new Date().getTime()
     }
 
-    static nowStr(): string {
+    /**
+     * 当前时间戳
+     */
+    static nowString(): string {
         return this.getCurrentDateTimeText("yyyy-MM-dd HH:mm:ss,SSS");
+    }
+
+    static getValueByTimeUnit(atTimeMs: number,
+                              timeUnit: TimeUnit
+    ): number {
+        let date: Date = new Date(atTimeMs);
+        switch (timeUnit) {
+            case TimeUnit.DAYS:
+                return date.getDate();
+            case TimeUnit.HOURS:
+                return date.getHours();
+            case TimeUnit.MINUTES:
+                return date.getMinutes();
+            case TimeUnit.SECONDS:
+                return date.getSeconds();
+            case TimeUnit.MILLISECONDS:
+                return date.getMilliseconds();
+            default:
+                return 0;
+        }
+    }
+
+
+    // 差异天数
+    static diffDays(createTimeMs: number, curTimeMs: number): number {
+        const diffTimeMs = curTimeMs - createTimeMs;
+        let dayTimeMs = TimeUnit.DAYS.toMilliseconds(1);
+        const diffDays = Math.abs(diffTimeMs / dayTimeMs);
+        return Math.floor(diffDays);
+    }
+
+    /**
+     * 是否同一天
+     * @param timeMs1
+     * @param timeMs2
+     */
+    static isSameDayByTimeMs(timeMs1: number, timeMs2: number): boolean {
+        const diffDays = this.diffDays(timeMs1, timeMs2);
+        return diffDays == 0;
     }
 }

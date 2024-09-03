@@ -11,7 +11,7 @@ export class AbstractSingleton {
      *
      * @return self
      */
-    static instance<T extends any>(this: Clazz<T>): T {
+    static ins<T extends any>(this: Clazz<T>): T {
         if (!(<any>this)._instance) {
             (<any>this)._instance = new this();
             (<any>this)._instance.onInit();
