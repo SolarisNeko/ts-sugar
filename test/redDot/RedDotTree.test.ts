@@ -1,10 +1,10 @@
-import {RedDotTree} from "../../src/redDot/RedDotTree";
+import {RedDotTreeBySimple} from "../../src/redDot/RedDotTreeBySimple";
 
 describe('RedDotTree', () => {
-    let redDotTree: RedDotTree;
+    let redDotTree: RedDotTreeBySimple;
 
     beforeEach(() => {
-        redDotTree = new RedDotTree();
+        redDotTree = new RedDotTreeBySimple();
     });
 
     it('should add red dots', () => {

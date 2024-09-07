@@ -71,7 +71,7 @@ export * from './prototypes/UInt8ArrayExtension';
 export * from './range/NumberRange';
 export * from './rateLimiter/RateLimiter';
 export * from './reactive/ReactiveObj';
-export * from './redDot/RedDotTree';
+export * from './redDot/RedDotTreeBySimple';
 export * from './router/CmdHandler';
 export * from './router/CmdRouter';
 export * from './structs/BinaryHeap';

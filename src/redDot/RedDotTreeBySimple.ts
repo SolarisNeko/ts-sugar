@@ -1,7 +1,7 @@
 /**
  * 红点树
  */
-export class RedDotTree {
+export class RedDotTreeBySimple {
     // 红点数据
     private dotMap: Map<string, number>;
 
