@@ -3,7 +3,7 @@ import {Clazz} from "../types/Types";
 /**
  * 抽象单例
  */
-export class AbstractSingleton {
+export class BaseSingleton {
 
     /**
      * 单例

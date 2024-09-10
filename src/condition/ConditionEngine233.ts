@@ -1,5 +1,5 @@
 import {JsonUtils} from "../json/JsonUtils";
-import {AbstractSingleton} from "../core/AbstractSingleton";
+import {BaseSingleton} from "../core/BaseSingleton";
 
 /**
  * 条件数据
@@ -130,7 +130,7 @@ class OrConditionCheckerStrategy implements IConditionCheckerStrategy {
 /**
  * 条件检查策略注册
  */
-export class ConditionCheckerRegister extends AbstractSingleton {
+export class ConditionCheckerRegister extends BaseSingleton {
     private _strategies: Map<string, IConditionCheckerStrategy> = new Map();
 
     init(): void {
@@ -176,7 +176,7 @@ export class ConditionResult {
 /**
  * 条件工程
  */
-export class ConditionEngine233 extends AbstractSingleton {
+export class ConditionEngine233 extends BaseSingleton {
 
     private _typeToCreatorMap: Map<string, ConditionCreator> = new Map();
 

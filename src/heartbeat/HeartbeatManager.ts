@@ -1,7 +1,7 @@
-import {AbstractSingleton} from "../core/AbstractSingleton";
+import {BaseSingleton} from "../core/BaseSingleton";
 import {Logger} from "../logger/Logger";
 
-export class HeartbeatManager extends AbstractSingleton {
+export class HeartbeatManager extends BaseSingleton {
 
     // 间隔
     private _taskNameToHbTaskMap = new Map<string, any>();

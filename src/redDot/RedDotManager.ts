@@ -1,4 +1,4 @@
-import {AbstractSingleton} from "../core/AbstractSingleton";
+import {BaseSingleton} from "../core/BaseSingleton";
 import {RedDotPath} from "./structs/RedDotPath";
 import {RedDotTree} from "./structs/RedDotTree";
 import {RedDotShowType} from "./RedDotShowType";
@@ -7,7 +7,7 @@ import {RedDotShowType} from "./RedDotShowType";
 /**
  * 红点管理器
  */
-export class RedDotManager extends AbstractSingleton {
+export class RedDotManager extends BaseSingleton {
 
 
     // state

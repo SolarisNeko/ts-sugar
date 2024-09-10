@@ -1,5 +1,5 @@
 import {Clazz} from "../types/Types";
-import {AbstractSingleton} from "../core/AbstractSingleton";
+import {BaseSingleton} from "../core/BaseSingleton";
 import {ArrayUtils} from "../utils/ArrayUtils";
 import {CloneUtils233} from "../utils/CloneUtils233";
 import {DataStream} from "../dataStream/DataStream";
@@ -8,7 +8,7 @@ import {DataStream} from "../dataStream/DataStream";
  * 配置管理器
  * - singleton instance
  */
-export class ConfigManager233 extends AbstractSingleton {
+export class ConfigManager233 extends BaseSingleton {
 
     private _classToDataIdMap: Map<Clazz<any>, Map<number | string, any>> = new Map()
 

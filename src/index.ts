@@ -19,7 +19,7 @@ export * from './condition/ConditionEngine233';
 export * from './config/ConfigManager233';
 export * from './coordinate/Coordinate3D';
 export * from './coordinate/Direction';
-export * from './core/AbstractSingleton';
+export * from './core/BaseSingleton';
 export * from './core/LazySingleton';
 export * from './core/ProgressBar233';
 export * from './core/VersionControlExecutor';
