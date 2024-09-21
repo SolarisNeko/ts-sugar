@@ -1,5 +1,5 @@
-import {MapUtils} from "../utils/MapUtils";
-import {IAttrTreePath} from "./AttrTreePath";
+import { MapUtils } from "../utils/MapUtils";
+import { AttrTreePath, IAttrTreePath } from "./AttrTreePath";
 
 /**
  * 单个属性, 转化成其他属性 new Map
@@ -22,7 +22,10 @@ export class AttrType {
     // 将最终属性 -> 新增的战斗用的属性
     private readonly calculateFinalLambda?: IConvertAttrToOtherAttrMap;
 
-    private static _nameToAttrMap: Map<string, AttrType> = new Map();
+    // <id, 属性类型>
+    private static ID_TO_ATTR_TYPE_MAP: Map<number, AttrType> = new Map();
+    // <名字, 属性类型>
+    private static NAME_TO_ATTR_TYPE_MAP: Map<string, AttrType> = new Map();
 
     /**
      *
@@ -56,7 +59,8 @@ export class AttrType {
                   calculateFinalLambda: IConvertAttrToOtherAttrMap = null
     ): AttrType {
         const attrType = new AttrType(id, name, order, calculateFinalLambda);
-        AttrType._nameToAttrMap.set(name, attrType);
+        AttrType.NAME_TO_ATTR_TYPE_MAP.set(name, attrType);
+        AttrType.ID_TO_ATTR_TYPE_MAP.set(id, attrType);
         return attrType;
     }
 
@@ -66,9 +70,21 @@ export class AttrType {
      * @param name
      */
     static getAttrTypeByName(name: string): AttrType | undefined {
-        const attrType = AttrType._nameToAttrMap.get(name);
+        const attrType = AttrType.NAME_TO_ATTR_TYPE_MAP.get(name);
         if (!attrType) {
             console.error(`没有找到属性类型. name=${name}, attrType = `, attrType)
+        }
+        return attrType;
+    }
+
+    /**
+     * 通过 attrId 获取 AttrType
+     * @param id 属性id
+     */
+    static getAttrTypeById(id: number): AttrType | undefined {
+        const attrType = AttrType.ID_TO_ATTR_TYPE_MAP.get(id);
+        if (!attrType) {
+            console.error(`没有找到属性类型. id=${id}, attrType = `, attrType)
         }
         return attrType;
     }
@@ -136,33 +152,56 @@ export class AttrTreeChangeResult<AttrType> {
     }
 }
 
+/**
+ * 属性变更监听器
+ */
 export interface AttrTreeChangeListener<AttrType> {
     (result: AttrTreeChangeResult<AttrType>): void;
 }
 
+/**
+ * 基础属性树
+ */
 export class BaseAttrTree<Path extends IAttrTreePath> {
 
     static readonly SPLIT: string = "/";
 
-    // 原生属性
+    // --- state
+    // 【所有来源提供的属性】 <提供属性的路径, <属性类型, 属性值>>
     private _pathToAttrMap: Map<string, Map<AttrType, number>> = new Map();
-    // 汇总属性. 用于展示用
+    // 【最终展示】 汇总后的整体面板属性. 用于展示用
     private _totalAttrMap: Map<AttrType, number> = new Map();
-    // 最终应用于战斗属性. 此时将攻击力百分比, 转为固定攻击力. 100atk + 30%atk = 130点
+    // 【最终应用】 战斗结果级属性. 此时将攻击力百分比, 转为固定攻击力. 100 atk + 30% atk = 100 + 100 x 30% = 130点
     private _finalAttrMap: Map<AttrType, number> = new Map();
-    // 属性变更的 listeners
+
+    // --- callback
+    // 监听属性变更的 listeners
     private _changeListeners: AttrTreeChangeListener<AttrType>[] = [];
 
+    /**
+     * 添加属性类型变更监听器
+     * @param listener
+     */
     addChangeListener(listener: AttrTreeChangeListener<AttrType>): void {
         this._changeListeners.push(listener);
     }
 
+    /**
+     * 通知所有属性监听器
+     * @param result
+     * @private
+     */
     private notifyChangeListeners(result: AttrTreeChangeResult<AttrType>): void {
         for (const listener of this._changeListeners) {
             listener(result);
         }
     }
 
+    /**
+     * 设置属性 Map by 路径
+     * @param path
+     * @param newAttrMap
+     */
     setAttrMapByPath(path: Path, newAttrMap: Map<AttrType, number>): void {
         const pathKey = path.getAttrPathString();
 
@@ -182,28 +221,43 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
         // 对比新老的最终属性加成
         const newFinalAttrMap = new Map(this._finalAttrMap);
         const result = this.compareAttrs(oldFinalAttrMap, newFinalAttrMap);
+
+        // 通知属性变更
         this.notifyChangeListeners(result);
     }
 
+    /**
+     * 比较属性 | 计算出差异值
+     * @param oldAttrMap
+     * @param newAttrMap
+     * @private
+     */
     private compareAttrs(
         oldAttrMap: Map<AttrType, number>,
         newAttrMap: Map<AttrType, number>,
     ): AttrTreeChangeResult<AttrType> {
+        // 计算差异结果
         const result = new AttrTreeChangeResult<AttrType>(oldAttrMap, newAttrMap);
 
+        // 老属性变更部分
         for (const [attrType, value] of oldAttrMap.entries()) {
             const newValue = newAttrMap.get(attrType);
             if (newValue === undefined) {
+                // 减到空部分
                 result.minusPart.set(attrType, value);
             } else if (newValue > value) {
+                // 增加部分
                 result.addPart.set(attrType, newValue - value);
             } else if (newValue < value) {
+                // 削减部分
                 result.minusPart.set(attrType, value - newValue);
             } else {
+                // 没有变化部分
                 result.noChangePart.set(attrType, value);
             }
         }
 
+        // 新属性
         for (const [attrType, value] of newAttrMap.entries()) {
             if (!oldAttrMap.has(attrType)) {
                 result.addPart.set(attrType, value);
@@ -213,26 +267,49 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
         return result;
     }
 
-    setAttrValue(path: Path, attrType: AttrType, value: number): void {
+    /**
+     * 设置属性 by 路径
+     * @param path
+     * @param attrType
+     * @param value
+     */
+    setAttrValueByPath(path: Path, attrType: AttrType, value: number): void {
         const attrs = new Map<AttrType, number>();
         attrs.set(attrType, value);
         this.setAttrMapByPath(path, attrs);
     }
 
-    getAttrValue(path: Path, attrType: AttrType): number | undefined {
+    /**
+     * 获取路径的属性值
+     * @param path
+     * @param attrType
+     */
+    getAttrValueByPath(path: Path, attrType: AttrType): number | undefined {
         const pathKey = path.getAttrPathString();
         const attrMap = this._pathToAttrMap.get(pathKey);
         return attrMap ? attrMap.get(attrType) : undefined;
     }
 
-    getTotalAttrValue(attrType: AttrType): number {
+    /**
+     * 获取某个类型的总属性值
+     * @param attrType
+     */
+    getTotalAttrValueByType(attrType: AttrType): number {
         return this._totalAttrMap.get(attrType) || 0;
     }
 
-    getFinalAttrValue(attrType: AttrType): number {
+    /**
+     * 获取最终属性值
+     * @param attrType
+     */
+    getFinalAttrValueByType(attrType: AttrType): number {
         return this._finalAttrMap.get(attrType) || 0;
     }
 
+    /**
+     * 刷新汇总的属性 Map
+     * @private
+     */
     private refreshTotalAttrMap(): void {
         this._totalAttrMap.clear();
 
@@ -267,11 +344,15 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
         })
     }
 
+    /**
+     * 比较算法
+     * @param targetAttrTree
+     */
     compare(targetAttrTree: BaseAttrTree<Path>): AttrTreeCompareResult<AttrType> {
         const result: AttrTreeCompareResult<AttrType> = new AttrTreeCompareResult();
 
         for (const [attrType, value] of this._totalAttrMap.entries()) {
-            const targetValue = targetAttrTree.getTotalAttrValue(attrType);
+            const targetValue = targetAttrTree.getTotalAttrValueByType(attrType);
             const targetType = [...targetAttrTree._totalAttrMap.keys()].find(t => this.areSameType(attrType, t));
 
             if (targetValue === undefined) {
@@ -296,6 +377,12 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
         return result;
     }
 
+    /**
+     * 是否同类型属性
+     * @param type1
+     * @param type2
+     * @private
+     */
     private areSameType(type1: AttrType, type2: AttrType): boolean {
         return type1.isEqualsTo(type2);
     }
@@ -342,5 +429,20 @@ export class BaseAttrTree<Path extends IAttrTreePath> {
         } else {
             return pathKey.substring(0, index);
         }
+    }
+
+
+    /**
+     * 重新加载属性 Map
+     * @param attrMap
+     */
+    loadFromMap(attrMap: Map<AttrTreePath, Map<AttrType, number>>) {
+        this._pathToAttrMap.clear();
+
+        attrMap.forEach((value, path) => {
+            const pathKey = path.getAttrPathString();
+            this._pathToAttrMap.set(pathKey, value);
+        });
+
     }
 }

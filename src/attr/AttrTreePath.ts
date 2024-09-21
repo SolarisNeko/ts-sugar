@@ -1,5 +1,3 @@
-
-import {StringUtils} from "../utils/StringUtils";
 import {BaseAttrTree} from "./BaseAttrTree";
 
 
@@ -25,7 +23,7 @@ export class AttrTreePath implements IAttrTreePath {
     }
 
     /**
-     * 创建属性槽位路径
+     * create 属性树路径
      * @param prefixPath
      * @param args
      */
@@ -34,23 +32,23 @@ export class AttrTreePath implements IAttrTreePath {
         return new AttrTreePath(prefixPath, argsStr)
     }
 
+    /**
+     * 获取属性书路径
+     */
     getAttrPathString(): string {
-        return this._prefixPath + this.getSuffixPath()
+        return this._prefixPath + this.getArgsPath()
     }
 
 
-    private getSuffixPath(): string {
-        let path = "";
+    /**
+     * 参数路径
+     * @private
+     */
+    private getArgsPath(): string {
         if (this._args.length === 0) {
             return "";
         }
-        this._args.forEach(item => {
-            if (StringUtils.isBlank(item)) {
-                return;
-            }
-            // demo = "/equip/1"
-            path += BaseAttrTree.SPLIT + item.toString()
-        });
-        return path;
+
+        return BaseAttrTree.SPLIT + this._args.join(BaseAttrTree.SPLIT);
     }
 }
