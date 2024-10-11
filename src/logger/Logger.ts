@@ -1,12 +1,12 @@
 import {StackFrameUtils} from "../utils/StackFrameUtils";
 import {DateTimeUtils} from "../time/DateTimeUtils";
 
-
+// 日志级别
 export enum LogLevel {
-    DEBUG = 'DEBUG',
-    INFO = 'INFO',
-    WARN = 'WARN',
-    ERROR = 'ERROR',
+    DEBUG = 1,
+    INFO = 2,
+    WARN = 3,
+    ERROR = 4,
 }
 
 // Logger 配置选项接口
@@ -47,12 +47,12 @@ export class Logger {
     // 日志分类
     private readonly loggerName: string;
     // 日志级别
-    private level: LogLevel = LogLevel.DEBUG;
+    private _level: LogLevel = LogLevel.DEBUG;
     // 日志颜色
-    private readonly color: string;
-    private readonly preStackLineNum: number;
+    private readonly _color: string;
+    private readonly _preStackLineNum: number;
     // 配置选项
-    private readonly options: LoggerOptions;
+    private readonly _options: LoggerOptions;
 
 
     /**
@@ -64,21 +64,21 @@ export class Logger {
                 options: LoggerOptions = new LoggerOptions(),
     ) {
         this.loggerName = loggerName;
-        this.options = options;
+        this._options = options;
 
-        this.preStackLineNum = options.preStackLineNum || 3;
-        this.level = options.level;
-        this.color = options.color;
+        this._preStackLineNum = options.preStackLineNum || 3;
+        this._level = options.level;
+        this._color = options.color;
     }
 
     public get logLevel(): LogLevel {
-        return this.level
+        return this._level
     }
 
     public setLogLevel(level: LogLevel) {
-        let oldLevel = this.level;
+        let oldLevel = this._level;
         Logger.DEFAULT.info(`logger name = ${this.loggerName}, level change! old level = ${oldLevel}, new level = ${level}`, this)
-        this.level = level;
+        this._level = level;
     }
 
     private getCallLocation(): string {
@@ -119,17 +119,19 @@ export class Logger {
                  message: string,
                  ...args: any[]
     ): void {
-        if (level < this.logLevel) {
+        if (level < this._level) {
+            // 不记录低于日志级别的日志
             return;
         }
 
-        let colorStyle: string = this.color;
+        let colorStyle: string = this._color;
         let dateTimeText = DateTimeUtils.getCurrentDateTimeText();
         // 获取前 N 行调用栈信息
-        const callLine = StackFrameUtils.getPreStackFrame(this.preStackLineNum);
+        const callLine = StackFrameUtils.getPreStackFrame(this._preStackLineNum);
 
-
-        let logMessage = `%c${dateTimeText} | ${this.loggerName} | ${level.toString()} | ${callLine} - ${message}`;
+        // 日志格式化
+        const levelName = LogLevel[level];
+        let logMessage = `%c${dateTimeText} | ${this.loggerName} | ${levelName} | ${callLine} - ${message}`;
 
         switch (level) {
             case LogLevel.DEBUG:
