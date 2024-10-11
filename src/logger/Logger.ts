@@ -209,12 +209,3 @@ export class LoggerFactory {
         return new Logger(loggerName, options);
     }
 }
-
-export class LoggerForTest {
-
-    /**
-     * 基本日志器
-     */
-    public static baseLogger: Logger = LoggerFactory.getLogger("base")
-
-}
