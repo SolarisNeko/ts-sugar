@@ -1,7 +1,7 @@
 // Lambda
-import {Kv, KvUtils} from "../kv/Kv";
-import {ObjectUtils} from "../utils/ObjectUtils";
-import {MergeFunction} from "../utils/LambdaExtension";
+import { Kv, KvUtils } from "../kv/Kv";
+import { ObjectUtils } from "../utils/ObjectUtils";
+import { MergeFunction } from "../utils/LambdaExtension";
 
 
 // 转换函数
@@ -278,7 +278,17 @@ export class DataStream<T> {
         return this.collect0();
     }
 
-    toMap<K, V>(keyFunction: ConvertFunction<T, K>, valueFunction: ConvertFunction<T, V>, mergeFunction: MergeFunction<V> = null): Map<K, V> {
+    // csv
+    toCsvString(): string {
+        const array = this.collect0();
+        return array.join(",");
+    }
+
+    // Map
+    toMap<K, V>(keyFunction: ConvertFunction<T, K>,
+                valueFunction: ConvertFunction<T, V>,
+                mergeFunction: MergeFunction<V> = null
+    ): Map<K, V> {
         const map = new Map<K, V>();
         for (const item of this.collect0()) {
             const key = keyFunction(item);
@@ -380,6 +390,8 @@ export class DataStream<T> {
             let currentItem: T | null = item;
             for (const operator of this._operators) {
                 currentItem = operator.apply(currentItem);
+
+                // 算子计算后得到 null, 则剔除元素
                 if (currentItem === null) {
                     break;
                 }
@@ -388,8 +400,10 @@ export class DataStream<T> {
                 result.push(currentItem);
             }
         }
+
         // 更新数据集
         this._dataIterator = result;
+        // 清空算子
         this._operators = [];
         return result;
     }
