@@ -8,6 +8,7 @@ export * from './attr/BaseAttrTree';
 export * from './behaviorTree/BehaviorTree';
 export * from './bytes/ByteArrayData';
 export * from './cache/Cache233';
+export * from './sensitiveWord/SensitiveWordTree';
 export * from './cd/CdTimer';
 export * from './cd/FrameCdTimer';
 export * from './collection/HashMap';
